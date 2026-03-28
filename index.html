@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Card Max">
+<meta name="theme-color" content="#0f172a">
+<title>Card Maximizer</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2FyZCBNYXhpbWl6ZXIiLCJzaG9ydF9uYW1lIjoiQ2FyZE1heCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxNzJhIiwidGhlbWVfY29sb3IiOiIjMGYxNzJhIn0=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { 
+    min-height: 100vh; background: #0f172a; color: #e2e8f0;
+    font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  input::placeholder { color: #64748b; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes popIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
+  @keyframes altSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .header { background:#0f172a; padding:16px 16px 0; position:sticky; top:0; z-index:100; border-bottom:1px solid #1e293b; padding-top: env(safe-area-inset-top, 16px); }
+  .header-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .logo { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,#16a34a,#059669); display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .title { font-size:16px; font-weight:700; letter-spacing:-0.02em; }
+  .subtitle { font-size:11px; color:#475569; font-weight:500; }
+
+  .tabs { display:flex; background:#1e293b; border-radius:10px; padding:3px; }
+  .tab { flex:1; text-align:center; padding:8px 4px 6px; border-radius:8px; cursor:pointer; transition:all 0.12s ease; user-select:none; }
+  .tab.active { background:#334155; }
+  .tab-label { font-size:13px; font-weight:600; color:#64748b; }
+  .tab.active .tab-label { color:#fff; }
+  .tab-desc { font-size:10px; color:#475569; margin-top:1px; }
+  .tab.active .tab-desc { color:#94a3b8; }
+
+  /* Quick Tap Grid */
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 10px 80px; }
+  .tile { background:#1e293b; border-radius:14px; padding:14px 6px 10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; user-select:none; border:1px solid #1e293b; transition:background 0.1s ease; min-height:90px; }
+  .tile:active { background:#334155; }
+  .tile-emoji { font-size:34px; line-height:1; margin-bottom:6px; }
+  .tile-label { font-size:14px; font-weight:600; color:#e2e8f0; text-align:center; line-height:1.2; }
+
+  /* Answer Overlay */
+  .overlay { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; animation:fadeIn 0.12s ease; overflow-y:auto; }
+  .overlay-cat { font-size:16px; font-weight:600; opacity:0.7; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px; }
+  .overlay-pct { font-family:'JetBrains Mono',monospace; font-size:80px; font-weight:700; line-height:1; letter-spacing:-0.04em; animation:popIn 0.15s ease; }
+  .overlay-apr { font-size:18px; font-weight:600; margin-top:4px; }
+  .overlay-name { font-size:28px; font-weight:700; color:#fff; margin-top:16px; text-align:center; line-height:1.2; }
+  .overlay-last4 { font-family:'JetBrains Mono',monospace; font-size:22px; color:#cbd5e1; font-weight:500; letter-spacing:0.08em; }
+  .owner-badge { font-size:13px; font-weight:700; padding:2px 8px; border-radius:6px; margin-left:10px; }
+  .overlay-note { font-size:13px; color:#94a3b8; margin-top:10px; background:rgba(255,255,255,0.05); padding:5px 12px; border-radius:8px; }
+  .alts-toggle { text-align:center; font-size:13px; color:#94a3b8; cursor:pointer; padding:8px; user-select:none; }
+  .alt-row { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; background:rgba(255,255,255,0.1); margin-bottom:3px; }
+  .alt-name { font-size:13px; flex:1; color:#f1f5f9; font-weight:500; }
+  .alt-badge { font-size:9px; font-weight:700; margin-left:6px; padding:1px 4px; border-radius:3px; }
+  .alt-pct { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; color:#f1f5f9; }
+  .back-btn { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.12); color:#e2e8f0; font-size:15px; font-weight:600; padding:12px 36px; border-radius:12px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,0.15); }
+  .back-btn:active { background:rgba(255,255,255,0.2); }
+
+  /* Full View */
+  .search-wrap { padding:12px 14px 6px; }
+  .search-input { width:100%; padding:10px 14px; border-radius:10px; border:1px solid #334155; background:#1e293b; color:#e2e8f0; font-size:15px; font-family:inherit; outline:none; }
+  .search-input:focus { border-color:#059669; }
+  .list-wrap { padding:4px 12px 80px; }
+  .list-row { display:flex; align-items:center; gap:10px; padding:12px; border-radius:12px; cursor:pointer; user-select:none; }
+  .list-row.open { background:#1e293b; }
+  .list-emoji { font-size:22px; width:32px; text-align:center; flex-shrink:0; }
+  .list-label { font-size:15px; font-weight:600; }
+  .list-sub { font-size:12px; color:#94a3b8; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list-pct { font-family:'JetBrains Mono',monospace; font-weight:600; font-size:14px; padding:3px 8px; border-radius:7px; }
+  .list-arrow { color:#475569; font-size:12px; transition:transform 0.15s ease; }
+  .card-row { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; margin-bottom:4px; }
+  .card-rank { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  .card-name { font-size:14px; font-weight:600; }
+  .card-badge { font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; }
+  .card-detail { font-size:12px; color:#64748b; margin-top:1px; }
+  .card-pct { font-family:'JetBrains Mono',monospace; font-weight:600; flex-shrink:0; }
+
+  .footer { text-align:center; padding:8px 16px 20px; font-size:10px; color:#1e293b; line-height:1.5; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-row">
+    <div class="logo">💳</div>
+    <div>
+      <div class="title">Card Maximizer</div>
+      <div class="subtitle" id="subtitle">Tap a category → see your best card</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tab-quick" onclick="switchTab('quick')">
+      <div class="tab-label">⚡ Quick Tap</div>
+      <div class="tab-desc">At checkout</div>
+    </div>
+    <div class="tab" id="tab-full" onclick="switchTab('full')">
+      <div class="tab-label">📋 Full View</div>
+      <div class="tab-desc">At home</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK TAP GRID -->
+<div id="quick-view">
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- ANSWER OVERLAY -->
+<div id="overlay" class="overlay hidden"></div>
+
+<!-- FULL VIEW -->
+<div id="full-view" class="hidden">
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="Search category or card..." oninput="filterList(this.value)">
+  </div>
+  <div class="list-wrap" id="list"></div>
+</div>
+
+<div class="footer">G = your card · M = Matt's · Chase bonus til Oct 26 · AMEX 1009 0% APR til Dec 26</div>
+
+<script>
+const CATEGORIES = [
+  { id:"groceries", label:"Grocery", emoji:"🛒", priority:1, cards:[
+    { name:"Amex Blue Cash", last4:"1000", pct:6, owner:"G", note:"Up to $6K/yr" },
+    { name:"Citi", last4:"3927", pct:3, owner:"M", note:"Supermarkets" },
+    { name:"AMEX BCE", last4:"1009", pct:3, owner:"M", note:"0% APR til Dec 26" },
+    { name:"Ally", last4:"—", pct:3, owner:"—", note:"" },
+    { name:"US Bank Alt Go", last4:"9283", pct:2, owner:"G", note:"Up to $2K/q" },
+    { name:"BOA", last4:"4130", pct:2, owner:"G", note:"Incl. Costco/wholesale" },
+  ]},
+  { id:"fast_food", label:"Fast Food", emoji:"🍔", priority:2, cards:[
+    { name:"US Bank Cash+", last4:"0770", pct:5, owner:"M", note:"Up to $2K/q" },
+    { name:"Chase Freedom", last4:"1124", pct:4.5, owner:"G", note:"3%+1.5% bonus til Oct 26" },
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"" },
+  ]},
+  { id:"restaurants", label:"Dining", emoji:"🍽️", priority:3, cards:[
+    { name:"Chase Freedom", last4:"1124", pct:4.5, owner:"G", note:"3%+1.5% bonus til Oct 26" },
+    { name:"US Bank Alt Go", last4:"9283", pct:4, owner:"G", note:"Up to $2K/q" },
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"" },
+    { name:"US Bank Cash+", last4:"0770", pct:2, owner:"M", note:"" },
+    { name:"Citi", last4:"3927", pct:2, owner:"M", note:"" },
+  ]},
+  { id:"gas", label:"Gas", emoji:"⛽", priority:4, cards:[
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"Includes Costco gas" },
+    { name:"Amex Blue Cash", last4:"1000", pct:3, owner:"G", note:"" },
+    { name:"AMEX BCE", last4:"1009", pct:3, owner:"M", note:"0% APR til Dec 26" },
+    { name:"Citi", last4:"3927", pct:3, owner:"M", note:"" },
+    { name:"Ally", last4:"—", pct:3, owner:"—", note:"" },
+  ]},
+  { id:"costco", label:"Costco", emoji:"🏬", priority:5, cards:[
+    { name:"Chase Freedom", last4:"1124", pct:3, owner:"G", note:"1.5%+1.5% bonus til Oct 26" },
+    { name:"BOA", last4:"4130", pct:2, owner:"G", note:"Wholesales clubs" },
+  ]},
+  { id:"costco_gas", label:"Costco Gas", emoji:"⛽🏬", priority:6, cards:[
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"✅ Includes Costco" },
+    { name:"Amex Blue Cash", last4:"1000", pct:3, owner:"G", note:"" },
+    { name:"Citi", last4:"3927", pct:3, owner:"M", note:"" },
+  ]},
+  { id:"online", label:"Online", emoji:"📦", priority:7, cards:[
+    { name:"Discover (M)", last4:"8920", pct:5, owner:"M", note:"Q1 2026 rotating" },
+    { name:"Discover (G)", last4:"9464", pct:5, owner:"G", note:"Q1 2026 rotating" },
+    { name:"BOA", last4:"4130", pct:3, owner:"G", note:"Online shopping" },
+    { name:"AMEX BCE", last4:"1009", pct:3, owner:"M", note:"Online retail Jan–Apr 26" },
+  ]},
+  { id:"drugstore", label:"Drugstore", emoji:"💊", priority:8, cards:[
+    { name:"Discover (M)", last4:"8920", pct:5, owner:"M", note:"Q1 2026 rotating" },
+    { name:"Discover (G)", last4:"9464", pct:5, owner:"G", note:"Q1 2026 rotating" },
+    { name:"Citi Custom Cash", last4:"9464", pct:5, owner:"G", note:"Up to $500/mo" },
+    { name:"Chase Freedom", last4:"1124", pct:4.5, owner:"G", note:"3%+1.5% bonus" },
+    { name:"Ally", last4:"—", pct:3, owner:"—", note:"" },
+  ]},
+  { id:"streaming", label:"Streaming", emoji:"📺", priority:9, cards:[
+    { name:"Amex Blue Cash", last4:"1000", pct:6, owner:"G", note:"$10 Disney credit" },
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"Digital books too" },
+    { name:"US Bank Alt Go", last4:"9283", pct:2, owner:"G", note:"" },
+  ]},
+  { id:"gym", label:"Fitness", emoji:"🏋️", priority:10, cards:[
+    { name:"Citi Custom Cash", last4:"9464", pct:5, owner:"G", note:"Up to $500/mo" },
+    { name:"Citi", last4:"3927", pct:3, owner:"M", note:"If selected category" },
+  ]},
+  { id:"transit", label:"Transit", emoji:"🚇", priority:11, cards:[
+    { name:"Amex Blue Cash", last4:"1000", pct:3, owner:"G", note:"Taxis, rideshare, trains" },
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"Toll, taxi, parking" },
+  ]},
+  { id:"travel", label:"Travel", emoji:"✈️", priority:12, cards:[
+    { name:"Chase Freedom", last4:"1124", pct:6.5, owner:"G", note:"Via Chase Travel portal" },
+    { name:"Citi", last4:"3927", pct:5, owner:"M", note:"Via cititravel.com only" },
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"Hotel, airline, rental" },
+  ]},
+  { id:"phone", label:"Phone", emoji:"📱", priority:13, cards:[
+    { name:"Wells Autograph", last4:"6163", pct:3, owner:"G", note:"" },
+  ]},
+  { id:"home", label:"Home Impr.", emoji:"🔨", priority:14, cards:[
+    { name:"Citi Custom Cash", last4:"9464", pct:5, owner:"G", note:"Up to $500/mo" },
+  ]},
+  { id:"dept_stores", label:"Dept Store", emoji:"🏪", priority:15, cards:[
+    { name:"US Bank Cash+", last4:"0770", pct:5, owner:"M", note:"Nordstrom, Saks, Kohl's" },
+  ]},
+  { id:"over1000", label:"Big $1K+", emoji:"💰", priority:16, cards:[
+    { name:"Citi Custom Cash", last4:"9464", pct:5, owner:"G", note:"If category, up to $500/mo" },
+    { name:"Chase Freedom", last4:"1124", pct:3, owner:"G", note:"1.5%+1.5% on everything" },
+    { name:"AMEX BCE", last4:"1009", pct:0, owner:"M", note:"0% APR til Dec 26" },
+  ]},
+  { id:"everything", label:"Other", emoji:"🔄", priority:17, cards:[
+    { name:"Chase Freedom", last4:"1124", pct:3, owner:"G", note:"1.5%+1.5% bonus til Oct 26" },
+    { name:"Ally", last4:"—", pct:1, owner:"—", note:"" },
+  ]},
+];
+
+const sorted = [...CATEGORIES].sort((a,b) => a.priority - b.priority);
+
+function answerGradient(pct) {
+  if (pct >= 5) return "linear-gradient(145deg, #14532d 0%, #052e16 100%)";
+  if (pct >= 3) return "linear-gradient(145deg, #0c4a6e 0%, #082f49 100%)";
+  return "linear-gradient(145deg, #1e293b 0%, #0f172a 100%)";
+}
+function answerAccent(pct) {
+  if (pct >= 5) return "#4ade80";
+  if (pct >= 3) return "#38bdf8";
+  return "#94a3b8";
+}
+function pctColor(pct) {
+  if (pct >= 5) return "#16a34a";
+  if (pct >= 4) return "#059669";
+  if (pct >= 3) return "#0284c7";
+  if (pct >= 2) return "#6366f1";
+  return "#94a3b8";
+}
+function pctBg(pct) {
+  if (pct >= 5) return "#dcfce7";
+  if (pct >= 4) return "#d1fae5";
+  if (pct >= 3) return "#dbeafe";
+  if (pct >= 2) return "#e0e7ff";
+  return "#f1f5f9";
+}
+function badgeHTML(owner) {
+  if (owner === "G") return `<span style="font-size:13px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;margin-left:10px">G</span>`;
+  if (owner === "M") return `<span style="font-size:13px;font-weight:700;background:#ede9fe;color:#5b21b6;padding:2px 8px;border-radius:6px;margin-left:10px">M</span>`;
+  return "";
+}
+function smallBadge(owner) {
+  if (owner === "G") return `<span class="alt-badge" style="background:#fef3c7;color:#92400e">G</span>`;
+  if (owner === "M") return `<span class="alt-badge" style="background:#ede9fe;color:#5b21b6">M</span>`;
+  return "";
+}
+function listBadge(owner) {
+  if (owner === "G") return `<span class="card-badge" style="background:#fef3c7;color:#92400e">G</span>`;
+  if (owner === "M") return `<span class="card-badge" style="background:#ede9fe;color:#5b21b6">M</span>`;
+  return "";
+}
+
+/* ── TAB SWITCHING ── */
+let currentTab = "quick";
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById("tab-quick").className = tab === "quick" ? "tab active" : "tab";
+  document.getElementById("tab-full").className = tab === "full" ? "tab active" : "tab";
+  document.getElementById("quick-view").className = tab === "quick" ? "" : "hidden";
+  document.getElementById("full-view").className = tab === "full" ? "" : "hidden";
+  document.getElementById("subtitle").textContent = tab === "quick" ? "Tap a category → see your best card" : "Browse all cards & details";
+}
+
+/* ── QUICK TAP GRID ── */
+function buildGrid() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = sorted.map(cat => `
+    <div class="tile" onclick="showAnswer('${cat.id}')">
+      <div class="tile-emoji">${cat.emoji}</div>
+      <div class="tile-label">${cat.label}</div>
+    </div>
+  `).join("");
+}
+
+/* ── ANSWER OVERLAY ── */
+let altsVisible = true;
+function showAnswer(id) {
+  const cat = CATEGORIES.find(c => c.id === id);
+  if (!cat) return;
+  const best = cat.cards[0];
+  const alts = cat.cards.slice(1);
+  const accent = answerAccent(best.pct);
+  altsVisible = true;
+
+  const overlay = document.getElementById("overlay");
+  overlay.className = "overlay";
+  overlay.style.background = answerGradient(best.pct);
+
+  let altsHTML = "";
+  if (alts.length > 0) {
+    altsHTML = `
+      <div style="margin-top:32px;width:100%;max-width:340px">
+        <div class="alts-toggle" onclick="toggleAlts(event)" id="alts-toggle">hide alternatives ▲</div>
+        <div id="alts-list">
+          ${alts.map((c, i) => `
+            <div class="alt-row" style="animation:altSlide 0.12s ease ${i*0.04}s both">
+              <span class="alt-name">${c.name} ••${c.last4} ${smallBadge(c.owner)}</span>
+              <span class="alt-pct">${c.pct > 0 ? c.pct+"%" : "0%APR"}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  overlay.innerHTML = `
+    <div class="overlay-cat" style="color:${accent}">${cat.emoji} ${cat.label}</div>
+    <div class="overlay-pct" style="color:${accent}">${best.pct > 0 ? best.pct+"%" : "0%"}</div>
+    ${best.pct === 0 ? `<div class="overlay-apr" style="color:${accent}">APR — carry balance</div>` : ""}
+    <div class="overlay-name">${best.name}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+      <span class="overlay-last4">•••• ${best.last4}</span>
+      ${badgeHTML(best.owner)}
+    </div>
+    ${best.note ? `<div class="overlay-note">${best.note}</div>` : ""}
+    ${altsHTML}
+    <div class="back-btn" onclick="hideAnswer()">← Back to grid</div>
+  `;
+}
+
+function hideAnswer() {
+  document.getElementById("overlay").className = "overlay hidden";
+}
+
+function toggleAlts(e) {
+  e.stopPropagation();
+  altsVisible = !altsVisible;
+  document.getElementById("alts-list").style.display = altsVisible ? "block" : "none";
+  document.getElementById("alts-toggle").textContent = altsVisible ? "hide alternatives ▲" : document.getElementById("alts-list").children.length + " alternatives ▼";
+}
+
+/* ── FULL VIEW LIST ── */
+let expandedId = null;
+function buildList(filter) {
+  const q = (filter || "").toLowerCase();
+  const cats = q ? CATEGORIES.filter(c =>
+    c.label.toLowerCase().includes(q) ||
+    c.cards.some(card => card.name.toLowerCase().includes(q))
+  ) : CATEGORIES;
+
+  const list = document.getElementById("list");
+  if (cats.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:#475569">No matching categories</div>`;
+    return;
+  }
+
+  list.innerHTML = cats.map(cat => {
+    const best = cat.cards[0];
+    const isOpen = expandedId === cat.id;
+    let cardsHTML = "";
+    if (isOpen) {
+      cardsHTML = `<div style="padding:4px 8px 8px">` + cat.cards.map((card, i) => `
+        <div class="card-row" style="background:${i===0?"#132216":"#1e293b"};border:1px solid ${i===0?"#16a34a33":"transparent"};animation:slideIn 0.15s ease ${i*0.04}s both">
+          <div class="card-rank" style="background:${i===0?"#16a34a":"#334155"};color:${i===0?"#fff":"#94a3b8"}">${i===0?"★":i+1}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="card-name" style="color:${i===0?"#4ade80":"#e2e8f0"}">${card.name}</span>
+              ${listBadge(card.owner)}
+            </div>
+            <div class="card-detail">•••${card.last4}${card.note ? " · "+card.note : ""}</div>
+          </div>
+          <div class="card-pct" style="font-size:${i===0?16:14}px;color:${pctColor(card.pct)}">${card.pct>0?card.pct+"%":"0%APR"}</div>
+        </div>
+      `).join("") + `</div>`;
+    }
+
+    return `
+      <div style="margin-bottom:4px">
+        <div class="list-row ${isOpen?"open":""}" onclick="toggleListItem('${cat.id}')">
+          <div class="list-emoji">${cat.emoji}</div>
+          <div style="flex:1;min-width:0">
+            <div class="list-label">${cat.label}</div>
+            <div class="list-sub">${best.name} •••${best.last4}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            ${best.pct > 0 ? `<div class="list-pct" style="background:${pctBg(best.pct)};color:${pctColor(best.pct)}">${best.pct}%</div>` : ""}
+            <div class="list-arrow" style="transform:rotate(${isOpen?180:0}deg)">▼</div>
+          </div>
+        </div>
+        ${cardsHTML}
+      </div>
+    `;
+  }).join("");
+}
+
+function toggleListItem(id) {
+  expandedId = expandedId === id ? null : id;
+  buildList(document.querySelector(".search-input")?.value);
+}
+
+function filterList(val) {
+  expandedId = null;
+  buildList(val);
+}
+
+/* ── INIT ── */
+buildGrid();
+buildList();
+
+/* ── SERVICE WORKER for offline ── */
+if ("serviceWorker" in navigator) {
+  const swCode = `
+    const CACHE = 'card-max-v1';
+    const URLS = ['./', './index.html'];
+    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS))));
+    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+  `;
+  const blob = new Blob([swCode], { type: "application/javascript" });
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+}
+</script>
+</body>
+</html>
