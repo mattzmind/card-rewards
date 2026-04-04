@@ -1,908 +1,443 @@
-import { useState, useMemo, useCallback, useEffect } from “react”;
+<!DOCTYPE html>
 
-/* ───────────────────────── CARD DATABASE ───────────────────────── */
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Card Max">
+<meta name="theme-color" content="#0f172a">
+<title>Card Maximizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;min-height:100dvh;background:#0f172a;color:#e2e8f0;font-family:'DM Sans','Segoe UI',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+input::placeholder{color:#64748b}
+input:focus{outline:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes altSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawerUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.header{background:#0f172a;padding:16px 16px 0;position:sticky;top:0;z-index:100;border-bottom:1px solid #1e293b;padding-top:env(safe-area-inset-top,16px)}
+.tabs{display:flex;background:#1e293b;border-radius:10px;padding:3px}
+.tab{flex:1;text-align:center;padding:10px 4px;border-radius:8px;cursor:pointer;transition:all .12s ease;user-select:none;font-size:13px;font-weight:600;color:#64748b}
+.tab.active{background:#334155;color:#fff}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 10px 80px}
+.tile{background:#1e293b;border-radius:14px;padding:14px 6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;min-height:90px;border:1px solid #1e293b;transition:background .1s}
+.tile:active{background:#334155}
+
+.overlay{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;animation:fadeIn .12s ease;overflow-y:auto}
+.back-btn{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.12);color:#e2e8f0;font-size:15px;font-weight:600;padding:12px 36px;border-radius:12px;cursor:pointer;user-select:none;border:1px solid rgba(255,255,255,.15)}
+.back-btn:active{background:rgba(255,255,255,.2)}
+
+.drawer-bg{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .12s ease}
+.drawer{background:#1e293b;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 20px 32px;animation:drawerUp .2s ease}
+
+.search-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:15px;font-family:inherit}
+.search-input:focus{border-color:#059669}
+
+.card-row{background:#1e293b;border-radius:14px;padding:14px 16px;margin-bottom:6px;cursor:pointer;user-select:none;border:1px solid #334155;display:flex;align-items:center;gap:12px;transition:background .1s}
+.card-row:active{background:#334155}
+
+.hidden{display:none}
+.mono{font-family:‘JetBrains Mono’,monospace}
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#16a34a,#059669);display:flex;align-items:center;justify-content:center;font-size:17px">💳</div>
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:700;letter-spacing:-0.02em">Card Maximizer</div>
+      <div id="subtitle" style="font-size:11px;color:#475569;font-weight:500">Tap category → tap card name for details</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tab-quick" onclick="switchTab('quick')">⚡ Quick</div>
+    <div class="tab" id="tab-cards" onclick="switchTab('cards')">💳 My Cards</div>
+    <div class="tab" id="tab-full" onclick="switchTab('full')">📋 Categories</div>
+  </div>
+</div>
+
+<div id="quick-view"><div class="grid" id="grid"></div></div>
+<div id="overlay" class="overlay hidden"></div>
+<div id="cards-view" class="hidden"></div>
+<div id="full-view" class="hidden"></div>
+<div id="drawer" class="hidden"></div>
+
+<div style="text-align:center;padding:8px 16px 20px;font-size:10px;color:#1e293b;line-height:1.5">
+  G = Gabby · M = Matt · Chase bonus til Oct 26 · AMEX 1009 0% APR til Dec 26
+</div>
+
+<script>
+/* ─── DATA ─── */
 const CARD_DB = {
-“amex_1000”: {
-name: “Amex Blue Cash”, last4: “1000”, owner: “G”, annualFee: “$95”,
-dueDate: “24th”, limit: “$18,900”, rewards: “$118.74”,
-tiers: [
-{ pct: 6, cat: “Groceries”, cap: “Up to $6K/yr, then 1%” },
-{ pct: 6, cat: “Streaming”, cap: “Up to $6K/yr” },
-{ pct: 3, cat: “Transit”, cap: “Taxis, rideshare, parking, tolls, trains” },
-{ pct: 3, cat: “Gas”, cap: null },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“$10 Disney streaming monthly credit”,
-“Return protection — 90 days, $300/item, $1K/yr”,
-“Extended warranty — +1 year (up to 5yr items), $10K/item”,
-“Purchase protection — stolen/damaged, $1K/item, $50K/yr”,
-“Car rental protection — $15/rental, must decline CDW”,
-“Amex Fan Experiences — Coachella, F1, All-Star, etc.”,
-],
-},
-“amex_1009”: {
-name: “AMEX BCE”, last4: “1009”, owner: “M”, annualFee: “$0”,
-dueDate: “11th”, limit: “$1,000”, rewards: “$0”,
-tiers: [
-{ pct: 3, cat: “Online retail”, cap: “Amazon, Jan–Apr 26” },
-{ pct: 3, cat: “Gas”, cap: “Up to $6K/yr” },
-{ pct: 3, cat: “Supermarket”, cap: “Up to $6K/yr, excl. warehouse” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“0% APR until Dec 9, 2026”,
-“Balance transfer 0% until Dec 9, 2026”,
-“$7 Disney streaming monthly credit”,
-“⚠️ $250 bonus after $2K spend in 6mo — exp. Apr 26”,
-],
-},
-“chase_1124”: {
-name: “Chase Freedom”, last4: “1124”, owner: “G”, annualFee: “$0”,
-dueDate: “3rd”, limit: “$10,200”, rewards: “—”,
-tiers: [
-{ pct: 6.5, cat: “Chase Travel”, cap: “5% + 1.5% bonus til Oct 26” },
-{ pct: 4.5, cat: “Dining & takeout”, cap: “3% + 1.5% bonus til Oct 26” },
-{ pct: 4.5, cat: “Drugstore”, cap: “3% + 1.5% bonus til Oct 26” },
-{ pct: 3, cat: “Everything else”, cap: “1.5% + 1.5% bonus til Oct 26” },
-],
-perks: [
-“Extra 1.5% on everything up to $20K first year (til Oct 26)”,
-“0% APR until Jan 6, 2027”,
-],
-},
-“wells_6163”: {
-name: “Wells Autograph”, last4: “6163”, owner: “G”, annualFee: “$0”,
-dueDate: “21st”, limit: “$12,000”, rewards: “$31.33”,
-tiers: [
-{ pct: 3, cat: “Restaurants, bars & fast food”, cap: null },
-{ pct: 3, cat: “Gas”, cap: “Includes Costco” },
-{ pct: 3, cat: “Transit”, cap: “Toll, taxi, parking” },
-{ pct: 3, cat: “Travel”, cap: “Hotel, airline, rental” },
-{ pct: 3, cat: “Phone plans”, cap: null },
-{ pct: 3, cat: “Streaming”, cap: “Digital books too” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“No international transaction fees”,
-],
-},
-“usbank_0770”: {
-name: “US Bank Cash+”, last4: “0770”, owner: “M”, annualFee: “$0”,
-dueDate: “28th”, limit: “$1,000”, rewards: “$210.41”,
-tiers: [
-{ pct: 5, cat: “Fast Food”, cap: “Up to $2K/q combined 5% categories” },
-{ pct: 5, cat: “Department Stores”, cap: “Nordstrom, Saks, Kohl’s” },
-{ pct: 2, cat: “Restaurants”, cap: “Unlimited” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“0% APR until Apr 2026”,
-“Choose your own 5% and 2% categories each quarter”,
-],
-},
-“usbank_9283”: {
-name: “US Bank Altitude Go”, last4: “9283”, owner: “G”, annualFee: “$0”,
-dueDate: “6th”, limit: “$2,000”, rewards: “$33.17”,
-tiers: [
-{ pct: 4, cat: “Restaurants”, cap: “Up to $2K/q” },
-{ pct: 2, cat: “Grocery Stores”, cap: null },
-{ pct: 2, cat: “Gas”, cap: “Excludes Costco & wholesale” },
-{ pct: 2, cat: “Streaming”, cap: “Fubo, Prime, Disney, YouTube, Netflix, Peacock” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [],
-},
-“citi_3927”: {
-name: “Citi”, last4: “3927”, owner: “M”, annualFee: “$0”,
-dueDate: “2nd”, limit: “$6,200”, rewards: “8,577 pts”,
-tiers: [
-{ pct: 5, cat: “Hotels, car rentals, attractions”, cap: “Via cititravel.com only” },
-{ pct: 3, cat: “Supermarkets”, cap: null },
-{ pct: 3, cat: “Gas stations”, cap: null },
-{ pct: 3, cat: “Selected category”, cap: “Fitness, salon, entertainment, pets, streaming” },
-{ pct: 2, cat: “Restaurants”, cap: null },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [],
-},
-“citi_9464”: {
-name: “Citi Custom Cash”, last4: “9464”, owner: “G”, annualFee: “$0”,
-dueDate: “22nd”, limit: “$5,900”, rewards: “$26.35”,
-tiers: [
-{ pct: 5, cat: “Top spend category auto-selected”, cap: “Up to $500/mo” },
-],
-perks: [
-“5% on: Fitness, Drugstore, Live Entertainment, Home Improvement”,
-“Auto-picks your highest-spend eligible category each month”,
-],
-},
-“boa_4130”: {
-name: “BOA”, last4: “4130”, owner: “G”, annualFee: “$0”,
-dueDate: “20th”, limit: “$5,000”, rewards: “$148.01”,
-tiers: [
-{ pct: 3, cat: “Online / Amazon / Target Pickup”, cap: “Up to $2,500/q” },
-{ pct: 2, cat: “Groceries & wholesale clubs”, cap: “Up to $2,500/q” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“Can switch 3% to: Dining, Drug Stores, Gas, Home Improvement, Travel”,
-],
-},
-“discover_8920”: {
-name: “Discover (M)”, last4: “8920”, owner: “M”, annualFee: “$0”,
-dueDate: “6th”, limit: “$4,700”, rewards: “$61.14”,
-tiers: [
-{ pct: 5, cat: “Restaurants”, cap: “Q2 2026 rotating, til Jun 30 · up to $1,500/q” },
-{ pct: 5, cat: “Home Improvement”, cap: “Q2 2026 rotating, til Jun 30 · up to $1,500/q” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“Rotating 5% categories change quarterly”,
-],
-},
-“discover_9464”: {
-name: “Discover (G)”, last4: “9464”, owner: “G”, annualFee: “$0”,
-dueDate: “6th”, limit: “$4,700”, rewards: “$61.14”,
-tiers: [
-{ pct: 5, cat: “Amazon & Drug Stores”, cap: “Up to $1,500/q” },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [
-“Rotating 5% categories change quarterly”,
-],
-},
-“ally”: {
-name: “Ally”, last4: “—”, owner: “M”, annualFee: “$0”,
-dueDate: “9th”, limit: “$6,200”, rewards: “$104.50”,
-tiers: [
-{ pct: 3, cat: “Gas stations”, cap: null },
-{ pct: 3, cat: “Grocery stores”, cap: null },
-{ pct: 3, cat: “Drugstores”, cap: null },
-{ pct: 1, cat: “Everything else”, cap: null },
-],
-perks: [],
-},
+  amex_1000:{name:"Amex Blue Cash",last4:"1000",owner:"G",annualFee:"$95",dueDate:"24th",limit:"$18,900",rewards:"$118.74",
+    tiers:[{pct:6,cat:"Groceries",cap:"Up to $6K/yr, then 1%"},{pct:6,cat:"Streaming",cap:"Up to $6K/yr"},{pct:3,cat:"Transit",cap:"Taxis, rideshare, parking, tolls, trains"},{pct:3,cat:"Gas",cap:null},{pct:1,cat:"Everything else",cap:null}],
+    perks:["$10 Disney streaming monthly credit","Return protection — 90 days, $300/item, $1K/yr","Extended warranty — +1 year (up to 5yr items), $10K/item","Purchase protection — stolen/damaged, $1K/item, $50K/yr","Car rental protection — $15/rental, must decline CDW","Amex Fan Experiences — Coachella, F1, All-Star, etc."]},
+  amex_1009:{name:"AMEX BCE",last4:"1009",owner:"M",annualFee:"$0",dueDate:"11th",limit:"$1,000",rewards:"$0",
+    tiers:[{pct:3,cat:"Online retail",cap:"Amazon, Jan–Apr 26"},{pct:3,cat:"Gas",cap:"Up to $6K/yr"},{pct:3,cat:"Supermarket",cap:"Up to $6K/yr, excl. warehouse"},{pct:1,cat:"Everything else",cap:null}],
+    perks:["0% APR until Dec 9, 2026","Balance transfer 0% until Dec 9, 2026","$7 Disney streaming monthly credit","⚠️ $250 bonus after $2K spend in 6mo — exp. Apr 26"]},
+  chase_1124:{name:"Chase Freedom",last4:"1124",owner:"G",annualFee:"$0",dueDate:"3rd",limit:"$10,200",rewards:"—",
+    tiers:[{pct:6.5,cat:"Chase Travel",cap:"5% + 1.5% bonus til Oct 26"},{pct:4.5,cat:"Dining & takeout",cap:"3% + 1.5% bonus til Oct 26"},{pct:4.5,cat:"Drugstore",cap:"3% + 1.5% bonus til Oct 26"},{pct:3,cat:"Everything else",cap:"1.5% + 1.5% bonus til Oct 26"}],
+    perks:["Extra 1.5% on everything up to $20K first year (til Oct 26)","0% APR until Jan 6, 2027"]},
+  wells_6163:{name:"Wells Autograph",last4:"6163",owner:"G",annualFee:"$0",dueDate:"21st",limit:"$12,000",rewards:"$31.33",
+    tiers:[{pct:3,cat:"Restaurants, bars & fast food",cap:null},{pct:3,cat:"Gas",cap:"Includes Costco"},{pct:3,cat:"Transit",cap:"Toll, taxi, parking"},{pct:3,cat:"Travel",cap:"Hotel, airline, rental"},{pct:3,cat:"Phone plans",cap:null},{pct:3,cat:"Streaming",cap:"Digital books too"},{pct:1,cat:"Everything else",cap:null}],
+    perks:["No international transaction fees"]},
+  usbank_0770:{name:"US Bank Cash+",last4:"0770",owner:"M",annualFee:"$0",dueDate:"28th",limit:"$1,000",rewards:"$210.41",
+    tiers:[{pct:5,cat:"Fast Food",cap:"Up to $2K/q combined 5% categories"},{pct:5,cat:"Department Stores",cap:"Nordstrom, Saks, Kohl's"},{pct:2,cat:"Restaurants",cap:"Unlimited"},{pct:1,cat:"Everything else",cap:null}],
+    perks:["0% APR until Apr 2026","Choose your own 5% and 2% categories each quarter"]},
+  usbank_9283:{name:"US Bank Altitude Go",last4:"9283",owner:"G",annualFee:"$0",dueDate:"6th",limit:"$2,000",rewards:"$33.17",
+    tiers:[{pct:4,cat:"Restaurants",cap:"Up to $2K/q"},{pct:2,cat:"Grocery Stores",cap:null},{pct:2,cat:"Gas",cap:"Excludes Costco & wholesale"},{pct:2,cat:"Streaming",cap:"Fubo, Prime, Disney, YouTube, Netflix, Peacock"},{pct:1,cat:"Everything else",cap:null}],
+    perks:[]},
+  citi_3927:{name:"Citi",last4:"3927",owner:"M",annualFee:"$0",dueDate:"2nd",limit:"$6,200",rewards:"8,577 pts",
+    tiers:[{pct:5,cat:"Hotels, car rentals, attractions",cap:"Via cititravel.com only"},{pct:3,cat:"Supermarkets",cap:null},{pct:3,cat:"Gas stations",cap:null},{pct:3,cat:"Selected category",cap:"Fitness, salon, entertainment, pets, streaming"},{pct:2,cat:"Restaurants",cap:null},{pct:1,cat:"Everything else",cap:null}],
+    perks:[]},
+  citi_9464:{name:"Citi Custom Cash",last4:"9464",owner:"G",annualFee:"$0",dueDate:"22nd",limit:"$5,900",rewards:"$26.35",
+    tiers:[{pct:5,cat:"Top spend category auto-selected",cap:"Up to $500/mo"}],
+    perks:["5% on: Fitness, Drugstore, Live Entertainment, Home Improvement","Auto-picks your highest-spend eligible category each month"]},
+  boa_4130:{name:"BOA",last4:"4130",owner:"G",annualFee:"$0",dueDate:"20th",limit:"$5,000",rewards:"$148.01",
+    tiers:[{pct:3,cat:"Online / Amazon / Target Pickup",cap:"Up to $2,500/q"},{pct:2,cat:"Groceries & wholesale clubs",cap:"Up to $2,500/q"},{pct:1,cat:"Everything else",cap:null}],
+    perks:["Can switch 3% to: Dining, Drug Stores, Gas, Home Improvement, Travel"]},
+  discover_8920:{name:"Discover (M)",last4:"8920",owner:"M",annualFee:"$0",dueDate:"6th",limit:"$4,700",rewards:"$61.14",
+    tiers:[{pct:5,cat:"Restaurants",cap:"Q2 2026 rotating, til Jun 30 · up to $1,500/q"},{pct:5,cat:"Home Improvement",cap:"Q2 2026 rotating, til Jun 30 · up to $1,500/q"},{pct:1,cat:"Everything else",cap:null}],
+    perks:["Rotating 5% categories change quarterly"]},
+  discover_9464:{name:"Discover (G)",last4:"9464",owner:"G",annualFee:"$0",dueDate:"6th",limit:"$4,700",rewards:"$61.14",
+    tiers:[{pct:5,cat:"Amazon & Drug Stores",cap:"Up to $1,500/q"},{pct:1,cat:"Everything else",cap:null}],
+    perks:["Rotating 5% categories change quarterly"]},
+  ally:{name:"Ally",last4:"—",owner:"M",annualFee:"$0",dueDate:"9th",limit:"$6,200",rewards:"$104.50",
+    tiers:[{pct:3,cat:"Gas stations",cap:null},{pct:3,cat:"Grocery stores",cap:null},{pct:3,cat:"Drugstores",cap:null},{pct:1,cat:"Everything else",cap:null}],
+    perks:[]},
 };
 
-/* Map card name+last4 to DB key */
-function findCardKey(name, last4) {
-const entries = Object.entries(CARD_DB);
-for (const [key, card] of entries) {
-if (card.last4 === last4) return key;
-}
-return null;
-}
-
-/* ───────────────────────── CATEGORY DATA ───────────────────────── */
 const CATEGORIES = [
-{ id:“groceries”, label:“Grocery”, emoji:“🛒”, priority:1, cards:[
-{ name:“Amex Blue Cash”, last4:“1000”, pct:6, owner:“G”, note:“Up to $6K/yr” },
-{ name:“Citi”, last4:“3927”, pct:3, owner:“M”, note:“Supermarkets” },
-{ name:“AMEX BCE”, last4:“1009”, pct:3, owner:“M”, note:“0% APR til Dec 26” },
-{ name:“Ally”, last4:”—”, pct:3, owner:“M”, note:”” },
-{ name:“US Bank Alt Go”, last4:“9283”, pct:2, owner:“G”, note:“Up to $2K/q” },
-{ name:“BOA”, last4:“4130”, pct:2, owner:“G”, note:“Incl. Costco/wholesale” },
-]},
-{ id:“fast_food”, label:“Fast Food”, emoji:“🍔”, priority:2, cards:[
-{ name:“US Bank Cash+”, last4:“0770”, pct:5, owner:“M”, note:“Up to $2K/q” },
-{ name:“Chase Freedom”, last4:“1124”, pct:4.5, owner:“G”, note:“3%+1.5% bonus til Oct 26” },
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:”” },
-]},
-{ id:“restaurants”, label:“Dining”, emoji:“🍽️”, priority:3, cards:[
-{ name:“Discover (M)”, last4:“8920”, pct:5, owner:“M”, note:“Q2 2026 rotating · til Jun 30” },
-{ name:“Chase Freedom”, last4:“1124”, pct:4.5, owner:“G”, note:“3%+1.5% bonus til Oct 26” },
-{ name:“US Bank Alt Go”, last4:“9283”, pct:4, owner:“G”, note:“Up to $2K/q” },
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:”” },
-{ name:“US Bank Cash+”, last4:“0770”, pct:2, owner:“M”, note:”” },
-{ name:“Citi”, last4:“3927”, pct:2, owner:“M”, note:”” },
-]},
-{ id:“gas”, label:“Gas”, emoji:“⛽”, priority:4, cards:[
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:“Includes Costco gas” },
-{ name:“Amex Blue Cash”, last4:“1000”, pct:3, owner:“G”, note:”” },
-{ name:“AMEX BCE”, last4:“1009”, pct:3, owner:“M”, note:“0% APR til Dec 26” },
-{ name:“Citi”, last4:“3927”, pct:3, owner:“M”, note:”” },
-{ name:“Ally”, last4:”—”, pct:3, owner:“M”, note:”” },
-]},
-{ id:“costco”, label:“Costco”, emoji:“🏬”, priority:5, cards:[
-{ name:“Chase Freedom”, last4:“1124”, pct:3, owner:“G”, note:“1.5%+1.5% bonus til Oct 26” },
-{ name:“BOA”, last4:“4130”, pct:2, owner:“G”, note:“Wholesales clubs” },
-]},
-{ id:“costco_gas”, label:“Costco Gas”, emoji:“⛽🏬”, priority:6, cards:[
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:“✅ Includes Costco” },
-{ name:“Amex Blue Cash”, last4:“1000”, pct:3, owner:“G”, note:”” },
-{ name:“Citi”, last4:“3927”, pct:3, owner:“M”, note:”” },
-]},
-{ id:“online”, label:“Online”, emoji:“📦”, priority:7, cards:[
-{ name:“Discover (G)”, last4:“9464”, pct:5, owner:“G”, note:“Q1 2026 rotating” },
-{ name:“BOA”, last4:“4130”, pct:3, owner:“G”, note:“Online shopping” },
-{ name:“AMEX BCE”, last4:“1009”, pct:3, owner:“M”, note:“Online retail Jan–Apr 26” },
-]},
-{ id:“drugstore”, label:“Drugstore”, emoji:“💊”, priority:8, cards:[
-{ name:“Discover (G)”, last4:“9464”, pct:5, owner:“G”, note:“Q1 2026 rotating” },
-{ name:“Citi Custom Cash”, last4:“9464”, pct:5, owner:“G”, note:“Up to $500/mo” },
-{ name:“Chase Freedom”, last4:“1124”, pct:4.5, owner:“G”, note:“3%+1.5% bonus” },
-{ name:“Ally”, last4:”—”, pct:3, owner:“M”, note:”” },
-]},
-{ id:“streaming”, label:“Streaming”, emoji:“📺”, priority:9, cards:[
-{ name:“Amex Blue Cash”, last4:“1000”, pct:6, owner:“G”, note:”$10 Disney credit” },
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:“Digital books too” },
-{ name:“US Bank Alt Go”, last4:“9283”, pct:2, owner:“G”, note:”” },
-]},
-{ id:“gym”, label:“Fitness”, emoji:“🏋️”, priority:10, cards:[
-{ name:“Citi Custom Cash”, last4:“9464”, pct:5, owner:“G”, note:“Up to $500/mo” },
-{ name:“Citi”, last4:“3927”, pct:3, owner:“M”, note:“If selected category” },
-]},
-{ id:“transit”, label:“Transit”, emoji:“🚇”, priority:11, cards:[
-{ name:“Amex Blue Cash”, last4:“1000”, pct:3, owner:“G”, note:“Taxis, rideshare, trains” },
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:“Toll, taxi, parking” },
-]},
-{ id:“travel”, label:“Travel”, emoji:“✈️”, priority:12, cards:[
-{ name:“Chase Freedom”, last4:“1124”, pct:6.5, owner:“G”, note:“Via Chase Travel portal” },
-{ name:“Citi”, last4:“3927”, pct:5, owner:“M”, note:“Via cititravel.com only” },
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:“Hotel, airline, rental” },
-]},
-{ id:“phone”, label:“Phone”, emoji:“📱”, priority:13, cards:[
-{ name:“Wells Autograph”, last4:“6163”, pct:3, owner:“G”, note:”” },
-]},
-{ id:“home”, label:“Home Impr.”, emoji:“🔨”, priority:14, cards:[
-{ name:“Discover (M)”, last4:“8920”, pct:5, owner:“M”, note:“Q2 2026 rotating · til Jun 30” },
-{ name:“Citi Custom Cash”, last4:“9464”, pct:5, owner:“G”, note:“Up to $500/mo” },
-]},
-{ id:“dept_stores”, label:“Dept Store”, emoji:“🏪”, priority:15, cards:[
-{ name:“US Bank Cash+”, last4:“0770”, pct:5, owner:“M”, note:“Nordstrom, Saks, Kohl’s” },
-]},
-{ id:“over1000”, label:“Big $1K+”, emoji:“💰”, priority:16, cards:[
-{ name:“Citi Custom Cash”, last4:“9464”, pct:5, owner:“G”, note:“If category, up to $500/mo” },
-{ name:“Chase Freedom”, last4:“1124”, pct:3, owner:“G”, note:“1.5%+1.5% on everything” },
-{ name:“AMEX BCE”, last4:“1009”, pct:0, owner:“M”, note:“0% APR til Dec 26” },
-]},
-{ id:“everything”, label:“Other”, emoji:“🔄”, priority:17, cards:[
-{ name:“Chase Freedom”, last4:“1124”, pct:3, owner:“G”, note:“1.5%+1.5% bonus til Oct 26” },
-{ name:“Ally”, last4:”—”, pct:1, owner:“M”, note:”” },
-]},
+  {id:"groceries",label:"Grocery",emoji:"🛒",priority:1,cards:[
+    {name:"Amex Blue Cash",last4:"1000",pct:6,owner:"G",note:"Up to $6K/yr"},
+    {name:"Citi",last4:"3927",pct:3,owner:"M",note:"Supermarkets"},
+    {name:"AMEX BCE",last4:"1009",pct:3,owner:"M",note:"0% APR til Dec 26"},
+    {name:"Ally",last4:"—",pct:3,owner:"M",note:""},
+    {name:"US Bank Alt Go",last4:"9283",pct:2,owner:"G",note:"Up to $2K/q"},
+    {name:"BOA",last4:"4130",pct:2,owner:"G",note:"Incl. Costco/wholesale"}]},
+  {id:"fast_food",label:"Fast Food",emoji:"🍔",priority:2,cards:[
+    {name:"US Bank Cash+",last4:"0770",pct:5,owner:"M",note:"Up to $2K/q"},
+    {name:"Chase Freedom",last4:"1124",pct:4.5,owner:"G",note:"3%+1.5% bonus til Oct 26"},
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:""}]},
+  {id:"restaurants",label:"Dining",emoji:"🍽️",priority:3,cards:[
+    {name:"Discover (M)",last4:"8920",pct:5,owner:"M",note:"Q2 2026 rotating · til Jun 30"},
+    {name:"Chase Freedom",last4:"1124",pct:4.5,owner:"G",note:"3%+1.5% bonus til Oct 26"},
+    {name:"US Bank Alt Go",last4:"9283",pct:4,owner:"G",note:"Up to $2K/q"},
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:""},
+    {name:"US Bank Cash+",last4:"0770",pct:2,owner:"M",note:""},
+    {name:"Citi",last4:"3927",pct:2,owner:"M",note:""}]},
+  {id:"gas",label:"Gas",emoji:"⛽",priority:4,cards:[
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:"Includes Costco gas"},
+    {name:"Amex Blue Cash",last4:"1000",pct:3,owner:"G",note:""},
+    {name:"AMEX BCE",last4:"1009",pct:3,owner:"M",note:"0% APR til Dec 26"},
+    {name:"Citi",last4:"3927",pct:3,owner:"M",note:""},
+    {name:"Ally",last4:"—",pct:3,owner:"M",note:""}]},
+  {id:"costco",label:"Costco",emoji:"🏬",priority:5,cards:[
+    {name:"Chase Freedom",last4:"1124",pct:3,owner:"G",note:"1.5%+1.5% bonus til Oct 26"},
+    {name:"BOA",last4:"4130",pct:2,owner:"G",note:"Wholesales clubs"}]},
+  {id:"costco_gas",label:"Costco Gas",emoji:"⛽🏬",priority:6,cards:[
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:"✅ Includes Costco"},
+    {name:"Amex Blue Cash",last4:"1000",pct:3,owner:"G",note:""},
+    {name:"Citi",last4:"3927",pct:3,owner:"M",note:""}]},
+  {id:"online",label:"Online",emoji:"📦",priority:7,cards:[
+    {name:"Discover (G)",last4:"9464",pct:5,owner:"G",note:"Q1 2026 rotating"},
+    {name:"BOA",last4:"4130",pct:3,owner:"G",note:"Online shopping"},
+    {name:"AMEX BCE",last4:"1009",pct:3,owner:"M",note:"Online retail Jan–Apr 26"}]},
+  {id:"drugstore",label:"Drugstore",emoji:"💊",priority:8,cards:[
+    {name:"Discover (G)",last4:"9464",pct:5,owner:"G",note:"Q1 2026 rotating"},
+    {name:"Citi Custom Cash",last4:"9464",pct:5,owner:"G",note:"Up to $500/mo"},
+    {name:"Chase Freedom",last4:"1124",pct:4.5,owner:"G",note:"3%+1.5% bonus"},
+    {name:"Ally",last4:"—",pct:3,owner:"M",note:""}]},
+  {id:"streaming",label:"Streaming",emoji:"📺",priority:9,cards:[
+    {name:"Amex Blue Cash",last4:"1000",pct:6,owner:"G",note:"$10 Disney credit"},
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:"Digital books too"},
+    {name:"US Bank Alt Go",last4:"9283",pct:2,owner:"G",note:""}]},
+  {id:"gym",label:"Fitness",emoji:"🏋️",priority:10,cards:[
+    {name:"Citi Custom Cash",last4:"9464",pct:5,owner:"G",note:"Up to $500/mo"},
+    {name:"Citi",last4:"3927",pct:3,owner:"M",note:"If selected category"}]},
+  {id:"transit",label:"Transit",emoji:"🚇",priority:11,cards:[
+    {name:"Amex Blue Cash",last4:"1000",pct:3,owner:"G",note:"Taxis, rideshare, trains"},
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:"Toll, taxi, parking"}]},
+  {id:"travel",label:"Travel",emoji:"✈️",priority:12,cards:[
+    {name:"Chase Freedom",last4:"1124",pct:6.5,owner:"G",note:"Via Chase Travel portal"},
+    {name:"Citi",last4:"3927",pct:5,owner:"M",note:"Via cititravel.com only"},
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:"Hotel, airline, rental"}]},
+  {id:"phone",label:"Phone",emoji:"📱",priority:13,cards:[
+    {name:"Wells Autograph",last4:"6163",pct:3,owner:"G",note:""}]},
+  {id:"home",label:"Home Impr.",emoji:"🔨",priority:14,cards:[
+    {name:"Discover (M)",last4:"8920",pct:5,owner:"M",note:"Q2 2026 rotating · til Jun 30"},
+    {name:"Citi Custom Cash",last4:"9464",pct:5,owner:"G",note:"Up to $500/mo"}]},
+  {id:"dept_stores",label:"Dept Store",emoji:"🏪",priority:15,cards:[
+    {name:"US Bank Cash+",last4:"0770",pct:5,owner:"M",note:"Nordstrom, Saks, Kohl's"}]},
+  {id:"over1000",label:"Big $1K+",emoji:"💰",priority:16,cards:[
+    {name:"Citi Custom Cash",last4:"9464",pct:5,owner:"G",note:"If category, up to $500/mo"},
+    {name:"Chase Freedom",last4:"1124",pct:3,owner:"G",note:"1.5%+1.5% on everything"},
+    {name:"AMEX BCE",last4:"1009",pct:0,owner:"M",note:"0% APR til Dec 26"}]},
+  {id:"everything",label:"Other",emoji:"🔄",priority:17,cards:[
+    {name:"Chase Freedom",last4:"1124",pct:3,owner:"G",note:"1.5%+1.5% bonus til Oct 26"},
+    {name:"Ally",last4:"—",pct:1,owner:"M",note:""}]},
 ];
 
-/* ───────────────────────── HELPERS ───────────────────────── */
-const pctColor = (pct) => {
-if (pct >= 5) return “#16a34a”;
-if (pct >= 4) return “#059669”;
-if (pct >= 3) return “#0284c7”;
-if (pct >= 2) return “#6366f1”;
-return “#94a3b8”;
-};
-const pctBg = (pct) => {
-if (pct >= 5) return “#dcfce7”;
-if (pct >= 4) return “#d1fae5”;
-if (pct >= 3) return “#dbeafe”;
-if (pct >= 2) return “#e0e7ff”;
-return “#f1f5f9”;
-};
-const ownerBadge = (o) => {
-if (o === “G”) return { bg: “#fef3c7”, color: “#92400e”, label: “G” };
-if (o === “M”) return { bg: “#ede9fe”, color: “#5b21b6”, label: “M” };
-return null;
-};
-const answerGradient = (pct) => {
-if (pct >= 5) return “linear-gradient(145deg, #14532d 0%, #052e16 100%)”;
-if (pct >= 3) return “linear-gradient(145deg, #0c4a6e 0%, #082f49 100%)”;
-return “linear-gradient(145deg, #1e293b 0%, #0f172a 100%)”;
-};
-const answerAccent = (pct) => {
-if (pct >= 5) return “#4ade80”;
-if (pct >= 3) return “#38bdf8”;
-return “#94a3b8”;
-};
+const sorted = [...CATEGORIES].sort((a,b)=>a.priority-b.priority);
 
-/* ───────────────────── REWARDS STORAGE HOOK ───────────────────── */
-function useRewardsStorage() {
-const [balances, setBalances] = useState({});
-const [loaded, setLoaded] = useState(false);
+/* ─── HELPERS ─── */
+function pctColor(p){return p>=5?"#16a34a":p>=4?"#059669":p>=3?"#0284c7":p>=2?"#6366f1":"#94a3b8"}
+function pctBg(p){return p>=5?"#dcfce7":p>=4?"#d1fae5":p>=3?"#dbeafe":p>=2?"#e0e7ff":"#f1f5f9"}
+function answerGrad(p){return p>=5?"linear-gradient(145deg,#14532d,#052e16)":p>=3?"linear-gradient(145deg,#0c4a6e,#082f49)":"linear-gradient(145deg,#1e293b,#0f172a)"}
+function answerAccent(p){return p>=5?"#4ade80":p>=3?"#38bdf8":"#94a3b8"}
+function badgeHTML(o,sz){
+  if(sz==="sm"){
+    if(o==="G")return`<span style="font-size:9px;font-weight:700;background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;margin-left:6px">G</span>`;
+    if(o==="M")return`<span style="font-size:9px;font-weight:700;background:#ede9fe;color:#5b21b6;padding:1px 4px;border-radius:3px;margin-left:6px">M</span>`;
+  } else {
+    if(o==="G")return`<span style="font-size:13px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;margin-left:10px">G</span>`;
+    if(o==="M")return`<span style="font-size:13px;font-weight:700;background:#ede9fe;color:#5b21b6;padding:2px 8px;border-radius:6px;margin-left:10px">M</span>`;
+  }
+  return"";
+}
+function findKey(last4){for(const[k,c]of Object.entries(CARD_DB))if(c.last4===last4)return k;return null}
 
-useEffect(() => {
-(async () => {
-try {
-const result = await window.storage.get(“rewards-balances”);
-if (result?.value) setBalances(JSON.parse(result.value));
-} catch {}
-setLoaded(true);
-})();
-}, []);
+/* ─── REWARDS STORAGE ─── */
+let rewardsCache={};
+try{rewardsCache=JSON.parse(localStorage.getItem("cardmax-rewards")||"{}")}catch{}
+function getRewards(key){return rewardsCache[key]!==undefined?rewardsCache[key]:CARD_DB[key]?.rewards||""}
+function setRewards(key,val){rewardsCache[key]=val;try{localStorage.setItem("cardmax-rewards",JSON.stringify(rewardsCache))}catch{}}
 
-const updateBalance = useCallback(async (cardKey, value) => {
-const updated = { …balances, [cardKey]: value };
-setBalances(updated);
-try {
-await window.storage.set(“rewards-balances”, JSON.stringify(updated));
-} catch {}
-return updated;
-}, [balances]);
-
-const getBalance = useCallback((cardKey) => {
-return balances[cardKey] !== undefined ? balances[cardKey] : CARD_DB[cardKey]?.rewards || “”;
-}, [balances]);
-
-return { getBalance, updateBalance, loaded };
+/* ─── TAB SWITCHING ─── */
+let currentTab="quick";
+const subtitles={quick:"Tap category → tap card name for details",cards:"All your cards & rewards at a glance",full:"Browse all cards & details"};
+function switchTab(t){
+  currentTab=t;
+  document.getElementById("tab-quick").className=t==="quick"?"tab active":"tab";
+  document.getElementById("tab-cards").className=t==="cards"?"tab active":"tab";
+  document.getElementById("tab-full").className=t==="full"?"tab active":"tab";
+  document.getElementById("quick-view").className=t==="quick"?"":"hidden";
+  document.getElementById("cards-view").className=t==="cards"?"":"hidden";
+  document.getElementById("full-view").className=t==="full"?"":"hidden";
+  document.getElementById("subtitle").textContent=subtitles[t];
+  if(t==="cards")buildMyCards();
+  if(t==="full")buildFullView();
 }
 
-/* ───────────────────── CARD DETAIL DRAWER ───────────────────── */
-function CardDrawer({ cardKey, onClose, getBalance, updateBalance }) {
-const card = CARD_DB[cardKey];
-const [editing, setEditing] = useState(false);
-const [editVal, setEditVal] = useState(””);
+/* ─── QUICK TAP GRID ─── */
+function buildGrid(){
+  document.getElementById("grid").innerHTML=sorted.map(c=>`
+    <div class="tile" onclick="showAnswer('${c.id}')">
+      <div style="font-size:34px;line-height:1;margin-bottom:6px">${c.emoji}</div>
+      <div style="font-size:14px;font-weight:600;color:#e2e8f0;text-align:center;line-height:1.2">${c.label}</div>
+    </div>`).join("");
+}
 
-if (!card) return null;
-const badge = ownerBadge(card.owner);
-const currentRewards = getBalance(cardKey);
+/* ─── ANSWER OVERLAY ─── */
+function showAnswer(id){
+  const cat=CATEGORIES.find(c=>c.id===id);if(!cat)return;
+  const best=cat.cards[0],alts=cat.cards.slice(1);
+  const accent=answerAccent(best.pct),bestKey=findKey(best.last4);
+  const o=document.getElementById("overlay");
+  o.className="overlay";o.style.background=answerGrad(best.pct);
+  o.innerHTML=`
+    <div style="font-size:16px;font-weight:600;color:${accent};opacity:.7;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">${cat.emoji} ${cat.label}</div>
+    <div class="mono" style="font-size:80px;font-weight:700;color:${accent};line-height:1;letter-spacing:-0.04em;animation:popIn .15s ease">${best.pct>0?best.pct+"%":"0%"}</div>
+    ${best.pct===0?`<div style="font-size:18px;color:${accent};font-weight:600;margin-top:4px">APR — carry balance</div>`:""}
+    <div onclick="event.stopPropagation();showDrawer('${bestKey}')" style="font-size:28px;font-weight:700;color:#fff;margin-top:16px;text-align:center;line-height:1.2;text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);text-underline-offset:3px;cursor:pointer">${best.name}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+      <span class="mono" style="font-size:22px;color:#cbd5e1;font-weight:500;letter-spacing:.08em">•••• ${best.last4}</span>
+      ${badgeHTML(best.owner)}
+    </div>
+    ${best.note?`<div style="font-size:13px;color:#94a3b8;margin-top:10px;background:rgba(255,255,255,.05);padding:5px 12px;border-radius:8px">${best.note}</div>`:""}
+    ${alts.length?`<div style="margin-top:24px;width:100%;max-width:340px">
+      <div style="font-size:12px;color:#64748b;text-transform:uppercase;font-weight:600;letter-spacing:.05em;margin-bottom:8px;text-align:center">Alternatives</div>
+      ${alts.map((c,i)=>{const k=findKey(c.last4);return`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1);margin-bottom:3px;animation:altSlide .12s ease ${i*.04}s both">
+          <span style="font-size:13px;flex:1;color:#f1f5f9;font-weight:500;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);text-underline-offset:2px" onclick="event.stopPropagation();showDrawer('${k}')">${c.name}</span>
+          <span style="font-size:12px;color:#94a3b8">••${c.last4}</span>
+          ${badgeHTML(c.owner,"sm")}
+          <span class="mono" style="font-size:13px;font-weight:600;color:#f1f5f9">${c.pct>0?c.pct+"%":"0%APR"}</span>
+        </div>`}).join("")}
+    </div>`:""}
+    <div class="back-btn" onclick="hideAnswer()">← Back to grid</div>`;
+}
+function hideAnswer(){document.getElementById("overlay").className="overlay hidden"}
 
-const startEdit = (e) => {
-e.stopPropagation();
-setEditVal(currentRewards);
-setEditing(true);
-};
-
-const saveEdit = () => {
-updateBalance(cardKey, editVal);
-setEditing(false);
-};
-
-return (
-<div style={{
-position: “fixed”, inset: 0, zIndex: 300,
-background: “rgba(0,0,0,0.6)”,
-display: “flex”, alignItems: “flex-end”, justifyContent: “center”,
-animation: “fadeIn 0.12s ease”,
-}} onClick={onClose}>
-<div onClick={(e) => e.stopPropagation()} style={{
-background: “#1e293b”,
-borderRadius: “20px 20px 0 0”,
-width: “100%”, maxWidth: 480,
-maxHeight: “85vh”, overflowY: “auto”,
-padding: “20px 20px 32px”,
-animation: “drawerUp 0.2s ease”,
-}}>
-{/* Handle */}
-<div style={{ width: 36, height: 4, borderRadius: 2, background: “#475569”, margin: “0 auto 16px” }} />
-
-```
-    {/* Card header */}
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: 12,
-        background: "linear-gradient(135deg, #334155, #1e293b)",
-        border: "1px solid #475569",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 20,
-      }}>💳</div>
-      <div style={{ flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 18, fontWeight: 700, color: "#f1f5f9" }}>{card.name}</span>
-          {badge && (
-            <span style={{
-              fontSize: 10, fontWeight: 700,
-              background: badge.bg, color: badge.color,
-              padding: "2px 6px", borderRadius: 4,
-            }}>{badge.label}</span>
-          )}
-        </div>
-        <div style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 13, color: "#94a3b8", marginTop: 2,
-        }}>•••• {card.last4}</div>
+/* ─── CARD DRAWER ─── */
+let drawerEditing=false;
+function showDrawer(key){
+  if(!key)return;
+  const card=CARD_DB[key];if(!card)return;
+  drawerEditing=false;
+  const d=document.getElementById("drawer");
+  d.className="drawer-bg";
+  d.onclick=function(e){if(e.target===d)hideDrawer()};
+  const rewards=getRewards(key);
+  d.innerHTML=`<div class="drawer" onclick="event.stopPropagation()">
+    <div style="width:36px;height:4px;border-radius:2px;background:#475569;margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#334155,#1e293b);border:1px solid #475569;display:flex;align-items:center;justify-content:center;font-size:20px">💳</div>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:700;color:#f1f5f9">${card.name} ${badgeHTML(card.owner,"sm")}</div>
+        <div class="mono" style="font-size:13px;color:#94a3b8;margin-top:2px">•••• ${card.last4}</div>
       </div>
     </div>
-
-    {/* Quick stats row */}
-    <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-      {[
-        { label: "Due", value: card.dueDate },
-        { label: "Limit", value: card.limit },
-        { label: "Fee", value: card.annualFee },
-      ].map((s, i) => (
-        <div key={i} style={{
-          flex: 1, background: "#0f172a", borderRadius: 10, padding: "8px 6px",
-          textAlign: "center",
-        }}>
-          <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", marginTop: 2 }}>{s.value}</div>
-        </div>
-      ))}
-
-      {/* Editable rewards */}
-      <div
-        onClick={!editing ? startEdit : undefined}
-        style={{
-          flex: 1, background: editing ? "#132216" : "#0f172a",
-          borderRadius: 10, padding: "8px 6px", textAlign: "center",
-          cursor: editing ? "default" : "pointer",
-          border: editing ? "1px solid #16a34a55" : "1px solid transparent",
-          transition: "all 0.15s ease",
-        }}
-      >
-        <div style={{ fontSize: 10, color: "#16a34a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          {editing ? "EDITING" : "REWARDS ✎"}
-        </div>
-        {editing ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2, justifyContent: "center" }}>
-            <input
-              autoFocus
-              value={editVal}
-              onChange={(e) => setEditVal(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); }}
-              onBlur={saveEdit}
-              style={{
-                width: "100%", maxWidth: 70,
-                background: "transparent", border: "none", borderBottom: "1px solid #16a34a",
-                color: "#4ade80", fontSize: 13, fontWeight: 700,
-                textAlign: "center", outline: "none",
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            />
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <div style="flex:1;background:#0f172a;border-radius:10px;padding:8px 6px;text-align:center">
+        <div style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Due</div>
+        <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-top:2px">${card.dueDate}</div>
+      </div>
+      <div style="flex:1;background:#0f172a;border-radius:10px;padding:8px 6px;text-align:center">
+        <div style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Limit</div>
+        <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-top:2px">${card.limit}</div>
+      </div>
+      <div style="flex:1;background:#0f172a;border-radius:10px;padding:8px 6px;text-align:center">
+        <div style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Fee</div>
+        <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-top:2px">${card.annualFee}</div>
+      </div>
+      <div id="rewards-box" onclick="startEditRewards('${key}')" style="flex:1;background:#0f172a;border:1px solid transparent;border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer">
+        <div style="font-size:10px;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:.05em">REWARDS ✎</div>
+        <div id="rewards-display" class="mono" style="font-size:13px;font-weight:700;color:#4ade80;margin-top:2px">${rewards}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Reward Tiers</div>
+      ${card.tiers.map((t,i)=>`
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:${i===0?"#132216":"#0f172a"};border:1px solid ${i===0?"#16a34a33":"transparent"};margin-bottom:4px">
+          <div class="mono" style="font-size:15px;font-weight:700;color:${pctColor(t.pct)};min-width:38px;text-align:right;flex-shrink:0">${t.pct}%</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:#e2e8f0">${t.cat}</div>
+            ${t.cap?`<div style="font-size:11px;color:#94a3b8;margin-top:2px">${t.cap}</div>`:""}
           </div>
-        ) : (
-          <div style={{
-            fontSize: 13, fontWeight: 700, color: "#4ade80", marginTop: 2,
-            fontFamily: "'JetBrains Mono', monospace",
-          }}>{currentRewards}</div>
-        )}
-      </div>
+        </div>`).join("")}
     </div>
-
-    {/* Reward tiers */}
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Reward Tiers</div>
-      {card.tiers.map((tier, i) => (
-        <div key={i} style={{
-          display: "flex", alignItems: "flex-start", gap: 10,
-          padding: "10px 12px", borderRadius: 10,
-          background: i === 0 ? "#132216" : "#0f172a",
-          border: i === 0 ? "1px solid #16a34a33" : "1px solid transparent",
-          marginBottom: 4,
-        }}>
-          <div style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 15, fontWeight: 700,
-            color: pctColor(tier.pct),
-            minWidth: 38, textAlign: "right", flexShrink: 0,
-          }}>{tier.pct}%</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0" }}>{tier.cat}</div>
-            {tier.cap && (
-              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{tier.cap}</div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-
-    {/* Perks & Notes */}
-    {card.perks.length > 0 && (
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Notes & Perks</div>
-        {card.perks.map((perk, i) => (
-          <div key={i} style={{
-            padding: "8px 12px", borderRadius: 8,
-            background: "#0f172a", marginBottom: 3,
-            fontSize: 13, color: "#cbd5e1", lineHeight: 1.4,
-          }}>{perk}</div>
-        ))}
-      </div>
-    )}
-
-    {/* Close button */}
-    <div
-      onClick={onClose}
-      style={{
-        marginTop: 20, textAlign: "center",
-        background: "rgba(255,255,255,0.08)",
-        color: "#94a3b8", fontSize: 14, fontWeight: 600,
-        padding: "12px", borderRadius: 12, cursor: "pointer",
-        border: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >Done</div>
-  </div>
-</div>
-```
-
-);
+    ${card.perks.length?`<div>
+      <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Notes & Perks</div>
+      ${card.perks.map(p=>`<div style="padding:8px 12px;border-radius:8px;background:#0f172a;margin-bottom:3px;font-size:13px;color:#cbd5e1;line-height:1.4">${p}</div>`).join("")}
+    </div>`:""}
+    <div onclick="hideDrawer()" style="margin-top:20px;text-align:center;background:rgba(255,255,255,.08);color:#94a3b8;font-size:14px;font-weight:600;padding:12px;border-radius:12px;cursor:pointer;border:1px solid rgba(255,255,255,.1)">Done</div>
+  </div>`;
+}
+function hideDrawer(){document.getElementById("drawer").className="hidden";if(currentTab==="cards")buildMyCards()}
+function startEditRewards(key){
+  if(drawerEditing)return;drawerEditing=true;
+  const box=document.getElementById("rewards-box");
+  const cur=getRewards(key);
+  box.style.background="#132216";box.style.borderColor="#16a34a55";box.onclick=null;
+  box.innerHTML=`<div style="font-size:10px;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:.05em">EDITING</div>
+    <input id="rewards-input" value="${cur}" style="width:100%;max-width:70px;background:transparent;border:none;border-bottom:1px solid #16a34a;color:#4ade80;font-size:13px;font-weight:700;text-align:center;outline:none;font-family:'JetBrains Mono',monospace;margin-top:2px"
+      onblur="saveRewards('${key}')" onkeydown="if(event.key==='Enter')saveRewards('${key}')">`;
+  document.getElementById("rewards-input").focus();
+}
+function saveRewards(key){
+  const inp=document.getElementById("rewards-input");if(!inp)return;
+  setRewards(key,inp.value);drawerEditing=false;
+  const box=document.getElementById("rewards-box");
+  box.style.background="#0f172a";box.style.borderColor="transparent";
+  box.onclick=function(){startEditRewards(key)};
+  box.innerHTML=`<div style="font-size:10px;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:.05em">REWARDS ✎</div>
+    <div class="mono" style="font-size:13px;font-weight:700;color:#4ade80;margin-top:2px">${getRewards(key)}</div>`;
 }
 
-/* ───────────────────── TAPPABLE CARD NAME ───────────────────── */
-function TappableCard({ name, last4, style, onTap }) {
-return (
-<span
-onClick={(e) => { e.stopPropagation(); onTap(); }}
-style={{
-…style,
-textDecoration: “underline”,
-textDecorationColor: “rgba(255,255,255,0.2)”,
-textUnderlineOffset: 3,
-cursor: “pointer”,
-}}
->{name}</span>
-);
+/* ─── MY CARDS VIEW ─── */
+function buildMyCards(filter){
+  const q=(filter||"").toLowerCase();
+  const all=Object.entries(CARD_DB).map(([k,c])=>({key:k,...c}));
+  const list=q?all.filter(c=>c.name.toLowerCase().includes(q)||c.last4.includes(q)||c.tiers.some(t=>t.cat.toLowerCase().includes(q))):all;
+  const G=list.filter(c=>c.owner==="G"),M=list.filter(c=>c.owner==="M");
+
+  const renderCard=c=>{
+    const rw=getRewards(c.key);
+    return`<div class="card-row" onclick="showDrawer('${c.key}')">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:700;color:#f1f5f9">${c.name}</div>
+        <div class="mono" style="font-size:12px;color:#64748b;margin-top:2px">•••• ${c.last4}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="mono" style="font-size:12px;color:#4ade80;font-weight:600">${rw}</div>
+        <div style="font-size:11px;color:#475569;margin-top:2px">Due: ${c.dueDate} · ${c.limit}</div>
+      </div>
+    </div>`;
+  };
+
+  const v=document.getElementById("cards-view");
+  v.innerHTML=`
+    <div style="padding:12px 14px 6px">
+      <input class="search-input" type="text" placeholder="Search cards, categories..." oninput="buildMyCards(this.value)" ${q?`value="${q}"`:""}>
+    </div>
+    <div style="padding:8px 12px 80px">
+      ${G.length?`<div style="font-size:12px;font-weight:700;color:#92400e;background:#fef3c7;display:inline-block;padding:3px 10px;border-radius:6px;margin-bottom:8px;letter-spacing:.04em">GABBY'S CARDS</div>${G.map(renderCard).join("")}<div style="height:16px"></div>`:""}
+      ${M.length?`<div style="font-size:12px;font-weight:700;color:#5b21b6;background:#ede9fe;display:inline-block;padding:3px 10px;border-radius:6px;margin-bottom:8px;letter-spacing:.04em">MATT'S CARDS</div>${M.map(renderCard).join("")}`:""}
+      ${list.length===0?`<div style="text-align:center;padding:40px;color:#475569">No matching cards</div>`:""}
+    </div>`;
 }
 
-/* ───────────────────── QUICK TAP VIEW ───────────────────── */
-function QuickTap({ onCardTap }) {
-const [selected, setSelected] = useState(null);
-const sorted = useMemo(() => […CATEGORIES].sort((a, b) => a.priority - b.priority), []);
+/* ─── FULL VIEW ─── */
+let expandedId=null;
+function buildFullView(filter){
+  const q=(filter||"").toLowerCase();
+  const cats=q?CATEGORIES.filter(c=>c.label.toLowerCase().includes(q)||c.cards.some(d=>d.name.toLowerCase().includes(q))):CATEGORIES;
 
-const cat = selected ? CATEGORIES.find((c) => c.id === selected) : null;
-const best = cat?.cards[0];
-const alts = cat?.cards.slice(1) || [];
-const [showAlts, setShowAlts] = useState(true);
-
-const handleSelect = useCallback((id) => { setSelected(id); setShowAlts(true); }, []);
-const handleDismiss = useCallback(() => { setSelected(null); setShowAlts(true); }, []);
-
-if (selected && best) {
-const badge = ownerBadge(best.owner);
-const accent = answerAccent(best.pct);
-const bestKey = findCardKey(best.name, best.last4);
-return (
-<div style={{
-position: “fixed”, inset: 0, zIndex: 200,
-background: answerGradient(best.pct),
-display: “flex”, flexDirection: “column”,
-alignItems: “center”, justifyContent: “center”,
-padding: 24, animation: “fadeIn 0.12s ease”, overflowY: “auto”,
-}}>
-<div style={{ fontSize: 16, fontWeight: 600, color: accent, opacity: 0.7, letterSpacing: “0.06em”, textTransform: “uppercase”, marginBottom: 8 }}>
-{cat.emoji} {cat.label}
-</div>
-<div style={{ fontFamily: “‘JetBrains Mono’, monospace”, fontSize: 80, fontWeight: 700, color: accent, lineHeight: 1, letterSpacing: “-0.04em”, animation: “popIn 0.15s ease” }}>
-{best.pct > 0 ? `${best.pct}%` : “0%”}
-</div>
-{best.pct === 0 && <div style={{ fontSize: 18, color: accent, fontWeight: 600, marginTop: 4 }}>APR — carry balance</div>}
-
-```
-    {/* Tappable card name */}
-    <TappableCard
-      name={best.name}
-      last4={best.last4}
-      onTap={() => bestKey && onCardTap(bestKey)}
-      style={{ fontSize: 28, fontWeight: 700, color: "#fff", marginTop: 16, textAlign: "center", lineHeight: 1.2 }}
-    />
-
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
-      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, color: "#cbd5e1", fontWeight: 500, letterSpacing: "0.08em" }}>•••• {best.last4}</span>
-      {badge && <span style={{ fontSize: 13, fontWeight: 700, background: badge.bg, color: badge.color, padding: "2px 8px", borderRadius: 6 }}>{badge.label}</span>}
+  const v=document.getElementById("full-view");
+  v.innerHTML=`
+    <div style="padding:12px 14px 6px">
+      <input class="search-input" type="text" placeholder="Search category or card..." oninput="filterFull(this.value)" ${q?`value="${q}"`:""}>
     </div>
-    {best.note && <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 10, background: "rgba(255,255,255,0.05)", padding: "5px 12px", borderRadius: 8 }}>{best.note}</div>}
-
-    {alts.length > 0 && (
-      <div style={{ marginTop: 32, width: "100%", maxWidth: 340 }}>
-        <div onClick={(e) => { e.stopPropagation(); setShowAlts(!showAlts); }} style={{ textAlign: "center", fontSize: 13, color: "#94a3b8", cursor: "pointer", padding: 8, userSelect: "none" }}>
-          {showAlts ? "hide alternatives ▲" : `${alts.length} alternative${alts.length > 1 ? "s" : ""} ▼`}
-        </div>
-        {showAlts && (
-          <div>
-            {alts.map((card, i) => {
-              const b = ownerBadge(card.owner);
-              const altKey = findCardKey(card.name, card.last4);
-              return (
-                <div key={i} style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "8px 12px", borderRadius: 8,
-                  background: "rgba(255,255,255,0.1)",
-                  marginBottom: 3, animation: `altSlide 0.12s ease ${i * 0.04}s both`,
-                }}>
-                  <span style={{ fontSize: 13, flex: 1, color: "#f1f5f9", fontWeight: 500, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                    <TappableCard
-                      name={card.name}
-                      last4={card.last4}
-                      onTap={() => altKey && onCardTap(altKey)}
-                      style={{ fontSize: 13, color: "#f1f5f9", fontWeight: 500 }}
-                    />
-                    <span style={{ color: "#94a3b8" }}>••{card.last4}</span>
-                    {b && <span style={{ fontSize: 9, fontWeight: 700, background: b.bg, color: b.color, padding: "1px 4px", borderRadius: 3 }}>{b.label}</span>}
-                  </span>
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 600, color: "#f1f5f9" }}>{card.pct > 0 ? `${card.pct}%` : "0%APR"}</span>
+    <div style="padding:4px 12px 80px" id="full-list">
+      ${cats.map(cat=>{
+        const isOpen=expandedId===cat.id,best=cat.cards[0];
+        let cards="";
+        if(isOpen){
+          cards=`<div style="padding:4px 8px 8px">${cat.cards.map((c,i)=>{
+            const k=findKey(c.last4);
+            return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:${i===0?"#132216":"#1e293b"};border:1px solid ${i===0?"#16a34a33":"transparent"};margin-bottom:4px;animation:slideIn .15s ease ${i*.04}s both">
+              <div style="width:22px;height:22px;border-radius:6px;background:${i===0?"#16a34a":"#334155"};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${i===0?"#fff":"#94a3b8"};flex-shrink:0">${i===0?"★":i+1}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span onclick="event.stopPropagation();showDrawer('${k}')" style="font-size:14px;font-weight:600;color:${i===0?"#4ade80":"#e2e8f0"};text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);text-underline-offset:3px;cursor:pointer">${c.name}</span>
+                  ${badgeHTML(c.owner,"sm")}
                 </div>
-              );
-            })}
+                <div style="font-size:12px;color:#64748b;margin-top:1px">•••${c.last4}${c.note?" · "+c.note:""}</div>
+              </div>
+              <div class="mono" style="font-weight:600;font-size:${i===0?16:14}px;color:${pctColor(c.pct)};flex-shrink:0">${c.pct>0?c.pct+"%":"0%APR"}</div>
+            </div>`}).join("")}</div>`;
+        }
+        return`<div style="margin-bottom:4px">
+          <div onclick="toggleFull('${cat.id}')" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:${isOpen?"#1e293b":"transparent"};cursor:pointer;user-select:none">
+            <div style="font-size:22px;width:32px;text-align:center;flex-shrink:0">${cat.emoji}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:600">${cat.label}</div>
+              <div style="font-size:12px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${best.name} •••${best.last4}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              ${best.pct>0?`<div class="mono" style="background:${pctBg(best.pct)};color:${pctColor(best.pct)};font-weight:600;font-size:14px;padding:3px 8px;border-radius:7px">${best.pct}%</div>`:""}
+              <div style="color:#475569;font-size:12px;transform:rotate(${isOpen?180:0}deg);transition:transform .15s ease">▼</div>
+            </div>
           </div>
-        )}
-      </div>
-    )}
-
-    <div onClick={handleDismiss} style={{
-      position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)",
-      background: "rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 15, fontWeight: 600,
-      padding: "12px 36px", borderRadius: 12, cursor: "pointer", userSelect: "none",
-      border: "1px solid rgba(255,255,255,0.15)",
-    }}>← Back to grid</div>
-  </div>
-);
-```
-
+          ${cards}
+        </div>`;
+      }).join("")}
+      ${cats.length===0?`<div style="text-align:center;padding:40px;color:#475569">No matching categories</div>`:""}
+    </div>`;
 }
+function toggleFull(id){expandedId=expandedId===id?null:id;buildFullView(document.querySelector("#full-view .search-input")?.value)}
+function filterFull(v){expandedId=null;buildFullView(v)}
 
-return (
-<div style={{ padding: “12px 10px”, paddingBottom: 80 }}>
-<div style={{ display: “grid”, gridTemplateColumns: “repeat(3, 1fr)”, gap: 8 }}>
-{sorted.map((cat) => (
-<div key={cat.id} onClick={() => handleSelect(cat.id)} style={{
-background: “#1e293b”, borderRadius: 14, padding: “14px 6px 10px”,
-display: “flex”, flexDirection: “column”, alignItems: “center”, justifyContent: “center”,
-cursor: “pointer”, userSelect: “none”, border: “1px solid #1e293b”,
-transition: “all 0.1s ease”, minHeight: 90, WebkitTapHighlightColor: “transparent”,
-}}
-onPointerDown={(e) => e.currentTarget.style.background = “#334155”}
-onPointerUp={(e) => e.currentTarget.style.background = “#1e293b”}
-onPointerLeave={(e) => e.currentTarget.style.background = “#1e293b”}
->
-<div style={{ fontSize: 34, lineHeight: 1, marginBottom: 6 }}>{cat.emoji}</div>
-<div style={{ fontSize: 14, fontWeight: 600, color: “#e2e8f0”, textAlign: “center”, lineHeight: 1.2 }}>{cat.label}</div>
-</div>
-))}
-</div>
-</div>
-);
+/* ─── INIT ─── */
+buildGrid();
+
+/* ─── SERVICE WORKER ─── */
+if("serviceWorker"in navigator){
+  const sw=`const C='card-max-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});
 }
+</script>
 
-/* ───────────────────── FULL VIEW ───────────────────── */
-function FullView({ onCardTap }) {
-const [search, setSearch] = useState(””);
-const [expandedId, setExpandedId] = useState(null);
-
-const filtered = useMemo(() => {
-if (!search.trim()) return CATEGORIES;
-const q = search.toLowerCase();
-return CATEGORIES.filter(c =>
-c.label.toLowerCase().includes(q) || c.cards.some(card => card.name.toLowerCase().includes(q))
-);
-}, [search]);
-
-return (
-<div style={{ paddingBottom: 80 }}>
-<div style={{ padding: “12px 14px 6px” }}>
-<input type=“text” placeholder=“Search category or card…” value={search}
-onChange={(e) => setSearch(e.target.value)}
-style={{ width: “100%”, padding: “10px 14px”, borderRadius: 10, border: “1px solid #334155”, background: “#1e293b”, color: “#e2e8f0”, fontSize: 15, fontFamily: “inherit”, outline: “none” }}
-onFocus={(e) => e.target.style.borderColor = “#059669”}
-onBlur={(e) => e.target.style.borderColor = “#334155”}
-/>
-</div>
-<div style={{ padding: “4px 12px” }}>
-{filtered.map((cat) => {
-const isOpen = expandedId === cat.id;
-const best = cat.cards[0];
-return (
-<div key={cat.id} style={{ marginBottom: 4 }}>
-<div onClick={() => setExpandedId(isOpen ? null : cat.id)} style={{
-display: “flex”, alignItems: “center”, gap: 10, padding: “12px”, borderRadius: 12,
-background: isOpen ? “#1e293b” : “transparent”, cursor: “pointer”, userSelect: “none”,
-}}>
-<div style={{ fontSize: 22, width: 32, textAlign: “center”, flexShrink: 0 }}>{cat.emoji}</div>
-<div style={{ flex: 1, minWidth: 0 }}>
-<div style={{ fontSize: 15, fontWeight: 600 }}>{cat.label}</div>
-<div style={{ fontSize: 12, color: “#94a3b8”, marginTop: 2, whiteSpace: “nowrap”, overflow: “hidden”, textOverflow: “ellipsis” }}>
-{best.name} •••{best.last4}
-</div>
-</div>
-<div style={{ display: “flex”, alignItems: “center”, gap: 6, flexShrink: 0 }}>
-{best.pct > 0 && <div style={{ background: pctBg(best.pct), color: pctColor(best.pct), fontFamily: “‘JetBrains Mono’, monospace”, fontWeight: 600, fontSize: 14, padding: “3px 8px”, borderRadius: 7 }}>{best.pct}%</div>}
-<div style={{ color: “#475569”, fontSize: 12, transform: isOpen ? “rotate(180deg)” : “rotate(0deg)”, transition: “transform 0.15s ease” }}>▼</div>
-</div>
-</div>
-{isOpen && (
-<div style={{ padding: “4px 8px 8px” }}>
-{cat.cards.map((card, i) => {
-const badge = ownerBadge(card.owner);
-const cardKey = findCardKey(card.name, card.last4);
-return (
-<div key={i} style={{
-display: “flex”, alignItems: “center”, gap: 10, padding: “10px 12px”, borderRadius: 10,
-background: i === 0 ? “#132216” : “#1e293b”,
-border: i === 0 ? “1px solid #16a34a33” : “1px solid transparent”, marginBottom: 4,
-animation: `slideIn 0.15s ease ${i * 0.04}s both`,
-}}>
-<div style={{
-width: 22, height: 22, borderRadius: 6,
-background: i === 0 ? “#16a34a” : “#334155”,
-display: “flex”, alignItems: “center”, justifyContent: “center”,
-fontSize: 11, fontWeight: 700, color: i === 0 ? “#fff” : “#94a3b8”, flexShrink: 0,
-}}>{i === 0 ? “★” : i + 1}</div>
-<div style={{ flex: 1, minWidth: 0 }}>
-<div style={{ display: “flex”, alignItems: “center”, gap: 6 }}>
-<TappableCard
-name={card.name} last4={card.last4}
-onTap={() => cardKey && onCardTap(cardKey)}
-style={{ fontSize: 14, fontWeight: 600, color: i === 0 ? “#4ade80” : “#e2e8f0” }}
-/>
-{badge && <span style={{ fontSize: 9, fontWeight: 700, background: badge.bg, color: badge.color, padding: “1px 5px”, borderRadius: 4 }}>{badge.label}</span>}
-</div>
-<div style={{ fontSize: 12, color: “#64748b”, marginTop: 1 }}>
-•••{card.last4}{card.note ? ` · ${card.note}` : “”}
-</div>
-</div>
-<div style={{ fontFamily: “‘JetBrains Mono’, monospace”, fontWeight: 600, fontSize: i === 0 ? 16 : 14, color: pctColor(card.pct), flexShrink: 0 }}>
-{card.pct > 0 ? `${card.pct}%` : “0%APR”}
-</div>
-</div>
-);
-})}
-</div>
-)}
-</div>
-);
-})}
-{filtered.length === 0 && <div style={{ textAlign: “center”, padding: 40, color: “#475569” }}>No matching categories</div>}
-</div>
-</div>
-);
-}
-
-/* ───────────────────── MY CARDS VIEW ───────────────────── */
-function MyCards({ onCardTap, getBalance }) {
-const [search, setSearch] = useState(””);
-const allCards = useMemo(() => Object.entries(CARD_DB).map(([key, card]) => ({ key, …card })), []);
-
-const filtered = useMemo(() => {
-if (!search.trim()) return allCards;
-const q = search.toLowerCase();
-return allCards.filter(c =>
-c.name.toLowerCase().includes(q) ||
-c.last4.includes(q) ||
-c.owner.toLowerCase().includes(q) ||
-c.tiers.some(t => t.cat.toLowerCase().includes(q))
-);
-}, [search, allCards]);
-
-const grouped = useMemo(() => {
-const g = { G: [], M: [], other: [] };
-filtered.forEach(c => {
-if (c.owner === “G”) g.G.push(c);
-else if (c.owner === “M”) g.M.push(c);
-else g.other.push(c);
-});
-return g;
-}, [filtered]);
-
-const renderCard = (card) => {
-const rewards = getBalance(card.key);
-return (
-<div
-key={card.key}
-onClick={() => onCardTap(card.key)}
-style={{
-background: “#1e293b”, borderRadius: 14, padding: “14px 16px”,
-marginBottom: 6, cursor: “pointer”, userSelect: “none”,
-border: “1px solid #334155”,
-transition: “background 0.1s ease”,
-display: “flex”, alignItems: “center”, gap: 12,
-}}
-onPointerDown={(e) => e.currentTarget.style.background = “#334155”}
-onPointerUp={(e) => e.currentTarget.style.background = “#1e293b”}
-onPointerLeave={(e) => e.currentTarget.style.background = “#1e293b”}
->
-<div style={{ flex: 1, minWidth: 0 }}>
-<div style={{ fontSize: 16, fontWeight: 700, color: “#f1f5f9” }}>{card.name}</div>
-<div style={{
-fontFamily: “‘JetBrains Mono’, monospace”,
-fontSize: 12, color: “#64748b”, marginTop: 2,
-}}>•••• {card.last4}</div>
-</div>
-<div style={{ textAlign: “right”, flexShrink: 0 }}>
-<div style={{ fontSize: 12, color: “#4ade80”, fontWeight: 600, fontFamily: “‘JetBrains Mono’, monospace” }}>{rewards}</div>
-<div style={{ fontSize: 11, color: “#475569”, marginTop: 2 }}>Due: {card.dueDate} · {card.limit}</div>
-</div>
-</div>
-);
-};
-
-return (
-<div style={{ paddingBottom: 80 }}>
-<div style={{ padding: “12px 14px 6px” }}>
-<input type=“text” placeholder=“Search cards, categories…” value={search}
-onChange={(e) => setSearch(e.target.value)}
-style={{ width: “100%”, padding: “10px 14px”, borderRadius: 10, border: “1px solid #334155”, background: “#1e293b”, color: “#e2e8f0”, fontSize: 15, fontFamily: “inherit”, outline: “none” }}
-onFocus={(e) => e.target.style.borderColor = “#059669”}
-onBlur={(e) => e.target.style.borderColor = “#334155”}
-/>
-</div>
-<div style={{ padding: “8px 12px” }}>
-{grouped.G.length > 0 && (
-<>
-<div style={{
-fontSize: 12, fontWeight: 700, color: “#92400e”, background: “#fef3c7”,
-display: “inline-block”, padding: “3px 10px”, borderRadius: 6,
-marginBottom: 8, letterSpacing: “0.04em”,
-}}>GABBY’S CARDS</div>
-{grouped.G.map(renderCard)}
-<div style={{ height: 16 }} />
-</>
-)}
-{grouped.M.length > 0 && (
-<>
-<div style={{
-fontSize: 12, fontWeight: 700, color: “#5b21b6”, background: “#ede9fe”,
-display: “inline-block”, padding: “3px 10px”, borderRadius: 6,
-marginBottom: 8, letterSpacing: “0.04em”,
-}}>MATT’S CARDS</div>
-{grouped.M.map(renderCard)}
-<div style={{ height: 16 }} />
-</>
-)}
-{grouped.other.length > 0 && (
-<>
-<div style={{
-fontSize: 12, fontWeight: 700, color: “#64748b”, background: “#334155”,
-display: “inline-block”, padding: “3px 10px”, borderRadius: 6,
-marginBottom: 8, letterSpacing: “0.04em”,
-}}>SHARED</div>
-{grouped.other.map(renderCard)}
-</>
-)}
-{filtered.length === 0 && (
-<div style={{ textAlign: “center”, padding: 40, color: “#475569” }}>No matching cards</div>
-)}
-</div>
-</div>
-);
-}
-
-/* ───────────────────── MAIN APP ───────────────────── */
-export default function CardMaximizer() {
-const [tab, setTab] = useState(“quick”);
-const [drawerCard, setDrawerCard] = useState(null);
-const { getBalance, updateBalance, loaded } = useRewardsStorage();
-
-return (
-<div style={{
-minHeight: “100vh”, background: “#0f172a”,
-fontFamily: “‘DM Sans’, ‘Segoe UI’, system-ui, sans-serif”, color: “#e2e8f0”,
-}}>
-<style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap'); * { box-sizing: border-box; margin: 0; padding: 0; } input::placeholder { color: #64748b; } @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} } @keyframes fadeIn { from{opacity:0} to{opacity:1} } @keyframes popIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} } @keyframes altSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} } @keyframes drawerUp { from{transform:translateY(100%)} to{transform:translateY(0)} }`}</style>
-
-```
-  {/* Header */}
-  <div style={{
-    background: "#0f172a", padding: "16px 16px 0",
-    position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid #1e293b",
-  }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-      <div style={{
-        width: 34, height: 34, borderRadius: 9,
-        background: "linear-gradient(135deg, #16a34a, #059669)",
-        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17,
-      }}>💳</div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em" }}>Card Maximizer</div>
-        <div style={{ fontSize: 11, color: "#475569", fontWeight: 500 }}>
-          {tab === "quick" ? "Tap category → tap card name for details" : tab === "cards" ? "All your cards & rewards at a glance" : "Browse all cards & details"}
-        </div>
-      </div>
-    </div>
-    <div style={{ display: "flex", background: "#1e293b", borderRadius: 10, padding: 3 }}>
-      {[
-        { id: "quick", label: "⚡ Quick" },
-        { id: "cards", label: "💳 My Cards" },
-        { id: "full", label: "📋 Categories" },
-      ].map((t) => (
-        <div key={t.id} onClick={() => setTab(t.id)} style={{
-          flex: 1, textAlign: "center", padding: "10px 4px", borderRadius: 8,
-          background: tab === t.id ? "#334155" : "transparent",
-          cursor: "pointer", transition: "all 0.12s ease", userSelect: "none",
-        }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: tab === t.id ? "#fff" : "#64748b" }}>{t.label}</div>
-        </div>
-      ))}
-    </div>
-  </div>
-
-  {tab === "quick" ? <QuickTap onCardTap={setDrawerCard} /> : tab === "cards" ? <MyCards onCardTap={setDrawerCard} getBalance={getBalance} /> : <FullView onCardTap={setDrawerCard} />}
-
-  <div style={{ textAlign: "center", padding: "8px 16px 20px", fontSize: 10, color: "#1e293b", lineHeight: 1.5 }}>
-    G = your card · M = Matt's · Chase bonus til Oct 26 · AMEX 1009 0% APR til Dec 26
-  </div>
-
-  {/* Card Detail Drawer */}
-  {drawerCard && <CardDrawer cardKey={drawerCard} onClose={() => setDrawerCard(null)} getBalance={getBalance} updateBalance={updateBalance} />}
-</div>
-```
-
-);
-}
+</body>
+</html>
