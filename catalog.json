@@ -1,5 +1,5 @@
 {
- "version": "2026.09.29-b3",
+ "version": "2026.09.30-v2",
  "updated": "2026-09-29",
  "brands": {
   "amex": {
@@ -395,7 +395,10 @@
      ],
      "rate": 3,
      "label": "Flights",
-     "cond": "Booked with the airline or through Amex Travel"
+     "cond": "Booked with the airline or through Amex Travel",
+     "m": [
+      "airline"
+     ]
     }
    ],
    "perks": [
@@ -443,7 +446,10 @@
      ],
      "rate": 2,
      "label": "Lyft",
-     "cond": "Lyft rides only, through Sep 30, 2027"
+     "cond": "Lyft rides only, through Sep 30, 2027",
+     "m": [
+      "lyft"
+     ]
     }
    ],
    "perks": [],
@@ -1007,7 +1013,8 @@
       "cats": [
        "grocery",
        "costco",
-       "streaming"
+       "streaming",
+       "warehouse"
       ],
       "label": "Grocery, wholesale clubs & select streaming"
      },
@@ -1059,7 +1066,8 @@
     {
      "cats": [
       "grocery",
-      "costco"
+      "costco",
+      "warehouse"
      ],
      "rate": 2,
      "label": "Grocery stores & wholesale clubs",
@@ -1504,7 +1512,11 @@
      ],
      "rate": 4,
      "label": "Flights & hotels booked direct",
-     "cond": "Booked directly with the airline or hotel"
+     "cond": "Booked directly with the airline or hotel",
+     "m": [
+      "airline",
+      "hotel"
+     ]
     },
     {
      "cats": [
@@ -1538,7 +1550,10 @@
      ],
      "rate": 2,
      "label": "Lyft",
-     "cond": "Lyft rides only, through Sep 30, 2027"
+     "cond": "Lyft rides only, through Sep 30, 2027",
+     "m": [
+      "lyft"
+     ]
     }
    ],
    "perks": [
@@ -1621,7 +1636,10 @@
      ],
      "rate": 3,
      "label": "United purchases",
-     "cond": "United flights & purchases only (6x more on your own fare)"
+     "cond": "United flights & purchases only (6x more on your own fare)",
+     "m": [
+      "united"
+     ]
     },
     {
      "cats": [
@@ -1629,7 +1647,10 @@
      ],
      "rate": 2,
      "label": "Hotels",
-     "cond": "Booked directly with the hotel"
+     "cond": "Booked directly with the hotel",
+     "m": [
+      "hotel"
+     ]
     },
     {
      "cats": [
@@ -1640,7 +1661,7 @@
     }
    ],
    "perks": [
-    "Miles valued at 1.2\u00a2 for ranking",
+    "Miles valued at 1.2¢ for ranking",
     "10,000-mile award discount after $20,000 spend a year"
    ],
    "source": {
@@ -1664,7 +1685,10 @@
      ],
      "rate": 4,
      "label": "United purchases",
-     "cond": "United flights & purchases only (6x more on your own fare)"
+     "cond": "United flights & purchases only (6x more on your own fare)",
+     "m": [
+      "united"
+     ]
     },
     {
      "cats": [
@@ -1691,7 +1715,7 @@
     }
    ],
    "perks": [
-    "Miles valued at 1.2\u00a2 for ranking"
+    "Miles valued at 1.2¢ for ranking"
    ],
    "source": {
     "url": "https://creditcards.chase.com/travel-credit-cards/united/united-quest",
@@ -1714,7 +1738,10 @@
      ],
      "rate": 2,
      "label": "Southwest purchases",
-     "cond": "Southwest flights & Getaways only"
+     "cond": "Southwest flights & Getaways only",
+     "m": [
+      "southwest"
+     ]
     },
     {
      "cats": [
@@ -1727,7 +1754,7 @@
     }
    ],
    "perks": [
-    "Points valued at 1.3\u00a2 for ranking",
+    "Points valued at 1.3¢ for ranking",
     "3,000 bonus points each anniversary"
    ],
    "source": {
@@ -1751,7 +1778,10 @@
      ],
      "rate": 4,
      "label": "Southwest purchases",
-     "cond": "Southwest flights & Getaways only"
+     "cond": "Southwest flights & Getaways only",
+     "m": [
+      "southwest"
+     ]
     },
     {
      "cats": [
@@ -1769,7 +1799,7 @@
     }
    ],
    "perks": [
-    "Points valued at 1.3\u00a2 for ranking",
+    "Points valued at 1.3¢ for ranking",
     "7,500 bonus points each anniversary"
    ],
    "source": {
@@ -1793,7 +1823,10 @@
      ],
      "rate": 6,
      "label": "Marriott hotels",
-     "cond": "Marriott Bonvoy hotels only"
+     "cond": "Marriott Bonvoy hotels only",
+     "m": [
+      "marriott"
+     ]
     },
     {
      "cats": [
@@ -1807,7 +1840,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.7\u00a2 for ranking",
+    "Points valued at 0.7¢ for ranking",
     "Free night award each anniversary"
    ],
    "source": {
@@ -1831,7 +1864,10 @@
      ],
      "rate": 10,
      "label": "IHG hotels",
-     "cond": "IHG hotels booked direct only"
+     "cond": "IHG hotels booked direct only",
+     "m": [
+      "ihg"
+     ]
     },
     {
      "cats": [
@@ -1856,7 +1892,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.5\u00a2 for ranking",
+    "Points valued at 0.5¢ for ranking",
     "$100 credit + 10,000 points after $20,000 spend a year"
    ],
    "source": {
@@ -1880,7 +1916,10 @@
      ],
      "rate": 4,
      "label": "Hyatt hotels",
-     "cond": "Hyatt hotels only"
+     "cond": "Hyatt hotels only",
+     "m": [
+      "hyatt"
+     ]
     },
     {
      "cats": [
@@ -1888,7 +1927,10 @@
      ],
      "rate": 2,
      "label": "Airline tickets",
-     "cond": "Bought directly from the airline"
+     "cond": "Bought directly from the airline",
+     "m": [
+      "airline"
+     ]
     },
     {
      "cats": [
@@ -1913,7 +1955,7 @@
     }
    ],
    "perks": [
-    "Points valued at 1.5\u00a2 for ranking",
+    "Points valued at 1.5¢ for ranking",
     "No foreign transaction fees"
    ],
    "source": {
@@ -1936,7 +1978,12 @@
      ],
      "rate": 5,
      "label": "Disney+, Hulu & ESPN",
-     "cond": "Bought directly at DisneyPlus.com, Hulu.com or ESPN"
+     "cond": "Bought directly at DisneyPlus.com, Hulu.com or ESPN",
+     "m": [
+      "disneyplus",
+      "hulu",
+      "espnplus"
+     ]
     },
     {
      "cats": [
@@ -2004,7 +2051,10 @@
      ],
      "rate": 5,
      "label": "Lyft",
-     "cond": "Lyft rides only, through Sep 30, 2027"
+     "cond": "Lyft rides only, through Sep 30, 2027",
+     "m": [
+      "lyft"
+     ]
     }
    ],
    "perks": [
@@ -2031,7 +2081,10 @@
      ],
      "rate": 5,
      "label": "Lyft",
-     "cond": "Lyft rides only, through Sep 30, 2027"
+     "cond": "Lyft rides only, through Sep 30, 2027",
+     "m": [
+      "lyft"
+     ]
     }
    ],
    "perks": [
@@ -2069,7 +2122,10 @@
      ],
      "rate": 5,
      "label": "Lyft",
-     "cond": "Lyft rides only, through Sep 30, 2027"
+     "cond": "Lyft rides only, through Sep 30, 2027",
+     "m": [
+      "lyft"
+     ]
     }
    ],
    "perks": [
@@ -2097,7 +2153,10 @@
      ],
      "rate": 5,
      "label": "Flights & prepaid hotels",
-     "cond": "Flights direct with the airline or Amex Travel; hotels prepaid on Amex Travel"
+     "cond": "Flights direct with the airline or Amex Travel; hotels prepaid on Amex Travel",
+     "m": [
+      "airline"
+     ]
     }
    ],
    "perks": [
@@ -2162,7 +2221,10 @@
      ],
      "rate": 2,
      "label": "Delta purchases",
-     "cond": "Bought directly from Delta"
+     "cond": "Bought directly from Delta",
+     "m": [
+      "delta"
+     ]
     },
     {
      "cats": [
@@ -2180,7 +2242,7 @@
     }
    ],
    "perks": [
-    "Miles valued at 1.1\u00a2 for ranking"
+    "Miles valued at 1.1¢ for ranking"
    ],
    "source": {
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/",
@@ -2203,7 +2265,11 @@
      ],
      "rate": 3,
      "label": "Delta & hotels",
-     "cond": "Bought directly from Delta or the hotel"
+     "cond": "Bought directly from Delta or the hotel",
+     "m": [
+      "delta",
+      "hotel"
+     ]
     },
     {
      "cats": [
@@ -2221,7 +2287,7 @@
     }
    ],
    "perks": [
-    "Miles valued at 1.1\u00a2 for ranking"
+    "Miles valued at 1.1¢ for ranking"
    ],
    "source": {
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-platinum-american-express-card/",
@@ -2244,11 +2310,14 @@
      ],
      "rate": 3,
      "label": "Delta purchases",
-     "cond": "Bought directly from Delta"
+     "cond": "Bought directly from Delta",
+     "m": [
+      "delta"
+     ]
     }
    ],
    "perks": [
-    "Miles valued at 1.1\u00a2 for ranking",
+    "Miles valued at 1.1¢ for ranking",
     "$1 MQD for every $10 spent"
    ],
    "source": {
@@ -2272,7 +2341,10 @@
      ],
      "rate": 7,
      "label": "Hilton hotels",
-     "cond": "Booked directly with Hilton hotels"
+     "cond": "Booked directly with Hilton hotels",
+     "m": [
+      "hilton"
+     ]
     },
     {
      "cats": [
@@ -2297,7 +2369,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.5\u00a2 for ranking"
+    "Points valued at 0.5¢ for ranking"
    ],
    "source": {
     "url": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors/",
@@ -2321,7 +2393,10 @@
      ],
      "rate": 12,
      "label": "Hilton hotels",
-     "cond": "Booked directly with Hilton hotels"
+     "cond": "Booked directly with Hilton hotels",
+     "m": [
+      "hilton"
+     ]
     },
     {
      "cats": [
@@ -2353,7 +2428,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.5\u00a2 for ranking",
+    "Points valued at 0.5¢ for ranking",
     "Free night after $15,000 spend a year"
    ],
    "source": {
@@ -2377,7 +2452,10 @@
      ],
      "rate": 14,
      "label": "Hilton hotels",
-     "cond": "Booked directly with Hilton hotels"
+     "cond": "Booked directly with Hilton hotels",
+     "m": [
+      "hilton"
+     ]
     },
     {
      "cats": [
@@ -2396,7 +2474,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.5\u00a2 for ranking"
+    "Points valued at 0.5¢ for ranking"
    ],
    "source": {
     "url": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-aspire/",
@@ -2419,7 +2497,10 @@
      ],
      "rate": 6,
      "label": "Marriott hotels",
-     "cond": "Marriott Bonvoy hotels only"
+     "cond": "Marriott Bonvoy hotels only",
+     "m": [
+      "marriott"
+     ]
     },
     {
      "cats": [
@@ -2427,7 +2508,10 @@
      ],
      "rate": 3,
      "label": "Flights",
-     "cond": "Booked directly with the airline"
+     "cond": "Booked directly with the airline",
+     "m": [
+      "airline"
+     ]
     },
     {
      "cats": [
@@ -2438,7 +2522,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.7\u00a2 for ranking"
+    "Points valued at 0.7¢ for ranking"
    ],
    "source": {
     "url": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-brilliant/",
@@ -2461,7 +2545,10 @@
      ],
      "rate": 6,
      "label": "Marriott hotels",
-     "cond": "Marriott Bonvoy hotels only"
+     "cond": "Marriott Bonvoy hotels only",
+     "m": [
+      "marriott"
+     ]
     },
     {
      "cats": [
@@ -2474,7 +2561,7 @@
     }
    ],
    "perks": [
-    "Points valued at 0.7\u00a2 for ranking",
+    "Points valued at 0.7¢ for ranking",
     "Free night after $15,000 spend a year"
    ],
    "source": {
@@ -2587,7 +2674,7 @@
      ],
      "rate": 3,
      "label": "Restaurants",
-     "note": "6x Fri & Sat 6 PM\u20136 AM ET (Citi Nights)"
+     "note": "6x Fri & Sat 6 PM–6 AM ET (Citi Nights)"
     }
    ],
    "perks": [],
@@ -2614,7 +2701,10 @@
      ],
      "rate": 2,
      "label": "American Airlines",
-     "cond": "American Airlines purchases only"
+     "cond": "American Airlines purchases only",
+     "m": [
+      "american"
+     ]
     },
     {
      "cats": [
@@ -2632,7 +2722,7 @@
     }
    ],
    "perks": [
-    "Miles valued at 1.3\u00a2 for ranking"
+    "Miles valued at 1.3¢ for ranking"
    ],
    "source": {
     "url": "https://www.citi.com/credit-cards/citi-aadvantage-platinum-select-world-elite-mastercard",
@@ -2663,11 +2753,14 @@
      ],
      "rate": 4,
      "label": "American Airlines",
-     "cond": "American Airlines purchases only (5x after $150,000/yr)"
+     "cond": "American Airlines purchases only (5x after $150,000/yr)",
+     "m": [
+      "american"
+     ]
     }
    ],
    "perks": [
-    "Miles valued at 1.3\u00a2 for ranking"
+    "Miles valued at 1.3¢ for ranking"
    ],
    "source": {
     "url": "https://www.citi.com/credit-cards/citi-aadvantage-executive-world-legend-mastercard",
@@ -2699,7 +2792,10 @@
      ],
      "rate": 3,
      "label": "American Airlines",
-     "cond": "American Airlines purchases only"
+     "cond": "American Airlines purchases only",
+     "m": [
+      "american"
+     ]
     },
     {
      "cats": [
@@ -2718,7 +2814,7 @@
     }
    ],
    "perks": [
-    "Miles valued at 1.3\u00a2 for ranking"
+    "Miles valued at 1.3¢ for ranking"
    ],
    "source": {
     "url": "https://www.citi.com/credit-cards/citi-aadvantage-globe-mastercard",
@@ -3014,7 +3110,8 @@
       "cats": [
        "grocery",
        "costco",
-       "streaming"
+       "streaming",
+       "warehouse"
       ],
       "label": "Grocery, wholesale clubs & select streaming"
      },
@@ -3070,7 +3167,8 @@
       "cats": [
        "grocery",
        "costco",
-       "streaming"
+       "streaming",
+       "warehouse"
       ],
       "label": "Grocery, wholesale clubs & select streaming"
      },
@@ -3191,7 +3289,11 @@
      ],
      "rate": 3,
      "label": "Alaska & Hawaiian Airlines",
-     "cond": "Alaska and Hawaiian Airlines purchases only"
+     "cond": "Alaska and Hawaiian Airlines purchases only",
+     "m": [
+      "alaska",
+      "hawaiian"
+     ]
     },
     {
      "cats": [
@@ -3217,7 +3319,7 @@
     }
    ],
    "perks": [
-    "Points valued at 1.3\u00a2 for ranking",
+    "Points valued at 1.3¢ for ranking",
     "Companion fare after $6,000 spend a year"
    ],
    "source": {
@@ -3242,7 +3344,10 @@
      ],
      "rate": 5,
      "label": "Hotels",
-     "cond": "Hotel and motel purchases"
+     "cond": "Hotel and motel purchases",
+     "m": [
+      "hotel"
+     ]
     },
     {
      "cats": [
@@ -3250,7 +3355,10 @@
      ],
      "rate": 4,
      "label": "Airlines",
-     "cond": "Airline purchases"
+     "cond": "Airline purchases",
+     "m": [
+      "airline"
+     ]
     },
     {
      "cats": [
@@ -3291,7 +3399,12 @@
      ],
      "rate": 3,
      "label": "Expedia, Hotels.com & Vrbo",
-     "cond": "Booked on Expedia, Hotels.com or Vrbo"
+     "cond": "Booked on Expedia, Hotels.com or Vrbo",
+     "m": [
+      "expedia",
+      "hotelscom",
+      "vrbo"
+     ]
     },
     {
      "cats": [
@@ -3420,11 +3533,14 @@
      ],
      "rate": 2,
      "label": "American Airlines",
-     "cond": "American Airlines purchases only"
+     "cond": "American Airlines purchases only",
+     "m": [
+      "american"
+     ]
     }
    ],
    "perks": [
-    "Miles valued at 1.3\u00a2 for ranking"
+    "Miles valued at 1.3¢ for ranking"
    ],
    "source": {
     "url": "https://cards.barclaycardus.com/banking/cards/aadvantage-aviator-red-world-elite-mastercard/",
@@ -3447,7 +3563,10 @@
      ],
      "rate": 6,
      "label": "JetBlue",
-     "cond": "JetBlue purchases only"
+     "cond": "JetBlue purchases only",
+     "m": [
+      "jetblue"
+     ]
     },
     {
      "cats": [
@@ -3465,7 +3584,7 @@
     }
    ],
    "perks": [
-    "Points valued at 1.3\u00a2 for ranking",
+    "Points valued at 1.3¢ for ranking",
     "5,000 bonus points each anniversary"
    ],
    "source": {
@@ -3578,7 +3697,10 @@
      ],
      "rate": 5,
      "label": "5% off at Lowe's",
-     "cond": "Lowe's only"
+     "cond": "Lowe's only",
+     "m": [
+      "lowes"
+     ]
     }
    ],
    "perks": [
@@ -3605,7 +3727,10 @@
      ],
      "rate": 5,
      "label": "Best Buy",
-     "cond": "Best Buy purchases only"
+     "cond": "Best Buy purchases only",
+     "m": [
+      "bestbuy"
+     ]
     },
     {
      "cats": [
@@ -3688,7 +3813,10 @@
      ],
      "rate": 3,
      "label": "Checking out with PayPal",
-     "cond": "Only when you pay through PayPal"
+     "cond": "Only when you pay through PayPal",
+     "m": [
+      "paypal"
+     ]
     }
    ],
    "perks": [],
@@ -3755,7 +3883,10 @@
      ],
      "rate": 4,
      "label": "Verizon",
-     "cond": "Verizon purchases only"
+     "cond": "Verizon purchases only",
+     "m": [
+      "verizon"
+     ]
     }
    ],
    "perks": [
@@ -3924,7 +4055,7 @@
     }
    ],
    "perks": [
-    "Points valued at 1\u00a2 for ranking; some redemptions are worth less"
+    "Points valued at 1¢ for ranking; some redemptions are worth less"
    ],
    "source": {
     "url": "https://www.navyfederal.org/loans-cards/credit-cards/more-rewards.html",
@@ -4000,7 +4131,7 @@
     }
    ],
    "perks": [
-    "Points worth 1\u00a2 for travel or investing; cash redemptions are worth less"
+    "Points worth 1¢ for travel or investing; cash redemptions are worth less"
    ],
    "source": {
     "url": "https://upgradedpoints.com/news/robinhood-gold-card-pros-cons/",
@@ -4047,5 +4178,1176 @@
     "checked": "2026-09-29"
    }
   }
- }
+ },
+ "stores": [
+  {
+   "id": "costco",
+   "name": "Costco",
+   "cat": "costco",
+   "note": "Costco takes only Visa credit cards"
+  },
+  {
+   "id": "costco_gas",
+   "name": "Costco Gas",
+   "cat": "costco_gas",
+   "aka": "costco fuel costco gas station",
+   "note": "Costco takes only Visa credit cards"
+  },
+  {
+   "id": "samsclub",
+   "name": "Sam's Club",
+   "cat": "warehouse",
+   "aka": "sams",
+   "note": "Warehouse clubs usually don't count as grocery"
+  },
+  {
+   "id": "bjs",
+   "name": "BJ's Wholesale",
+   "cat": "warehouse",
+   "aka": "bjs",
+   "note": "Warehouse clubs usually don't count as grocery"
+  },
+  {
+   "id": "walmart",
+   "name": "Walmart",
+   "cat": "walmart",
+   "aka": "walmart supercenter",
+   "note": "Walmart doesn't take Apple Pay, and most cards don't count it as grocery"
+  },
+  {
+   "id": "target",
+   "name": "Target",
+   "cat": "target",
+   "note": "Most cards don't count Target as grocery"
+  },
+  {
+   "id": "amazon",
+   "name": "Amazon",
+   "cat": "amazon",
+   "aka": "amazon.com prime audible"
+  },
+  {
+   "id": "wholefoods",
+   "name": "Whole Foods",
+   "cat": "wholefoods",
+   "aka": "whole foods market"
+  },
+  {
+   "id": "safeway",
+   "name": "Safeway",
+   "cat": "grocery"
+  },
+  {
+   "id": "kroger",
+   "name": "Kroger",
+   "cat": "grocery"
+  },
+  {
+   "id": "albertsons",
+   "name": "Albertsons",
+   "cat": "grocery"
+  },
+  {
+   "id": "vons",
+   "name": "Vons",
+   "cat": "grocery"
+  },
+  {
+   "id": "ralphs",
+   "name": "Ralphs",
+   "cat": "grocery"
+  },
+  {
+   "id": "publix",
+   "name": "Publix",
+   "cat": "grocery"
+  },
+  {
+   "id": "traderjoes",
+   "name": "Trader Joe's",
+   "cat": "grocery"
+  },
+  {
+   "id": "aldi",
+   "name": "Aldi",
+   "cat": "grocery"
+  },
+  {
+   "id": "heb",
+   "name": "H-E-B",
+   "cat": "grocery"
+  },
+  {
+   "id": "wegmans",
+   "name": "Wegmans",
+   "cat": "grocery"
+  },
+  {
+   "id": "sprouts",
+   "name": "Sprouts",
+   "cat": "grocery"
+  },
+  {
+   "id": "foodlion",
+   "name": "Food Lion",
+   "cat": "grocery"
+  },
+  {
+   "id": "stopshop",
+   "name": "Stop & Shop",
+   "cat": "grocery"
+  },
+  {
+   "id": "giant",
+   "name": "Giant",
+   "cat": "grocery"
+  },
+  {
+   "id": "meijer",
+   "name": "Meijer",
+   "cat": "grocery"
+  },
+  {
+   "id": "fredmeyer",
+   "name": "Fred Meyer",
+   "cat": "grocery"
+  },
+  {
+   "id": "winco",
+   "name": "WinCo",
+   "cat": "grocery"
+  },
+  {
+   "id": "smartfinal",
+   "name": "Smart & Final",
+   "cat": "grocery"
+  },
+  {
+   "id": "lucky",
+   "name": "Lucky",
+   "cat": "grocery"
+  },
+  {
+   "id": "savemart",
+   "name": "Save Mart",
+   "cat": "grocery"
+  },
+  {
+   "id": "harristeeter",
+   "name": "Harris Teeter",
+   "cat": "grocery"
+  },
+  {
+   "id": "hyvee",
+   "name": "Hy-Vee",
+   "cat": "grocery"
+  },
+  {
+   "id": "staterbros",
+   "name": "Stater Bros",
+   "cat": "grocery"
+  },
+  {
+   "id": "winndixie",
+   "name": "Winn-Dixie",
+   "cat": "grocery"
+  },
+  {
+   "id": "shoprite",
+   "name": "ShopRite",
+   "cat": "grocery"
+  },
+  {
+   "id": "jewelosco",
+   "name": "Jewel-Osco",
+   "cat": "grocery"
+  },
+  {
+   "id": "kingsoopers",
+   "name": "King Soopers",
+   "cat": "grocery"
+  },
+  {
+   "id": "frysfood",
+   "name": "Fry's Food",
+   "cat": "grocery"
+  },
+  {
+   "id": "food4less",
+   "name": "Food 4 Less",
+   "cat": "grocery"
+  },
+  {
+   "id": "groceryoutlet",
+   "name": "Grocery Outlet",
+   "cat": "grocery"
+  },
+  {
+   "id": "99ranch",
+   "name": "99 Ranch",
+   "cat": "grocery"
+  },
+  {
+   "id": "hmart",
+   "name": "H Mart",
+   "cat": "grocery"
+  },
+  {
+   "id": "mcdonalds",
+   "name": "McDonald's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "chipotle",
+   "name": "Chipotle",
+   "cat": "fast_food"
+  },
+  {
+   "id": "starbucks",
+   "name": "Starbucks",
+   "cat": "fast_food",
+   "note": "Usually counts as fast food or dining"
+  },
+  {
+   "id": "chickfila",
+   "name": "Chick-fil-A",
+   "cat": "fast_food"
+  },
+  {
+   "id": "tacobell",
+   "name": "Taco Bell",
+   "cat": "fast_food"
+  },
+  {
+   "id": "wendys",
+   "name": "Wendy's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "burgerking",
+   "name": "Burger King",
+   "cat": "fast_food"
+  },
+  {
+   "id": "subway",
+   "name": "Subway",
+   "cat": "fast_food"
+  },
+  {
+   "id": "pandaexpress",
+   "name": "Panda Express",
+   "cat": "fast_food"
+  },
+  {
+   "id": "innout",
+   "name": "In-N-Out",
+   "cat": "fast_food"
+  },
+  {
+   "id": "dominos",
+   "name": "Domino's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "pizzahut",
+   "name": "Pizza Hut",
+   "cat": "fast_food"
+  },
+  {
+   "id": "dunkin",
+   "name": "Dunkin'",
+   "cat": "fast_food"
+  },
+  {
+   "id": "panera",
+   "name": "Panera",
+   "cat": "fast_food"
+  },
+  {
+   "id": "jackinthebox",
+   "name": "Jack in the Box",
+   "cat": "fast_food"
+  },
+  {
+   "id": "sonic",
+   "name": "Sonic",
+   "cat": "fast_food"
+  },
+  {
+   "id": "kfc",
+   "name": "KFC",
+   "cat": "fast_food"
+  },
+  {
+   "id": "popeyes",
+   "name": "Popeyes",
+   "cat": "fast_food"
+  },
+  {
+   "id": "fiveguys",
+   "name": "Five Guys",
+   "cat": "fast_food"
+  },
+  {
+   "id": "shakeshack",
+   "name": "Shake Shack",
+   "cat": "fast_food"
+  },
+  {
+   "id": "jerseymikes",
+   "name": "Jersey Mike's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "wingstop",
+   "name": "Wingstop",
+   "cat": "fast_food"
+  },
+  {
+   "id": "dutchbros",
+   "name": "Dutch Bros",
+   "cat": "fast_food"
+  },
+  {
+   "id": "raisingcanes",
+   "name": "Raising Cane's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "deltaco",
+   "name": "Del Taco",
+   "cat": "fast_food"
+  },
+  {
+   "id": "elpolloloco",
+   "name": "El Pollo Loco",
+   "cat": "fast_food"
+  },
+  {
+   "id": "carlsjr",
+   "name": "Carl's Jr.",
+   "cat": "fast_food"
+  },
+  {
+   "id": "arbys",
+   "name": "Arby's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "culvers",
+   "name": "Culver's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "whataburger",
+   "name": "Whataburger",
+   "cat": "fast_food"
+  },
+  {
+   "id": "peetscoffee",
+   "name": "Peet's Coffee",
+   "cat": "fast_food"
+  },
+  {
+   "id": "jamba",
+   "name": "Jamba",
+   "cat": "fast_food"
+  },
+  {
+   "id": "littlecaesars",
+   "name": "Little Caesars",
+   "cat": "fast_food"
+  },
+  {
+   "id": "papajohns",
+   "name": "Papa John's",
+   "cat": "fast_food"
+  },
+  {
+   "id": "noodlescompany",
+   "name": "Noodles & Company",
+   "cat": "fast_food"
+  },
+  {
+   "id": "qdoba",
+   "name": "Qdoba",
+   "cat": "fast_food"
+  },
+  {
+   "id": "sweetgreen",
+   "name": "Sweetgreen",
+   "cat": "fast_food"
+  },
+  {
+   "id": "cava",
+   "name": "CAVA",
+   "cat": "fast_food"
+  },
+  {
+   "id": "olivegarden",
+   "name": "Olive Garden",
+   "cat": "dining"
+  },
+  {
+   "id": "applebees",
+   "name": "Applebee's",
+   "cat": "dining"
+  },
+  {
+   "id": "chilis",
+   "name": "Chili's",
+   "cat": "dining"
+  },
+  {
+   "id": "cheesecakefactory",
+   "name": "Cheesecake Factory",
+   "cat": "dining"
+  },
+  {
+   "id": "redrobin",
+   "name": "Red Robin",
+   "cat": "dining"
+  },
+  {
+   "id": "ihop",
+   "name": "IHOP",
+   "cat": "dining"
+  },
+  {
+   "id": "dennys",
+   "name": "Denny's",
+   "cat": "dining"
+  },
+  {
+   "id": "buffalowildwings",
+   "name": "Buffalo Wild Wings",
+   "cat": "dining"
+  },
+  {
+   "id": "outback",
+   "name": "Outback",
+   "cat": "dining"
+  },
+  {
+   "id": "texasroadhouse",
+   "name": "Texas Roadhouse",
+   "cat": "dining"
+  },
+  {
+   "id": "p.f.changs",
+   "name": "P.F. Chang's",
+   "cat": "dining"
+  },
+  {
+   "id": "redlobster",
+   "name": "Red Lobster",
+   "cat": "dining"
+  },
+  {
+   "id": "bjsrestaurant",
+   "name": "BJ's Restaurant",
+   "cat": "dining"
+  },
+  {
+   "id": "crackerbarrel",
+   "name": "Cracker Barrel",
+   "cat": "dining"
+  },
+  {
+   "id": "benihana",
+   "name": "Benihana",
+   "cat": "dining"
+  },
+  {
+   "id": "doordash",
+   "name": "DoorDash",
+   "cat": "dining",
+   "aka": "door dash"
+  },
+  {
+   "id": "ubereats",
+   "name": "Uber Eats",
+   "cat": "dining"
+  },
+  {
+   "id": "grubhub",
+   "name": "Grubhub",
+   "cat": "dining"
+  },
+  {
+   "id": "instacart",
+   "name": "Instacart",
+   "cat": "grocery",
+   "note": "Often counts as grocery; some cards treat it as online"
+  },
+  {
+   "id": "shell",
+   "name": "Shell",
+   "cat": "gas"
+  },
+  {
+   "id": "chevron",
+   "name": "Chevron",
+   "cat": "gas"
+  },
+  {
+   "id": "exxon",
+   "name": "Exxon",
+   "cat": "gas"
+  },
+  {
+   "id": "mobil",
+   "name": "Mobil",
+   "cat": "gas"
+  },
+  {
+   "id": "arco",
+   "name": "ARCO",
+   "cat": "gas"
+  },
+  {
+   "id": "76",
+   "name": "76",
+   "cat": "gas"
+  },
+  {
+   "id": "bp",
+   "name": "BP",
+   "cat": "gas"
+  },
+  {
+   "id": "valero",
+   "name": "Valero",
+   "cat": "gas"
+  },
+  {
+   "id": "circlek",
+   "name": "Circle K",
+   "cat": "gas"
+  },
+  {
+   "id": "speedway",
+   "name": "Speedway",
+   "cat": "gas"
+  },
+  {
+   "id": "quiktrip",
+   "name": "QuikTrip",
+   "cat": "gas"
+  },
+  {
+   "id": "wawa",
+   "name": "Wawa",
+   "cat": "gas"
+  },
+  {
+   "id": "sheetz",
+   "name": "Sheetz",
+   "cat": "gas"
+  },
+  {
+   "id": "marathon",
+   "name": "Marathon",
+   "cat": "gas"
+  },
+  {
+   "id": "sunoco",
+   "name": "Sunoco",
+   "cat": "gas"
+  },
+  {
+   "id": "caseys",
+   "name": "Casey's",
+   "cat": "gas"
+  },
+  {
+   "id": "bucees",
+   "name": "Buc-ee's",
+   "cat": "gas"
+  },
+  {
+   "id": "kwiktrip",
+   "name": "Kwik Trip",
+   "cat": "gas"
+  },
+  {
+   "id": "texaco",
+   "name": "Texaco",
+   "cat": "gas"
+  },
+  {
+   "id": "citgo",
+   "name": "Citgo",
+   "cat": "gas"
+  },
+  {
+   "id": "phillips66",
+   "name": "Phillips 66",
+   "cat": "gas"
+  },
+  {
+   "id": "conoco",
+   "name": "Conoco",
+   "cat": "gas"
+  },
+  {
+   "id": "sinclair",
+   "name": "Sinclair",
+   "cat": "gas"
+  },
+  {
+   "id": "cvs",
+   "name": "CVS",
+   "cat": "drugstore",
+   "aka": "cvs pharmacy"
+  },
+  {
+   "id": "walgreens",
+   "name": "Walgreens",
+   "cat": "drugstore"
+  },
+  {
+   "id": "riteaid",
+   "name": "Rite Aid",
+   "cat": "drugstore"
+  },
+  {
+   "id": "homedepot",
+   "name": "Home Depot",
+   "cat": "home",
+   "aka": "the home depot"
+  },
+  {
+   "id": "lowes",
+   "name": "Lowe's",
+   "cat": "home",
+   "aka": "lowes"
+  },
+  {
+   "id": "acehardware",
+   "name": "Ace Hardware",
+   "cat": "home",
+   "aka": "ace"
+  },
+  {
+   "id": "menards",
+   "name": "Menards",
+   "cat": "home"
+  },
+  {
+   "id": "truevalue",
+   "name": "True Value",
+   "cat": "home"
+  },
+  {
+   "id": "macys",
+   "name": "Macy's",
+   "cat": "department"
+  },
+  {
+   "id": "nordstrom",
+   "name": "Nordstrom",
+   "cat": "department"
+  },
+  {
+   "id": "kohls",
+   "name": "Kohl's",
+   "cat": "department"
+  },
+  {
+   "id": "jcpenney",
+   "name": "JCPenney",
+   "cat": "department"
+  },
+  {
+   "id": "dillards",
+   "name": "Dillard's",
+   "cat": "department"
+  },
+  {
+   "id": "bloomingdales",
+   "name": "Bloomingdale's",
+   "cat": "department"
+  },
+  {
+   "id": "belk",
+   "name": "Belk",
+   "cat": "department"
+  },
+  {
+   "id": "nordstromrack",
+   "name": "Nordstrom Rack",
+   "cat": "department"
+  },
+  {
+   "id": "saks",
+   "name": "Saks",
+   "cat": "department"
+  },
+  {
+   "id": "oldnavy",
+   "name": "Old Navy",
+   "cat": "clothing"
+  },
+  {
+   "id": "gap",
+   "name": "Gap",
+   "cat": "clothing"
+  },
+  {
+   "id": "hm",
+   "name": "H&M",
+   "cat": "clothing"
+  },
+  {
+   "id": "zara",
+   "name": "Zara",
+   "cat": "clothing"
+  },
+  {
+   "id": "uniqlo",
+   "name": "Uniqlo",
+   "cat": "clothing"
+  },
+  {
+   "id": "tjmaxx",
+   "name": "TJ Maxx",
+   "cat": "clothing"
+  },
+  {
+   "id": "marshalls",
+   "name": "Marshalls",
+   "cat": "clothing"
+  },
+  {
+   "id": "ross",
+   "name": "Ross",
+   "cat": "clothing"
+  },
+  {
+   "id": "nike",
+   "name": "Nike",
+   "cat": "clothing"
+  },
+  {
+   "id": "lululemon",
+   "name": "Lululemon",
+   "cat": "clothing"
+  },
+  {
+   "id": "bananarepublic",
+   "name": "Banana Republic",
+   "cat": "clothing"
+  },
+  {
+   "id": "burlington",
+   "name": "Burlington",
+   "cat": "clothing"
+  },
+  {
+   "id": "bestbuy",
+   "name": "Best Buy",
+   "cat": "electronics"
+  },
+  {
+   "id": "applestore",
+   "name": "Apple Store",
+   "cat": "electronics",
+   "aka": "apple"
+  },
+  {
+   "id": "ikea",
+   "name": "IKEA",
+   "cat": "furniture"
+  },
+  {
+   "id": "wayfair",
+   "name": "Wayfair",
+   "cat": "furniture"
+  },
+  {
+   "id": "ashley",
+   "name": "Ashley",
+   "cat": "furniture",
+   "aka": "ashley furniture"
+  },
+  {
+   "id": "dicks",
+   "name": "Dick's Sporting Goods",
+   "cat": "sporting",
+   "aka": "dicks"
+  },
+  {
+   "id": "rei",
+   "name": "REI",
+   "cat": "sporting"
+  },
+  {
+   "id": "academy",
+   "name": "Academy Sports",
+   "cat": "sporting"
+  },
+  {
+   "id": "petco",
+   "name": "Petco",
+   "cat": "pets"
+  },
+  {
+   "id": "petsmart",
+   "name": "PetSmart",
+   "cat": "pets"
+  },
+  {
+   "id": "chewy",
+   "name": "Chewy",
+   "cat": "pets"
+  },
+  {
+   "id": "ulta",
+   "name": "Ulta Beauty",
+   "cat": "beauty",
+   "aka": "ulta"
+  },
+  {
+   "id": "sephora",
+   "name": "Sephora",
+   "cat": "beauty"
+  },
+  {
+   "id": "greatclips",
+   "name": "Great Clips",
+   "cat": "beauty",
+   "aka": "haircut"
+  },
+  {
+   "id": "staples",
+   "name": "Staples",
+   "cat": "office"
+  },
+  {
+   "id": "officedepot",
+   "name": "Office Depot",
+   "cat": "office",
+   "aka": "office max officemax"
+  },
+  {
+   "id": "netflix",
+   "name": "Netflix",
+   "cat": "streaming"
+  },
+  {
+   "id": "hulu",
+   "name": "Hulu",
+   "cat": "streaming"
+  },
+  {
+   "id": "disneyplus",
+   "name": "Disney+",
+   "cat": "streaming"
+  },
+  {
+   "id": "spotify",
+   "name": "Spotify",
+   "cat": "streaming"
+  },
+  {
+   "id": "youtubetv",
+   "name": "YouTube TV",
+   "cat": "streaming"
+  },
+  {
+   "id": "max",
+   "name": "Max",
+   "cat": "streaming"
+  },
+  {
+   "id": "peacock",
+   "name": "Peacock",
+   "cat": "streaming"
+  },
+  {
+   "id": "appletvplus",
+   "name": "Apple TV+",
+   "cat": "streaming"
+  },
+  {
+   "id": "paramountplus",
+   "name": "Paramount+",
+   "cat": "streaming"
+  },
+  {
+   "id": "espnplus",
+   "name": "ESPN+",
+   "cat": "streaming"
+  },
+  {
+   "id": "sling",
+   "name": "Sling",
+   "cat": "streaming"
+  },
+  {
+   "id": "verizon",
+   "name": "Verizon",
+   "cat": "phone"
+  },
+  {
+   "id": "att",
+   "name": "AT&T",
+   "cat": "phone",
+   "aka": "at&t att"
+  },
+  {
+   "id": "tmobile",
+   "name": "T-Mobile",
+   "cat": "phone",
+   "aka": "tmobile"
+  },
+  {
+   "id": "xfinity",
+   "name": "Xfinity",
+   "cat": "utilities",
+   "aka": "comcast"
+  },
+  {
+   "id": "spectrum",
+   "name": "Spectrum",
+   "cat": "utilities"
+  },
+  {
+   "id": "uber",
+   "name": "Uber",
+   "cat": "transit"
+  },
+  {
+   "id": "lyft",
+   "name": "Lyft",
+   "cat": "transit"
+  },
+  {
+   "id": "amc",
+   "name": "AMC Theatres",
+   "cat": "entertainment",
+   "aka": "amc"
+  },
+  {
+   "id": "regal",
+   "name": "Regal",
+   "cat": "entertainment"
+  },
+  {
+   "id": "ticketmaster",
+   "name": "Ticketmaster",
+   "cat": "entertainment"
+  },
+  {
+   "id": "disneyland",
+   "name": "Disneyland / Disney World",
+   "cat": "entertainment",
+   "aka": "disney parks"
+  },
+  {
+   "id": "planetfitness",
+   "name": "Planet Fitness",
+   "cat": "fitness"
+  },
+  {
+   "id": "24hourfitness",
+   "name": "24 Hour Fitness",
+   "cat": "fitness"
+  },
+  {
+   "id": "lafitness",
+   "name": "LA Fitness",
+   "cat": "fitness"
+  },
+  {
+   "id": "orangetheory",
+   "name": "Orangetheory",
+   "cat": "fitness"
+  },
+  {
+   "id": "equinox",
+   "name": "Equinox",
+   "cat": "fitness"
+  },
+  {
+   "id": "ebay",
+   "name": "eBay",
+   "cat": "online"
+  },
+  {
+   "id": "etsy",
+   "name": "Etsy",
+   "cat": "online"
+  },
+  {
+   "id": "walmartcom",
+   "name": "Walmart.com",
+   "cat": "online",
+   "aka": "walmart online"
+  },
+  {
+   "id": "paypal",
+   "name": "PayPal checkout",
+   "cat": "online",
+   "aka": "paypal",
+   "note": "Pick this when you pay through PayPal online"
+  },
+  {
+   "id": "delta",
+   "name": "Delta",
+   "cat": "travel",
+   "aka": "delta airlines",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "united",
+   "name": "United",
+   "cat": "travel",
+   "aka": "united airlines",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "american",
+   "name": "American Airlines",
+   "cat": "travel",
+   "aka": "aa",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "southwest",
+   "name": "Southwest",
+   "cat": "travel",
+   "aka": "southwest airlines",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "alaska",
+   "name": "Alaska Airlines",
+   "cat": "travel",
+   "aka": "alaska",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "hawaiian",
+   "name": "Hawaiian Airlines",
+   "cat": "travel",
+   "aka": "hawaiian",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "jetblue",
+   "name": "JetBlue",
+   "cat": "travel",
+   "aka": "jet blue",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "spirit",
+   "name": "Spirit",
+   "cat": "travel",
+   "aka": "spirit airlines",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "frontier",
+   "name": "Frontier",
+   "cat": "travel",
+   "aka": "frontier airlines",
+   "tags": [
+    "airline"
+   ]
+  },
+  {
+   "id": "marriott",
+   "name": "Marriott",
+   "cat": "travel",
+   "aka": "bonvoy westin sheraton ritz courtyard",
+   "tags": [
+    "hotel"
+   ]
+  },
+  {
+   "id": "hilton",
+   "name": "Hilton",
+   "cat": "travel",
+   "aka": "hampton doubletree embassy",
+   "tags": [
+    "hotel"
+   ]
+  },
+  {
+   "id": "hyatt",
+   "name": "Hyatt",
+   "cat": "travel",
+   "tags": [
+    "hotel"
+   ]
+  },
+  {
+   "id": "ihg",
+   "name": "IHG",
+   "cat": "travel",
+   "aka": "holiday inn intercontinental",
+   "tags": [
+    "hotel"
+   ]
+  },
+  {
+   "id": "bestwestern",
+   "name": "Best Western",
+   "cat": "travel",
+   "tags": [
+    "hotel"
+   ]
+  },
+  {
+   "id": "airbnb",
+   "name": "Airbnb",
+   "cat": "travel"
+  },
+  {
+   "id": "expedia",
+   "name": "Expedia",
+   "cat": "travel"
+  },
+  {
+   "id": "hotelscom",
+   "name": "Hotels.com",
+   "cat": "travel"
+  },
+  {
+   "id": "vrbo",
+   "name": "Vrbo",
+   "cat": "travel"
+  },
+  {
+   "id": "hertz",
+   "name": "Hertz",
+   "cat": "travel",
+   "aka": "rental car"
+  },
+  {
+   "id": "enterprise",
+   "name": "Enterprise",
+   "cat": "travel",
+   "aka": "rental car"
+  }
+ ]
 }
