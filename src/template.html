@@ -20,7 +20,7 @@
   --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
   --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --tabbar:64px;
+  --tabbar:60px; --gutter:20px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0b100e; --surface:#141b18; --surface-2:#1c2521; --ink:#e8efec; --muted:#97a69f; --line:#26312d;
@@ -50,23 +50,23 @@ input,textarea{font:inherit;color:inherit}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
 /* app bar */
-.appbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.appbar h1{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:-.02em}
+.appbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);padding:calc(env(safe-area-inset-top,0px) + 10px) var(--gutter) 10px;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.appbar h1{font-family:var(--display);font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
 .btn-pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:14px;padding:8px 14px;border-radius:999px}
 .btn-pill .ic{width:18px;height:18px}
-.view{padding:0 16px}
+.view{padding:4px var(--gutter) 0}
 
 /* search */
-.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px;box-shadow:var(--shadow)}
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 14px;min-height:48px}
 .search:focus-within{border-color:var(--accent)}
 .search .ic{color:var(--muted)}
-.search input{flex:1;min-width:0;border:none;background:transparent;font-size:17px;padding:14px 0;outline:none}
+.search input{flex:1;min-width:0;border:none;background:transparent;font-size:17px;padding:12px 0;outline:none}
 .search input::placeholder{color:var(--muted)}
 input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
 .clear{color:var(--muted);padding:6px}
 
 /* sections, tiles, chips, lists */
-.sec{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:24px 2px 10px}
+.sec{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:28px 4px 10px}
 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:92px;justify-content:center;text-align:center}
 .tile .ic{width:28px;height:28px;color:var(--accent)}
@@ -112,12 +112,12 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .back{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:600;padding:6px 0}
 
 /* tab bar */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 8px max(8px,env(safe-area-inset-bottom,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line);display:flex;justify-content:space-around;padding:6px 12px max(6px,calc(env(safe-area-inset-bottom,0px) - 12px))}
 /* iPhone fix: paint the bar's color past the bottom edge so no strip of page shows under it */
 .tabbar::after,.ob-bar::after{content:"";position:absolute;left:0;right:0;top:100%;height:120px;background:inherit;pointer-events:none}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);font-size:12px;font-weight:600;position:relative}
+.tabbar button{flex:1;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;min-height:46px;justify-content:center;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.01em;position:relative}
 .tabbar button.on{color:var(--accent)}
-.tabbar .ic{width:24px;height:24px}
+.tabbar .ic{width:26px;height:26px}
 .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--warn);color:var(--bg);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
 
 /* answer screen */
@@ -181,7 +181,7 @@ body.no-select{user-select:none;-webkit-user-select:none}
 .pin-ic{display:inline-flex;color:var(--accent);margin-right:4px;vertical-align:-2px}
 .pin-ic .ic,.sec .ic{width:14px;height:14px;vertical-align:-2px}
 .sec-n{color:var(--muted);font-weight:500;margin-left:4px;letter-spacing:0}
-.w-toolbar{display:flex;gap:8px;overflow-x:auto;margin:2px -16px 6px;padding:2px 16px 8px;scrollbar-width:none}
+.w-toolbar{display:flex;gap:8px;overflow-x:auto;margin:2px calc(-1*var(--gutter)) 6px;padding:2px var(--gutter) 8px;scrollbar-width:none}
 .w-toolbar::-webkit-scrollbar{display:none}
 .w-toolbar .chip{flex-shrink:0;white-space:nowrap}
 .view-chip .ic{width:16px;height:16px}
@@ -201,6 +201,108 @@ button.radio{width:100%;text-align:left}
 .switch.on{background:var(--accent)}
 .switch.on::after{transform:translateX(18px)}
 .danger-row .row-title,.danger-row .row-ic{color:var(--danger)}
+/* Pay home: favorites panel → recent strip → all categories grid */
+.fav-panel{margin-top:18px;padding:14px 12px 12px;border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 14%,var(--surface)) 0%,color-mix(in srgb,var(--star) 10%,var(--surface)) 100%);border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line))}
+.fav-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px}
+.fav-head h2{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em}
+.fav-head h2 .ic{width:20px;height:20px;color:var(--star);fill:currentColor}
+.fav-hint{font-size:13px;color:var(--muted);margin:-6px 4px 10px}
+.fav-panel .tile{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05)}
+.recent-wrap{margin-top:22px}
+.recent-head{display:flex;align-items:baseline;justify-content:space-between}
+.recent-head .sec{margin:0 2px 10px}
+.recent-strip{display:flex;gap:8px;overflow-x:auto;margin:0 calc(-1*var(--gutter));padding:2px var(--gutter) 4px;scrollbar-width:none}
+.recent-strip::-webkit-scrollbar{display:none}
+.recent-strip .chip{flex-shrink:0;white-space:nowrap;padding:9px 14px 9px 10px}
+.recent-strip .chip .ic{width:18px;height:18px;color:var(--accent)}
+.all-wrap{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+.all-title{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em;margin:0 2px 4px}
+.cat-group{margin-top:14px}
+.cat-group h3{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 10px}
+.cat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 6px}
+.cat-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:2px;text-align:center;position:relative}
+.cat-bubble{width:56px;height:56px;border-radius:18px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);transition:transform .1s}
+.cat-bubble .ic{width:26px;height:26px}
+.cat-btn:active .cat-bubble{transform:scale(.93);background:var(--surface-2)}
+.cat-btn span.lbl{font-size:12.5px;font-weight:500;line-height:1.2;color:var(--ink)}
+.cat-btn .fav-mark{position:absolute;top:-2px;right:calc(50% - 34px);width:18px;height:18px;border-radius:50%;background:var(--bg);display:grid;place-items:center;color:var(--star)}
+.cat-btn .fav-mark .ic{width:13px;height:13px;fill:currentColor}
+/* card page: rename in the header */
+.title-edit{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pencil{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--surface-2)}
+.pencil .ic{width:17px;height:17px}
+.pencil:active{background:var(--line)}
+.rename-inline{display:flex;align-items:center;gap:6px}
+.rename-inline .field{flex:1;min-width:0;font-size:18px;font-weight:600;padding:9px 12px}
+.icon-btn.ok{background:var(--accent);color:var(--on-accent);width:40px;height:40px;margin:0}
+/* chosen categories: dropdowns, saved summary */
+.pick-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 14px 14px;margin-top:4px}
+.pick-slot{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.pick-slot:last-of-type{border-bottom:none}
+.pick-rate{min-width:44px;font-size:20px;font-weight:600;color:var(--rate);line-height:1.2}
+.pick-main{flex:1;min-width:0}
+.pick-label{font-weight:600;margin-bottom:6px}
+.pick-values{display:flex;flex-wrap:wrap;gap:6px}
+.pick-val{background:var(--surface-2);border-radius:8px;padding:5px 10px;font-size:14px;font-weight:500}
+.pick-foot{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--rate);font-size:14px;font-weight:600}
+.pick-foot .ic{width:18px;height:18px}
+.pick-foot span{flex:1}
+.pick-new{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--warn-bg);color:var(--warn);font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.select-wrap{position:relative;display:block;margin-top:8px}
+.select{width:100%;appearance:none;-webkit-appearance:none;background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;padding:13px 40px 13px 14px;font-size:16px;font-weight:500;color:var(--ink)}
+.select:focus{outline:none;border-color:var(--accent)}
+.select-wrap .ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--muted);pointer-events:none}
+.pick-actions{display:flex;gap:10px;margin-top:6px}
+.pick-actions .btn{margin:0;flex:1}
+.pick-actions .btn-outline{flex:0 0 auto;width:auto;padding:13px 18px}
+/* wallet: Sort and Filter pills */
+.w-toolbar{flex-wrap:nowrap}
+.pill-btn{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;height:38px;padding:0 12px 0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:15px;font-weight:600;color:var(--ink)}
+.pill-btn .ic{width:18px;height:18px;color:var(--muted)}
+.pill-btn .ic.dim{width:14px;height:14px}
+.pill-btn.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.pill-btn.active .ic{color:var(--accent)}
+.f-chips{margin-top:-2px;align-items:center}
+.f-chip{gap:4px;padding:6px 8px 6px 12px;font-size:14px}
+.f-chip .ic{width:14px;height:14px}
+/* Todoist-style display sheets */
+.sheet.custom-top{padding-top:8px}
+.sheet.custom-top>.handle{margin:0 auto 6px}
+.set-head{position:sticky;top:-8px;z-index:4;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;padding:6px 0 10px;background:var(--bg)}
+.set-head h2{text-align:center;font-size:17px;font-weight:700}
+.round-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.round-btn .ic{width:20px;height:20px}
+.round-btn.ok{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.round-btn.ghost{visibility:hidden}
+.set-sec{font-size:15px;font-weight:600;color:var(--muted);margin:18px 4px 8px}
+.set-group{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.set-row{display:flex;align-items:center;gap:14px;width:100%;min-height:54px;padding:0 14px;position:relative}
+.set-row+.set-row::before{content:"";position:absolute;top:0;left:52px;right:0;border-top:1px solid var(--line)}
+.set-row.opt+.set-row.opt::before,.set-row:not(:has(.set-ic))+.set-row::before{left:16px}
+.set-row:active{background:var(--surface-2)}
+.set-row:disabled{opacity:.45}
+.set-ic{width:24px;display:grid;place-items:center;color:var(--muted)}
+.set-ic .ic{width:22px;height:22px}
+.set-label{flex:1;font-size:17px;font-weight:500}
+.set-val{color:var(--muted);font-size:16px;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.set-row.opt.on .set-label{font-weight:600}
+.set-row.opt .ic{color:var(--accent)}
+.set-hint{font-size:13px;color:var(--muted);margin:10px 6px 0}
+.reset-btn{display:block;width:100%;margin-top:22px;min-height:54px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--danger);font-size:17px;font-weight:600;text-align:center}
+/* ⋮ popover menu */
+.pop-bg{position:fixed;inset:0;z-index:70;background:transparent}
+.pop-menu{position:fixed;min-width:236px;max-width:calc(100vw - 32px);padding:6px;border-radius:16px;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);transform-origin:top right;animation:popmenu .16s cubic-bezier(.2,.9,.3,1.2)}
+.pop-item{display:flex;align-items:center;gap:14px;width:100%;padding:12px 12px;border-radius:10px;font-size:17px;font-weight:500}
+.pop-item .ic{width:22px;height:22px;color:var(--ink)}
+.pop-item:active{background:var(--surface-2)}
+.pop-sep{height:1px;background:var(--line);margin:4px 10px}
+@keyframes popmenu{from{opacity:0;transform:scale(.85)}}
+/* icon-only back bubble */
+.bubble.back{padding:0;justify-content:center;width:38px;color:var(--ink)}
+/* Pay: big tiles everywhere; favorites marked with a star */
+.cat-group .tiles{gap:10px}
+.tile .fav-mark{position:absolute;top:8px;right:8px;color:var(--star);display:grid}
+.tile .fav-mark .ic{width:15px;height:15px;fill:currentColor;color:var(--star)}
 /* clear, tappable action buttons */
 .action-stack{display:flex;flex-direction:column;gap:10px;margin-top:22px}
 .action-stack .btn{margin-top:0}
@@ -322,7 +424,6 @@ button.radio{width:100%;text-align:left}
 .drawer-head .sheet-sub{margin:2px 0 6px;font-size:14px}
 .tiers{display:flex;flex-direction:column;gap:6px}
 .tier{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
-.tier.top{border-color:var(--accent)}
 .tier-rate{min-width:48px;text-align:right;font-weight:600;color:var(--rate)}
 .notes{padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 .flabel{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:16px 2px 8px}
@@ -387,11 +488,13 @@ button.radio{width:100%;text-align:left}
       </label>
       <div id="pay-results" hidden></div>
       <div id="pay-home">
+        <section class="fav-panel" aria-labelledby="top-title">
+          <div class="fav-head"><h2 id="top-title"></h2><button class="link-btn" onclick="openFavs()" id="fav-edit">Edit</button></div>
+          <p class="fav-hint" id="fav-hint" hidden></p>
+          <div id="top" class="tiles"></div>
+        </section>
         <div id="recents"></div>
-        <div class="sec-row"><h2 class="sec" id="top-title">Your top spots</h2><button class="link-btn" onclick="openFavs()" id="fav-edit">Pick favorites</button></div>
-        <div id="top" class="tiles"></div>
-        <button id="more-btn" class="more" onclick="toggleMore()">More categories</button>
-        <div id="all" class="tiles" style="margin-top:10px" hidden></div>
+        <div id="all"></div>
       </div>
     </div>
   </section>
@@ -416,6 +519,7 @@ button.radio{width:100%;text-align:left}
 <button id="fab" class="fab" onclick="openAdd()" aria-label="Add a card" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 <div id="select-bar" class="select-bar" hidden></div>
 <div id="dialog" class="dialog-bg" hidden></div>
+<div id="popover" class="pop-bg" hidden></div>
 <div id="sheet" class="sheet-bg" hidden></div>
 <div id="onboard" class="onboard" hidden>
   <div class="ob-inner">

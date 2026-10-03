@@ -55,6 +55,10 @@ const ICONS={
   select:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12.5l3 3 5-6"/>',
   download:'<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
   more:'<circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/>',
+  filter:'<path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
+  layers:'<rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 21h11a2 2 0 0 0 2-2V8"/>',
   arrowUp:'<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>',
   arrowDown:'<path d="M12 5v14"/><path d="M6 13l6 6 6-6"/>',
   sort:'<path d="M7 4v16M3.5 7.5L7 4l3.5 3.5"/><path d="M17 20V4M13.5 16.5L17 20l3.5-3.5"/>',
@@ -107,4 +111,11 @@ const POPULAR_CARDS=["chase_freedom_unlimited","chase_sapphire_preferred","chase
   "amex_blue_cash_everyday","amex_gold","amex_platinum","capone_venture","capone_savor","capone_quicksilver","capone_venture_x",
   "citi_double_cash","citi_costco","discover_it_cash_back","boa_customized_cash","wells_active_cash","wells_autograph",
   "apple_card","usbank_cash_plus"];
+/* How "All categories" is grouped on Pay (anything not listed falls into the last group) */
+const CAT_GROUPS=[
+  ["Everyday",["grocery","dining","fast_food","gas","drugstore","wholefoods"]],
+  ["Stores & shopping",["costco","costco_gas","warehouse","walmart","target","amazon","online","department","home","electronics","clothing","furniture","sporting","pets","beauty","office"]],
+  ["Travel & going out",["travel","transit","entertainment"]],
+  ["Bills & everything else",["streaming","phone","utilities","fitness","other"]],
+];
 const DEFAULT_TOP=["grocery","dining","gas","fast_food","amazon","costco"];

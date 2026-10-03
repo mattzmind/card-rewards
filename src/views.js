@@ -63,25 +63,34 @@ function renderPay(){
   }
   home.hidden=false;res.hidden=true;
   const rec=state.recents.filter(x=>catById(x.c)&&(!x.s||storeById(x.s)));
-  $("recents").innerHTML=rec.length?`<h2 class="sec">Recent</h2><div class="chips">${rec.map(x=>{
-    const s=x.s&&storeById(x.s);return `<button class="chip" onclick="openAnswer('${x.c}','${x.s||""}')">${ic(x.c)}${esc(s?s.name:catName(x.c))}</button>`}).join("")}</div>`:"";
+  $("recents").innerHTML=rec.length?`<div class="recent-wrap"><div class="recent-head"><h2 class="sec">Recent</h2><button class="link-btn" onclick="clearRecents()">Clear</button></div>
+    <div class="recent-strip no-swipe">${rec.map(x=>{
+    const s=x.s&&storeById(x.s);return `<button class="chip" onclick="openAnswer('${x.c}','${x.s||""}')">${ic(x.c)}${esc(s?s.name:catName(x.c))}</button>`}).join("")}</div></div>`:"";
   const vis=visibleCats(),vid=new Set(vis.map(c=>c.id));
   const byUse=vis.filter(c=>state.usage[c.id]).sort((a,b)=>state.usage[b.id]-state.usage[a.id]).map(c=>c.id);
   const favs=favItems();let top;
   if(favs.length){
     top=favs.filter(f=>!f.s).map(f=>f.c);
-    $("top-title").textContent="Favorites";$("fav-edit").textContent="Edit";
+    $("top-title").innerHTML=`${ic("star")}Favorites`;$("fav-edit").textContent="Edit";$("fav-hint").hidden=true;
     $("top").innerHTML=favs.map(favTile).join("");
   }else{
     top=[...new Set([...byUse,...DEFAULT_TOP.filter(id=>vid.has(id))])].slice(0,6);
-    $("top-title").textContent="Your top spots";$("fav-edit").textContent="Pick favorites";
+    $("top-title").innerHTML=`${ic("star")}Your top spots`;$("fav-edit").textContent="Pick favorites";
+    $("fav-hint").hidden=false;$("fav-hint").textContent="Star the places you pay most to keep them here.";
     $("top").innerHTML=top.map(id=>tile(catById(id))).join("");
   }
-  const rest=vis.filter(c=>!top.includes(c.id));
-  $("more-btn").innerHTML=`${moreOpen?"Fewer categories":`More categories (${rest.length})`}${ic(moreOpen?"chevD":"chevR","dim")}`;
-  $("all").hidden=!moreOpen;$("all").innerHTML=rest.map(tile).join("");
+  // All categories: grouped icon grid, always open (favorites are marked with a star)
+  const favSet=new Set(state.favs),placed=new Set();
+  const btn=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${favSet.has("c:"+c.id)?`<span class="fav-mark" aria-label="Favorite">${ic("star")}</span>`:""}${ic(c.id)}<span>${esc(c.label)}</span></button>`;
+  let h=`<div class="all-wrap"><h2 class="all-title">All categories</h2>`;
+  CAT_GROUPS.forEach(([name,ids],i)=>{
+    const list=(i===CAT_GROUPS.length-1?vis.filter(c=>!placed.has(c.id)):vis.filter(c=>ids.includes(c.id)));
+    list.forEach(c=>placed.add(c.id));
+    if(list.length)h+=`<div class="cat-group"><h3>${esc(name)}</h3><div class="tiles">${list.map(btn).join("")}</div></div>`;
+  });
+  $("all").innerHTML=h+`</div>`;
 }
-function toggleMore(){moreOpen=!moreOpen;renderPay()}
+function clearRecents(){const old=state.recents;state.recents=[];save();renderPay();toast("Recent cleared",()=>{state.recents=old;save();renderPay()})}
 
 /* ─── Favorites: categories (and stores starred from an answer) pinned to the top of Pay ─── */
 const favKey=(c,s)=>s?"s:"+s:"c:"+c;
@@ -271,12 +280,12 @@ function clearReports(){if(!clearArmed){clearArmed=true;toast("Tap Clear again t
    ══════════════════════════════════════════════════════════ */
 /* back = {label, fn}: shows a floating back bubble and turns on swipe-back */
 let sheetBack=null;
-function openSheet(html,keepScroll,back){
+function openSheet(html,keepScroll,back,opts={}){
   const s=$("sheet"),prev=keepScroll===true?s.querySelector(".sheet")?.scrollTop:(typeof keepScroll==="number"?keepScroll:0);
   sheetBack=back||null;
   s.hidden=false;s.onclick=e=>{if(e.target===s)closeSheet()};
-  s.innerHTML=`<div class="sheet ${keepScroll?"still":""}" role="dialog" aria-modal="true"><div class="sheet-top"><div class="handle"></div>${
-    back?`<button class="bubble" onclick="sheetGoBack()" aria-label="Back to ${esc(back.label)}">${ic("chevL")}${esc(back.label)}</button>`:""}<button class="bubble close" onclick="closeSheet()" aria-label="Close">${ic("x")}</button></div>${html}</div>`;
+  s.innerHTML=`<div class="sheet ${keepScroll?"still":""} ${opts.customTop?"custom-top":""}" role="dialog" aria-modal="true">${opts.customTop?`<div class="handle"></div>`:`<div class="sheet-top"><div class="handle"></div>${
+    back?`<button class="bubble back" onclick="sheetGoBack()" aria-label="Back to ${esc(back.label)}">${ic("chevL")}</button>`:""}<button class="bubble close" onclick="closeSheet()" aria-label="Close">${ic("x")}</button></div>`}${html}</div>`;
   const sh=s.querySelector(".sheet");if(sh){sh.scrollTop=prev||0;sheetGestures(sh,closeSheet,()=>sheetBack&&sheetBack.fn)}
   document.body.classList.add("locked");
 }
@@ -326,7 +335,13 @@ function cardArt(pid,miniWidth){
 
 /* ─── Card details ─── */
 let drawerId=null,removeArmed=false;
+let drawerRenaming=null,pickEdit=null; // pickEdit = {wid, draft:{slotId:[ids]}}
+function startInlineName(id){drawerRenaming=id;openDrawer(id,true);setTimeout(()=>{const i=$("rn-inline");if(i){i.focus();i.select()}},50)}
+function cancelInlineName(id){drawerRenaming=null;openDrawer(id,true)}
+function saveInlineName(id){const w=walletById(id),v=$("rn-inline").value.trim(),old=w.nickname;w.nickname=v;drawerRenaming=null;save();openDrawer(id,true);render();
+  toast(v?`Renamed to ${v}`:"Using the card's own name",()=>{w.nickname=old;save();render();if(drawerId===id&&!$("sheet").hidden)openDrawer(id,true)})}
 function openDrawer(id,keep){
+  if(!keep||drawerId!==id){drawerRenaming=null;pickEdit=null}
   const w=walletById(id);if(!w)return;const p=P(w.product);
   drawerId=id;if(!keep)removeArmed=false;
   if(!p){openSheet(`<h2 class="sheet-title">${esc(dn(w))}</h2><p class="sheet-sub">This card isn't in the catalog anymore.</p>
@@ -345,7 +360,11 @@ function openDrawer(id,keep){
   const s=p.source||{};
   openSheet(`
     <div class="drawer-head">${cardArt(w.product,72)}<div class="row-main">
-      <h2 class="sheet-title">${esc(dn(w))} ${ownerBadge(w)}</h2>
+      ${drawerRenaming===w.id?`<div class="rename-inline"><input class="field" id="rn-inline" value="${esc(w.nickname||"")}" placeholder="${esc(p.short)}" maxlength="40" autocomplete="off"
+          onkeydown="if(event.key==='Enter')saveInlineName('${w.id}');if(event.key==='Escape')cancelInlineName('${w.id}')">
+          <button class="icon-btn ok" onclick="saveInlineName('${w.id}')" aria-label="Save name">${ic("check")}</button>
+          <button class="icon-btn" onclick="cancelInlineName('${w.id}')" aria-label="Cancel">${ic("x")}</button></div>`
+        :`<h2 class="sheet-title title-edit"><span>${esc(dn(w))}</span><button class="pencil" onclick="startInlineName('${w.id}')" aria-label="Rename card">${ic("edit")}</button>${ownerBadge(w)}</h2>`}
       <p class="sheet-sub">${esc(brand.name)} ${esc(p.name)} · ${netLabel(netOf(w))}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p>
       ${p.status==="closed"?`<span class="pill warn">No longer offered to new applicants</span>`:""}
       ${w.inactive?`<span class="pill">Deactivated ${shortDate(isoToDate(w.inactive))}</span>`:""}</div></div>
@@ -358,8 +377,6 @@ function openDrawer(id,keep){
     ${p.type!=="cash"?`<p class="hint">Ranked at ${p.cpp||1}¢ per ${p.type==="miles"?"mile":"point"}.</p>`:""}
     ${notes.length?`<h3 class="sec">Notes & perks</h3><ul class="notes">${notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`:""}
     <h3 class="sec">Card details</h3>
-    <label class="flabel" for="f-nick">Nickname</label>
-    <input class="field" id="f-nick" value="${esc(w.nickname)}" placeholder="${esc(p.short)}" onchange="setField('${w.id}','nickname',this.value.trim())">
     <label class="flabel" for="f-last4">Last 4 digits</label>
     <input class="field mono" id="f-last4" inputmode="numeric" maxlength="4" value="${esc(w.last4)}" onchange="setField('${w.id}','last4',this.value.replace(/\\D/g,'').slice(0,4))">
     ${SHOW.accountDetails?`<label class="flabel" for="f-due">Due day</label><input class="field" id="f-due" inputmode="numeric" value="${w.dueDay||""}" onchange="setField('${w.id}','dueDay',parseInt(this.value)||null)">`:""}
@@ -380,17 +397,13 @@ function setupHTML(w){
         <button class="chip ${on?"on":""}" onclick="toggleAct('${w.id}','${k}')">${on?ic("check")+"Activated":"Mark activated"}</button></div>`}).join("");
     h+=`<p class="hint">${esc(r.activateHint||"Activate in your card's app first, then mark it here.")}</p>`;
   }
-  (p.choice||[]).forEach(s=>{
-    const x=w.sel[s.id]||{},cur=selOpts(w,s);
-    const stale=s.period==="quarter"&&x.opts&&x.opts.length&&(!x.quarter||x.quarter<PICK_Q);
-    h+=`<div class="flabel">${esc(s.label)} · choose ${s.pick}${s.period==="quarter"?` for ${qLabel(PICK_Q)}`:""}</div>
-      <div class="chips">${s.options.map(o=>`<button class="chip ${cur.includes(o.id)?"on":""}" onclick="togglePick('${w.id}','${s.id}','${o.id}')">${esc(o.label)}</button>`).join("")}</div>
-      ${stale?`<div class="btn-row"><span class="hint">Last set for ${qLabel(x.quarter||QK)}</span><button class="btn-sm" onclick="confirmSame('${w.id}',true)">Keep same picks</button></div>`:""}
-      ${isDefaultSel(w,s)?`<p class="hint">Using the card's default until you choose.</p>`:""}`;
-  });
+  if((p.choice||[]).length)h+=picksHTML(w,p);
   if(p.auto){
-    h+=`<div class="flabel">Where will you spend most this month?</div><p class="hint">Only that category earns 5%.</p>
-      <div class="chips">${p.auto.options.map(o=>`<button class="chip ${w.autoFocus===o?"on":""}" onclick="setField('${w.id}','autoFocus','${o}')">${esc(catName(o))}</button>`).join("")}</div>`;
+    h+=`<div class="pick-card"><div class="pick-slot"><div class="pick-rate mono">${fmtRate(p.auto.rate)}%</div><div class="pick-main">
+      <div class="pick-label">Where will you spend most this month?</div><p class="hint" style="margin:2px 0 8px">Only your top category earns ${fmtRate(p.auto.rate)}%. This is a guess you can change any time.</p>
+      <label class="select-wrap"><select class="select" onchange="setField('${w.id}','autoFocus',this.value)">
+        <option value="" ${w.autoFocus?"":"selected"} disabled>Choose a category</option>
+        ${p.auto.options.map(o=>`<option value="${o}" ${w.autoFocus===o?"selected":""}>${esc(catName(o))}</option>`).join("")}</select>${ic("chevD")}</label></div></div></div>`;
   }
   return h?`<h3 class="sec">${p.rotating?"Quarterly bonus":"Your categories"}</h3>${h}`:"";
 }
@@ -400,6 +413,48 @@ function ownerChips(sel,action){
 function setField(id,f,v){const w=walletById(id);if(!w)return;w[f]=v;save();openDrawer(id,true)}
 function toggleAct(id,k){const w=walletById(id);w.activated=w.activated.includes(k)?w.activated.filter(x=>x!==k):[...w.activated,k];save();
   if(!$("sheet").hidden&&drawerId===id)openDrawer(id,true);else render()}
+/* Chosen categories (U.S. Bank Cash+, BoA, Bilt, Citi Strata…): one dropdown per pick, then Save.
+   Once saved they're locked; changing them takes Edit → confirm → Save, for fixing a mistake. */
+function picksHTML(w,p){
+  const slots=p.choice,editing=pickEdit&&pickEdit.wid===w.id;
+  const saved=s=>{const x=w.sel[s.id];return !!(x&&x.opts&&x.opts.length)};
+  const needs=slots.some(s=>!saved(s)&&!isDefaultSel(w,s));
+  if(!editing&&needs){pickEdit={wid:w.id,draft:Object.fromEntries(slots.map(s=>[s.id,[...selOpts(w,s)]]))};return picksHTML(w,p)}
+  const per=slots.some(s=>s.period==="quarter")?` for ${qLabel(PICK_Q)}`:"";
+  if(!editing){
+    const stale=slots.filter(s=>s.period==="quarter"&&saved(s)&&(!w.sel[s.id].quarter||w.sel[s.id].quarter<PICK_Q));
+    return `<div class="pick-card saved">${slots.map(s=>`<div class="pick-slot"><div class="pick-rate mono">${fmtRate(s.rate)}%</div><div class="pick-main">
+        <div class="pick-label">${esc(s.label.replace(/^Your /,"").replace(/^\w/,c=>c.toUpperCase()))}</div>
+        <div class="pick-values">${selLabels(w,s).map(l=>`<span class="pick-val">${esc(l)}</span>`).join("")||`<span class="dim">Not set</span>`}${isDefaultSel(w,s)?`<span class="dim"> (card default)</span>`:""}</div></div></div>`).join("")}
+      <div class="pick-foot">${ic("check")}<span>${stale.length?`Saved for ${qLabel(w.sel[stale[0].id].quarter||QK)}`:`Saved${per}`}</span>
+        <button class="btn-sm alt" onclick="askEditPicks('${w.id}')">${ic("edit")}Edit</button></div>
+      ${stale.length?`<div class="pick-new">New quarter: keep the same picks for ${qLabel(PICK_Q)}? <button class="btn-sm" onclick="confirmSame('${w.id}',true)">Keep same</button></div>`:""}</div>`;
+  }
+  const d=pickEdit.draft,complete=slots.every(s=>(d[s.id]||[]).filter(Boolean).length===s.pick);
+  return `<div class="pick-card editing">${slots.map(s=>{
+      const cur=d[s.id]||[];
+      return `<div class="pick-slot"><div class="pick-rate mono">${fmtRate(s.rate)}%</div><div class="pick-main">
+        <div class="pick-label">Choose ${s.pick}${s.period==="quarter"?per:""}</div>${s.note?`<p class="hint" style="margin:0 0 6px">${esc(s.note)}</p>`:""}
+        ${Array.from({length:s.pick},(_,i)=>{const taken=cur.filter((v,j)=>j!==i&&v);
+          return `<label class="select-wrap"><select class="select" onchange="setPickDraft('${w.id}','${s.id}',${i},this.value)" aria-label="${esc(s.label)} pick ${i+1}">
+            <option value="" ${cur[i]?"":"selected"}>Choose a category</option>
+            ${s.options.filter(o=>!taken.includes(o.id)).map(o=>`<option value="${o.id}" ${cur[i]===o.id?"selected":""}>${esc(o.label)}</option>`).join("")}</select>${ic("chevD")}</label>`}).join("")}
+      </div></div>`}).join("")}
+    <p class="hint">Pick the same categories you chose with ${esc(B(p.brand).name)}. Most banks lock them until next quarter.</p>
+    <div class="pick-actions">${slots.some(saved)?`<button class="btn-outline" onclick="pickEdit=null;openDrawer('${w.id}',true)">Cancel</button>`:""}
+      <button class="btn" ${complete?"":"disabled"} onclick="savePicks('${w.id}')">Save categories</button></div></div>`;
+}
+function setPickDraft(wid,slotId,i,val){const a=pickEdit.draft[slotId]=pickEdit.draft[slotId]||[];a[i]=val||undefined;openDrawer(wid,true)}
+function askEditPicks(wid){
+  confirmDialog("Edit your saved categories?","Use this to fix a mistake or match a change you made with your bank. Your new picks replace the saved ones.","Edit",()=>{
+    const w=walletById(wid),p=P(w.product);pickEdit={wid,draft:Object.fromEntries(p.choice.map(s=>[s.id,[...selOpts(w,s)]]))};openDrawer(wid,true)},"primary");
+}
+function savePicks(wid){
+  const w=walletById(wid),p=P(w.product),before=JSON.parse(JSON.stringify(w.sel));
+  p.choice.forEach(s=>{w.sel[s.id]={opts:(pickEdit.draft[s.id]||[]).filter(Boolean).slice(0,s.pick),quarter:s.period==="quarter"?PICK_Q:undefined}});
+  pickEdit=null;save();openDrawer(wid,true);render();if(answerCtx)renderAnswer();
+  toast("Categories saved",()=>{w.sel=before;save();render();if(drawerId===wid&&!$("sheet").hidden)openDrawer(wid,true)});
+}
 function togglePick(id,slotId,opt){
   const w=walletById(id),s=P(w.product).choice.find(x=>x.id===slotId);
   const cur=(w.sel[slotId]&&w.sel[slotId].opts)||[];let next;
@@ -455,17 +510,24 @@ function confirmDialog(title,msg,okLabel,fn,kind="danger"){
 function closeDialog(){$("dialog").hidden=true;$("dialog").innerHTML="";dialogFn=null}
 
 /* ─── Wallet menu (⋮) and select mode ─── */
+/* ⋮ opens a small menu under the button (like Todoist), not a sheet */
 function openWalletMenu(){
-  const off=state.wallet.filter(w=>w.inactive).length;
-  const item=(icon,label,sub,fn)=>`<button class="row" onclick="${fn}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${label}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span></button>`;
-  openSheet(`<h2 class="sheet-title">Wallet</h2><div class="list" style="margin-top:12px">
-    ${item("plus","Add a card","","closeSheet();openAdd()")}
-    ${state.wallet.length?item("sort","Sort & view",`${SORTS[viewOpt().sort]} · grouped by ${GROUPS[viewOpt().group].toLowerCase()}`,"openViewSheet()"):""}
-    ${state.wallet.length?item("select","Select cards","Deactivate or remove several at once","closeSheet();startSelect()"):""}
-    ${off?item("archive",showInactive?"Hide deactivated cards":"Show deactivated cards",`${off} card${off>1?"s":""}`,"showInactive=!showInactive;closeSheet()"):""}
-    ${item("download","Back up or restore","Save your wallet to a file","openBackup()")}
-  </div>`);
+  const off=state.wallet.filter(w=>w.inactive).length,has=state.wallet.length;
+  const item=(icon,label,fn)=>`<button class="pop-item" role="menuitem" onclick="closePopover();${fn}">${ic(icon)}<span>${label}</span></button>`;
+  openPopover($("appbar-action").querySelector(".icon-btn"),`
+    ${item("plus","Add a card","openAdd()")}
+    ${has?item("select","Select cards","startSelect()"):""}
+    ${has?item("sort","Sort","openDisplay('sort')")+item("filter","Filter","openDisplay('filter')"):""}
+    ${off?`<div class="pop-sep"></div>`+item("archive",showInactive?"Hide deactivated cards":`Show deactivated cards (${off})`,"showInactive=!showInactive;renderWallet()"):""}
+    <div class="pop-sep"></div>${item("download","Back up or restore","openBackup()")}`);
 }
+function openPopover(anchor,html){
+  const p=$("popover"),r=anchor.getBoundingClientRect();
+  p.innerHTML=`<div class="pop-menu" role="menu" style="top:${Math.round(r.bottom+6)}px;right:${Math.round(innerWidth-r.right)}px">${html}</div>`;
+  p.hidden=false;p.onclick=e=>{if(e.target===p)closePopover()};
+}
+function closePopover(){const p=$("popover");p.hidden=true;p.innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("popover").hidden)closePopover()});
 function startSelect(){selectMode=new Set();render()}
 function endSelect(){selectMode=null;render()}
 function toggleSelect(id){selectMode.has(id)?selectMode.delete(id):selectMode.add(id);render()}
@@ -529,7 +591,7 @@ function renderBankCards(){
   const b=B(addIss),items=productsOf(addIss);
   openSheet(`<h2 class="sheet-title">${esc(b.name)}</h2><p class="sheet-sub">${b.note?esc(b.note):`${items.length} card${items.length>1?"s":""}`}</p>
     ${items.length>3?searchRow("bank-q",`Search ${b.short||b.name} cards`,bankQ,"bankQ=this.value;renderBankList()","clearBankSearch()"):""}
-    <div id="bank-list" class="offers"></div><button class="btn-outline" onclick="bankQ.trim()?clearBankSearch():renderBanks()">${ic("chevL")}Back to all banks</button>`,bankCardsScroll||0.001,{label:"All banks",fn:()=>renderBanks()});
+    <div id="bank-list" class="offers"></div>`,bankCardsScroll||0.001,{label:"All banks",fn:()=>renderBanks()});
   renderBankList();$("sheet").querySelector(".sheet").scrollTop=bankCardsScroll||0;
 }
 function cardFull(id){const p=P(id),owned=ownedCount(id)&&SINGLE_CARD_PER_PRODUCT;

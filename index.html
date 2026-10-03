@@ -22,7 +22,7 @@
   --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
   --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --tabbar:64px;
+  --tabbar:60px; --gutter:20px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0b100e; --surface:#141b18; --surface-2:#1c2521; --ink:#e8efec; --muted:#97a69f; --line:#26312d;
@@ -52,23 +52,23 @@ input,textarea{font:inherit;color:inherit}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
 /* app bar */
-.appbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.appbar h1{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:-.02em}
+.appbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);padding:calc(env(safe-area-inset-top,0px) + 10px) var(--gutter) 10px;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.appbar h1{font-family:var(--display);font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
 .btn-pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:14px;padding:8px 14px;border-radius:999px}
 .btn-pill .ic{width:18px;height:18px}
-.view{padding:0 16px}
+.view{padding:4px var(--gutter) 0}
 
 /* search */
-.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px;box-shadow:var(--shadow)}
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 14px;min-height:48px}
 .search:focus-within{border-color:var(--accent)}
 .search .ic{color:var(--muted)}
-.search input{flex:1;min-width:0;border:none;background:transparent;font-size:17px;padding:14px 0;outline:none}
+.search input{flex:1;min-width:0;border:none;background:transparent;font-size:17px;padding:12px 0;outline:none}
 .search input::placeholder{color:var(--muted)}
 input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
 .clear{color:var(--muted);padding:6px}
 
 /* sections, tiles, chips, lists */
-.sec{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:24px 2px 10px}
+.sec{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:28px 4px 10px}
 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:92px;justify-content:center;text-align:center}
 .tile .ic{width:28px;height:28px;color:var(--accent)}
@@ -114,12 +114,12 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .back{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:600;padding:6px 0}
 
 /* tab bar */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 8px max(8px,env(safe-area-inset-bottom,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line);display:flex;justify-content:space-around;padding:6px 12px max(6px,calc(env(safe-area-inset-bottom,0px) - 12px))}
 /* iPhone fix: paint the bar's color past the bottom edge so no strip of page shows under it */
 .tabbar::after,.ob-bar::after{content:"";position:absolute;left:0;right:0;top:100%;height:120px;background:inherit;pointer-events:none}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);font-size:12px;font-weight:600;position:relative}
+.tabbar button{flex:1;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;min-height:46px;justify-content:center;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.01em;position:relative}
 .tabbar button.on{color:var(--accent)}
-.tabbar .ic{width:24px;height:24px}
+.tabbar .ic{width:26px;height:26px}
 .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--warn);color:var(--bg);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
 
 /* answer screen */
@@ -183,7 +183,7 @@ body.no-select{user-select:none;-webkit-user-select:none}
 .pin-ic{display:inline-flex;color:var(--accent);margin-right:4px;vertical-align:-2px}
 .pin-ic .ic,.sec .ic{width:14px;height:14px;vertical-align:-2px}
 .sec-n{color:var(--muted);font-weight:500;margin-left:4px;letter-spacing:0}
-.w-toolbar{display:flex;gap:8px;overflow-x:auto;margin:2px -16px 6px;padding:2px 16px 8px;scrollbar-width:none}
+.w-toolbar{display:flex;gap:8px;overflow-x:auto;margin:2px calc(-1*var(--gutter)) 6px;padding:2px var(--gutter) 8px;scrollbar-width:none}
 .w-toolbar::-webkit-scrollbar{display:none}
 .w-toolbar .chip{flex-shrink:0;white-space:nowrap}
 .view-chip .ic{width:16px;height:16px}
@@ -203,6 +203,108 @@ button.radio{width:100%;text-align:left}
 .switch.on{background:var(--accent)}
 .switch.on::after{transform:translateX(18px)}
 .danger-row .row-title,.danger-row .row-ic{color:var(--danger)}
+/* Pay home: favorites panel → recent strip → all categories grid */
+.fav-panel{margin-top:18px;padding:14px 12px 12px;border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 14%,var(--surface)) 0%,color-mix(in srgb,var(--star) 10%,var(--surface)) 100%);border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line))}
+.fav-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px}
+.fav-head h2{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em}
+.fav-head h2 .ic{width:20px;height:20px;color:var(--star);fill:currentColor}
+.fav-hint{font-size:13px;color:var(--muted);margin:-6px 4px 10px}
+.fav-panel .tile{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05)}
+.recent-wrap{margin-top:22px}
+.recent-head{display:flex;align-items:baseline;justify-content:space-between}
+.recent-head .sec{margin:0 2px 10px}
+.recent-strip{display:flex;gap:8px;overflow-x:auto;margin:0 calc(-1*var(--gutter));padding:2px var(--gutter) 4px;scrollbar-width:none}
+.recent-strip::-webkit-scrollbar{display:none}
+.recent-strip .chip{flex-shrink:0;white-space:nowrap;padding:9px 14px 9px 10px}
+.recent-strip .chip .ic{width:18px;height:18px;color:var(--accent)}
+.all-wrap{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+.all-title{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em;margin:0 2px 4px}
+.cat-group{margin-top:14px}
+.cat-group h3{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 10px}
+.cat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 6px}
+.cat-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:2px;text-align:center;position:relative}
+.cat-bubble{width:56px;height:56px;border-radius:18px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);transition:transform .1s}
+.cat-bubble .ic{width:26px;height:26px}
+.cat-btn:active .cat-bubble{transform:scale(.93);background:var(--surface-2)}
+.cat-btn span.lbl{font-size:12.5px;font-weight:500;line-height:1.2;color:var(--ink)}
+.cat-btn .fav-mark{position:absolute;top:-2px;right:calc(50% - 34px);width:18px;height:18px;border-radius:50%;background:var(--bg);display:grid;place-items:center;color:var(--star)}
+.cat-btn .fav-mark .ic{width:13px;height:13px;fill:currentColor}
+/* card page: rename in the header */
+.title-edit{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pencil{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--surface-2)}
+.pencil .ic{width:17px;height:17px}
+.pencil:active{background:var(--line)}
+.rename-inline{display:flex;align-items:center;gap:6px}
+.rename-inline .field{flex:1;min-width:0;font-size:18px;font-weight:600;padding:9px 12px}
+.icon-btn.ok{background:var(--accent);color:var(--on-accent);width:40px;height:40px;margin:0}
+/* chosen categories: dropdowns, saved summary */
+.pick-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 14px 14px;margin-top:4px}
+.pick-slot{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.pick-slot:last-of-type{border-bottom:none}
+.pick-rate{min-width:44px;font-size:20px;font-weight:600;color:var(--rate);line-height:1.2}
+.pick-main{flex:1;min-width:0}
+.pick-label{font-weight:600;margin-bottom:6px}
+.pick-values{display:flex;flex-wrap:wrap;gap:6px}
+.pick-val{background:var(--surface-2);border-radius:8px;padding:5px 10px;font-size:14px;font-weight:500}
+.pick-foot{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--rate);font-size:14px;font-weight:600}
+.pick-foot .ic{width:18px;height:18px}
+.pick-foot span{flex:1}
+.pick-new{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--warn-bg);color:var(--warn);font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.select-wrap{position:relative;display:block;margin-top:8px}
+.select{width:100%;appearance:none;-webkit-appearance:none;background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;padding:13px 40px 13px 14px;font-size:16px;font-weight:500;color:var(--ink)}
+.select:focus{outline:none;border-color:var(--accent)}
+.select-wrap .ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--muted);pointer-events:none}
+.pick-actions{display:flex;gap:10px;margin-top:6px}
+.pick-actions .btn{margin:0;flex:1}
+.pick-actions .btn-outline{flex:0 0 auto;width:auto;padding:13px 18px}
+/* wallet: Sort and Filter pills */
+.w-toolbar{flex-wrap:nowrap}
+.pill-btn{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;height:38px;padding:0 12px 0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:15px;font-weight:600;color:var(--ink)}
+.pill-btn .ic{width:18px;height:18px;color:var(--muted)}
+.pill-btn .ic.dim{width:14px;height:14px}
+.pill-btn.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.pill-btn.active .ic{color:var(--accent)}
+.f-chips{margin-top:-2px;align-items:center}
+.f-chip{gap:4px;padding:6px 8px 6px 12px;font-size:14px}
+.f-chip .ic{width:14px;height:14px}
+/* Todoist-style display sheets */
+.sheet.custom-top{padding-top:8px}
+.sheet.custom-top>.handle{margin:0 auto 6px}
+.set-head{position:sticky;top:-8px;z-index:4;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;padding:6px 0 10px;background:var(--bg)}
+.set-head h2{text-align:center;font-size:17px;font-weight:700}
+.round-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.round-btn .ic{width:20px;height:20px}
+.round-btn.ok{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.round-btn.ghost{visibility:hidden}
+.set-sec{font-size:15px;font-weight:600;color:var(--muted);margin:18px 4px 8px}
+.set-group{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.set-row{display:flex;align-items:center;gap:14px;width:100%;min-height:54px;padding:0 14px;position:relative}
+.set-row+.set-row::before{content:"";position:absolute;top:0;left:52px;right:0;border-top:1px solid var(--line)}
+.set-row.opt+.set-row.opt::before,.set-row:not(:has(.set-ic))+.set-row::before{left:16px}
+.set-row:active{background:var(--surface-2)}
+.set-row:disabled{opacity:.45}
+.set-ic{width:24px;display:grid;place-items:center;color:var(--muted)}
+.set-ic .ic{width:22px;height:22px}
+.set-label{flex:1;font-size:17px;font-weight:500}
+.set-val{color:var(--muted);font-size:16px;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.set-row.opt.on .set-label{font-weight:600}
+.set-row.opt .ic{color:var(--accent)}
+.set-hint{font-size:13px;color:var(--muted);margin:10px 6px 0}
+.reset-btn{display:block;width:100%;margin-top:22px;min-height:54px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--danger);font-size:17px;font-weight:600;text-align:center}
+/* ⋮ popover menu */
+.pop-bg{position:fixed;inset:0;z-index:70;background:transparent}
+.pop-menu{position:fixed;min-width:236px;max-width:calc(100vw - 32px);padding:6px;border-radius:16px;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);transform-origin:top right;animation:popmenu .16s cubic-bezier(.2,.9,.3,1.2)}
+.pop-item{display:flex;align-items:center;gap:14px;width:100%;padding:12px 12px;border-radius:10px;font-size:17px;font-weight:500}
+.pop-item .ic{width:22px;height:22px;color:var(--ink)}
+.pop-item:active{background:var(--surface-2)}
+.pop-sep{height:1px;background:var(--line);margin:4px 10px}
+@keyframes popmenu{from{opacity:0;transform:scale(.85)}}
+/* icon-only back bubble */
+.bubble.back{padding:0;justify-content:center;width:38px;color:var(--ink)}
+/* Pay: big tiles everywhere; favorites marked with a star */
+.cat-group .tiles{gap:10px}
+.tile .fav-mark{position:absolute;top:8px;right:8px;color:var(--star);display:grid}
+.tile .fav-mark .ic{width:15px;height:15px;fill:currentColor;color:var(--star)}
 /* clear, tappable action buttons */
 .action-stack{display:flex;flex-direction:column;gap:10px;margin-top:22px}
 .action-stack .btn{margin-top:0}
@@ -324,7 +426,6 @@ button.radio{width:100%;text-align:left}
 .drawer-head .sheet-sub{margin:2px 0 6px;font-size:14px}
 .tiers{display:flex;flex-direction:column;gap:6px}
 .tier{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
-.tier.top{border-color:var(--accent)}
 .tier-rate{min-width:48px;text-align:right;font-weight:600;color:var(--rate)}
 .notes{padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 .flabel{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:16px 2px 8px}
@@ -389,11 +490,13 @@ button.radio{width:100%;text-align:left}
       </label>
       <div id="pay-results" hidden></div>
       <div id="pay-home">
+        <section class="fav-panel" aria-labelledby="top-title">
+          <div class="fav-head"><h2 id="top-title"></h2><button class="link-btn" onclick="openFavs()" id="fav-edit">Edit</button></div>
+          <p class="fav-hint" id="fav-hint" hidden></p>
+          <div id="top" class="tiles"></div>
+        </section>
         <div id="recents"></div>
-        <div class="sec-row"><h2 class="sec" id="top-title">Your top spots</h2><button class="link-btn" onclick="openFavs()" id="fav-edit">Pick favorites</button></div>
-        <div id="top" class="tiles"></div>
-        <button id="more-btn" class="more" onclick="toggleMore()">More categories</button>
-        <div id="all" class="tiles" style="margin-top:10px" hidden></div>
+        <div id="all"></div>
       </div>
     </div>
   </section>
@@ -418,6 +521,7 @@ button.radio{width:100%;text-align:left}
 <button id="fab" class="fab" onclick="openAdd()" aria-label="Add a card" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 <div id="select-bar" class="select-bar" hidden></div>
 <div id="dialog" class="dialog-bg" hidden></div>
+<div id="popover" class="pop-bg" hidden></div>
 <div id="sheet" class="sheet-bg" hidden></div>
 <div id="onboard" class="onboard" hidden>
   <div class="ob-inner">
@@ -501,6 +605,10 @@ const ICONS={
   select:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12.5l3 3 5-6"/>',
   download:'<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
   more:'<circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/>',
+  filter:'<path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
+  layers:'<rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 21h11a2 2 0 0 0 2-2V8"/>',
   arrowUp:'<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>',
   arrowDown:'<path d="M12 5v14"/><path d="M6 13l6 6 6-6"/>',
   sort:'<path d="M7 4v16M3.5 7.5L7 4l3.5 3.5"/><path d="M17 20V4M13.5 16.5L17 20l3.5-3.5"/>',
@@ -553,6 +661,13 @@ const POPULAR_CARDS=["chase_freedom_unlimited","chase_sapphire_preferred","chase
   "amex_blue_cash_everyday","amex_gold","amex_platinum","capone_venture","capone_savor","capone_quicksilver","capone_venture_x",
   "citi_double_cash","citi_costco","discover_it_cash_back","boa_customized_cash","wells_active_cash","wells_autograph",
   "apple_card","usbank_cash_plus"];
+/* How "All categories" is grouped on Pay (anything not listed falls into the last group) */
+const CAT_GROUPS=[
+  ["Everyday",["grocery","dining","fast_food","gas","drugstore","wholefoods"]],
+  ["Stores & shopping",["costco","costco_gas","warehouse","walmart","target","amazon","online","department","home","electronics","clothing","furniture","sporting","pets","beauty","office"]],
+  ["Travel & going out",["travel","transit","entertainment"]],
+  ["Bills & everything else",["streaming","phone","utilities","fitness","other"]],
+];
 const DEFAULT_TOP=["grocery","dining","gas","fast_food","amazon","costco"];
 
 /* ══════════════════════════════════════════════════════════
@@ -815,8 +930,10 @@ function allTasks(){return activeWallet().flatMap(w=>tasksFor(w).map(t=>({...t,w
    - Pin cards to the top, rename, deactivate, delete
    ══════════════════════════════════════════════════════════ */
 let selectMode=null,showInactive=false;
-const VIEW_DEFAULT={sort:"custom",group:"person",filter:"all",showRate:true,showLast4:true};
-const viewOpt=()=>(state.view=Object.assign({},VIEW_DEFAULT,state.view||{}));
+const FILTER_DEFAULT={person:"all",earns:"all",type:"all",bank:"all",network:"all",fee:"all",status:"all"};
+const VIEW_DEFAULT={sort:"custom",order:"asc",group:"none",f:{...FILTER_DEFAULT},showRate:true,showLast4:true};
+/* Saved per phone; older versions stored a single "filter" string, so start those fresh */
+const viewOpt=()=>{const v=Object.assign({},VIEW_DEFAULT,state.view||{});v.f=Object.assign({},FILTER_DEFAULT,v.f||{});delete v.filter;return(state.view=v)};
 const SORTS={custom:"My order",rewards:"Highest rewards",name:"Name A–Z",bank:"Bank",added:"Recently added"};
 const GROUPS={person:"Person",bank:"Bank",type:"Reward type",none:"No groups"};
 const TYPE_LABEL={cash:"Cash back",points:"Points",miles:"Miles"};
@@ -832,23 +949,36 @@ function topRate(w){
 const addedAt=w=>w.added||(+(String(w.id).match(/^w(\d{12,})/)||[])[1]||0);
 const isPeople=()=>multiOwner()&&state.people.length>1;
 
-function walletFiltered(list){
-  const f=viewOpt().filter;
-  if(f==="attention")return list.filter(w=>!w.inactive&&tasksFor(w).length);
-  if(f==="cash")return list.filter(w=>P(w.product)?.type==="cash");
-  if(f==="points")return list.filter(w=>P(w.product)&&P(w.product).type!=="cash");
-  if(f.startsWith("person:"))return list.filter(w=>w.owner===f.slice(7));
-  return list;
+/* earns more than its everyday rate at this category */
+const earnsExtra=(w,catId)=>{const p=P(w.product),c=catById(catId);if(!p||!c)return false;const e=evalCard(w,c,null);
+  if(!e)return false;const mult=p.type==="cash"?1:(p.cpp||1),promo=e.extras.reduce((t,x)=>t+x.extra,0)*mult;
+  return e.rate-promo>(p.base||0)*mult+0.001}; // promos that boost everything don't count
+function walletFiltered(list,f=viewOpt().f){
+  return list.filter(w=>{const p=P(w.product);
+    if(f.person!=="all"&&w.owner!==f.person)return false;
+    if(f.earns!=="all"&&!earnsExtra(w,f.earns))return false;
+    if(f.type!=="all"&&(p?.type||"cash")!==f.type)return false;
+    if(f.bank!=="all"&&p?.brand!==f.bank)return false;
+    if(f.network!=="all"&&netOf(w)!==f.network)return false;
+    if(f.fee==="none"&&p&&p.fee>0)return false;
+    if(f.fee==="paid"&&!(p&&p.fee>0))return false;
+    if(f.status==="setup"&&!(!w.inactive&&tasksFor(w).length))return false;
+    if(f.status==="pinned"&&!w.pinned)return false;
+    if(f.status==="intro"&&!(w.introApr&&w.introApr>=TODAY))return false;
+    return true;});
 }
+const activeFilterCount=(f=viewOpt().f)=>Object.keys(FILTER_DEFAULT).filter(k=>f[k]!==FILTER_DEFAULT[k]).length;
+/* Each sort's natural direction: A–Z, highest first, newest first */
+const SORT_NATURAL={custom:"asc",rewards:"desc",name:"asc",bank:"asc",added:"desc"};
 function walletSorted(list){
-  const s=viewOpt().sort,idx=new Map(state.wallet.map((w,i)=>[w.id,i])),a=[...list];
+  const v=viewOpt(),s=v.sort,idx=new Map(state.wallet.map((w,i)=>[w.id,i])),a=[...list];
   const bank=w=>P(w.product)?B(P(w.product).brand).name:"~";
-  if(s==="rewards")a.sort((x,y)=>topRate(y)-topRate(x)||idx.get(x.id)-idx.get(y.id));
+  if(s==="rewards")a.sort((x,y)=>topRate(x)-topRate(y)||idx.get(x.id)-idx.get(y.id));
   else if(s==="name")a.sort((x,y)=>dn(x).localeCompare(dn(y)));
   else if(s==="bank")a.sort((x,y)=>bank(x).localeCompare(bank(y))||dn(x).localeCompare(dn(y)));
-  else if(s==="added")a.sort((x,y)=>addedAt(y)-addedAt(x)||idx.get(y.id)-idx.get(x.id));
-  else a.sort((x,y)=>idx.get(x.id)-idx.get(y.id));
-  return a;
+  else if(s==="added")a.sort((x,y)=>addedAt(x)-addedAt(y)||idx.get(x.id)-idx.get(y.id));
+  else{a.sort((x,y)=>idx.get(x.id)-idx.get(y.id));return a}
+  return v.order==="desc"?a.reverse():a;
 }
 function walletGroups(list){
   const g=viewOpt().group;
@@ -893,7 +1023,7 @@ function renderWallet(){
   if(all.length)h+=walletToolbar();
   if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and the Pay tab ranks them for every purchase.</p>
     <button class="btn" onclick="openOnboard()">Pick your cards</button></div>`;
-  else if(!active.length&&v.filter!=="all")h+=`<div class="empty small"><p>No cards match this filter.</p><button class="btn-sm alt" onclick="setView('filter','all')">Show all cards</button></div>`;
+  else if(!active.length&&activeFilterCount())h+=`<div class="empty small"><p>No cards match these filters.</p><button class="btn-sm alt" onclick="clearFilter('*')">Clear filters</button></div>`;
   else if(!active.length)h+=`<p class="hint">All your cards are deactivated. Reactivate one below or tap + to add a card.</p>`;
   else{
     const pinned=active.filter(w=>w.pinned),rest=active.filter(w=>!w.pinned);
@@ -915,35 +1045,88 @@ function renderWallet(){
   $("foot").innerHTML=`${Object.keys(CATALOG.products).length} cards and ${stores().length} stores in the catalog${d?`, updated ${d}`:""}.<br>Your cards stay on this phone. <button class="link-btn" onclick="openBackup()">Back up or restore</button>`;
 }
 
-/* Toolbar: sort/view button + quick filter chips (scroll sideways) */
+/* Toolbar: two pills, Sort and Filter, plus removable chips for active filters */
 function walletToolbar(){
-  const v=viewOpt(),n=t=>activeWallet().filter(t).length,att=n(w=>tasksFor(w).length);
-  const chips=[["all","All"]];
-  if(isPeople())state.people.forEach(pp=>chips.push(["person:"+pp.id,pp.name]));
-  if(att)chips.push(["attention",`Needs setup · ${att}`]);
-  if(n(w=>P(w.product)?.type==="cash")&&n(w=>P(w.product)&&P(w.product).type!=="cash"))chips.push(["cash","Cash back"],["points","Points & miles"]);
-  const changed=v.sort!=="custom"||v.group!==VIEW_DEFAULT.group;
+  const v=viewOpt(),n=activeFilterCount(),sortOn=v.sort!=="custom"||v.group!=="none";
+  const chips=Object.keys(FILTER_DEFAULT).filter(k=>v.f[k]!==FILTER_DEFAULT[k])
+    .map(k=>`<button class="chip on-soft f-chip" onclick="clearFilter('${k}')" aria-label="Remove filter ${esc(filterValueLabel(k,v.f[k]))}">${esc(filterValueLabel(k,v.f[k]))}${ic("x")}</button>`).join("");
   return `<div class="w-toolbar no-swipe">
-    <button class="chip view-chip ${changed?"on-soft":""}" onclick="openViewSheet()">${ic("sort")}${esc(SORTS[v.sort])}</button>
-    ${chips.map(([k,l])=>`<button class="chip ${v.filter===k?"on":""}" onclick="setView('filter','${k}')">${esc(l)}</button>`).join("")}</div>`;
+    <button class="pill-btn ${sortOn?"active":""}" onclick="openDisplay('sort')">${ic("sort")}<span>${esc(SORTS[v.sort])}</span>${ic("chevD","dim")}</button>
+    <button class="pill-btn ${n?"active":""}" onclick="openDisplay('filter')">${ic("filter")}<span>Filter${n?` · ${n}`:""}</span>${ic("chevD","dim")}</button>
+  </div>${chips?`<div class="w-toolbar f-chips no-swipe">${chips}<button class="link-btn" onclick="clearFilter('*')">Clear all</button></div>`:""}`;
 }
-function setView(k,val){viewOpt();state.view[k]=val;save();renderWallet();if(!$("sheet").hidden&&$("sheet").querySelector(".view-sheet"))openViewSheet(true)}
+function clearFilter(k){const v=viewOpt();if(k==="*")v.f={...FILTER_DEFAULT};else v.f[k]=FILTER_DEFAULT[k];save();renderWallet()}
 
-function openViewSheet(keep){
-  const v=viewOpt();
-  const opt=(k,val,label,sub)=>`<button class="radio ${v[k]===val?"on":""}" onclick="setView('${k}','${val}')"><span class="radio-dot"></span><span class="row-main"><span class="row-title">${label}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span></button>`;
-  const tog=(k,label)=>`<button class="toggle-row" onclick="setView('${k}',${!v[k]})" role="switch" aria-checked="${v[k]}"><span>${label}</span><span class="switch ${v[k]?"on":""}"></span></button>`;
-  openSheet(`<div class="view-sheet"><h2 class="sheet-title">Sort & view</h2>
-    <h3 class="sec">Sort by</h3><div class="stack-sm">
-      ${opt("sort","custom","My order","Press and hold a card to drag it")}
-      ${opt("sort","rewards","Highest rewards","Cards that can earn the most first")}
-      ${opt("sort","name","Name A–Z")}${opt("sort","bank","Bank")}${opt("sort","added","Recently added")}</div>
-    <h3 class="sec">Group by</h3><div class="stack-sm">
-      ${isPeople()?opt("group","person","Person"):""}${opt("group","bank","Bank")}${opt("group","type","Reward type","Cash back, points, miles")}${opt("group",isPeople()?"none":"person","No groups")}</div>
-    <h3 class="sec">Show on each card</h3><div class="list">${tog("showRate","Top reward rate")}${tog("showLast4","Last 4 digits")}</div>
-    <button class="btn" onclick="closeSheet()">Done</button>
-    <button class="btn-outline" style="margin-top:10px" onclick="state.view={...VIEW_DEFAULT};save();renderWallet();openViewSheet(true)">Reset to default</button></div>`,keep);
+/* ─── Sort & Filter sheets (Todoist-style: rows with current value → option list; ✓ saves, ✕ discards) ─── */
+let viewDraft=null,displayMode="sort";
+function filterDefs(){
+  const ws=state.wallet,ps=ws.map(w=>P(w.product)).filter(Boolean),uniq=a=>[...new Set(a)];
+  const defs=[];
+  if(isPeople())defs.push({k:"person",icon:"user",label:"Whose card",opts:[["all","Everyone"],...state.people.filter(pp=>ws.some(w=>w.owner===pp.id)).map(pp=>[pp.id,pp.name])]});
+  const cats=visibleCats().filter(c=>c.id!=="other"&&ws.some(w=>earnsExtra(w,c.id)));
+  defs.push({k:"earns",icon:"star",label:"Earns extra at",hint:"Cards that earn more than their everyday rate there",opts:[["all","Anywhere"],...cats.map(c=>[c.id,c.label])]});
+  const types=uniq(ps.map(p=>p.type));
+  if(types.length>1)defs.push({k:"type",icon:"gauge",label:"Reward type",opts:[["all","All"],...["cash","points","miles"].filter(t=>types.includes(t)).map(t=>[t,TYPE_LABEL[t]])]});
+  const banks=uniq(ps.map(p=>p.brand)).sort((a,b)=>B(a).name.localeCompare(B(b).name));
+  if(banks.length>1)defs.push({k:"bank",icon:"home",label:"Bank",opts:[["all","All banks"],...banks.map(b=>[b,B(b).name])]});
+  const nets=uniq(ws.map(netOf).filter(Boolean));
+  if(nets.length>1)defs.push({k:"network",icon:"pay",label:"Network",hint:"Handy where only some cards are accepted, like Costco (Visa)",opts:[["all","All networks"],...nets.sort().map(n=>[n,netLabel(n)])]});
+  if(ps.some(p=>p.fee>0)&&ps.some(p=>!(p.fee>0)))defs.push({k:"fee",icon:"tag",label:"Annual fee",opts:[["all","All"],["none","No annual fee"],["paid","Has an annual fee"]]});
+  defs.push({k:"status",icon:"flag",label:"Status",opts:[["all","All cards"],["setup","Needs setup"],["pinned","Pinned"],["intro","0% intro APR"]]});
+  return defs;
 }
+function filterValueLabel(k,val){const d=filterDefs().find(x=>x.k===k);const o=d&&d.opts.find(x=>x[0]===val);return o?o[1]:val}
+function openDisplay(mode,keep){
+  if(!keep){viewDraft=JSON.parse(JSON.stringify(viewOpt()));displayMode=mode}
+  const v=viewDraft,row=(icon,label,value,fn,disabled)=>`<button class="set-row" ${disabled?"disabled":""} onclick="${fn}"><span class="set-ic">${ic(icon)}</span><span class="set-label">${label}</span><span class="set-val">${esc(value)}</span>${ic("chevR","dim")}</button>`;
+  let body;
+  if(mode==="sort"){
+    body=`<div class="set-group" style="margin-top:8px">
+      ${row("layers","Grouping",GROUPS[v.group==="person"&&!isPeople()?"none":v.group],"displayPick('group')")}
+      ${row("sort","Sorting",SORTS[v.sort],"displayPick('sort')")}
+      ${row("arrowUp","Ordering",v.sort==="custom"?"Your order":(v.order==="asc"?"Ascending":"Descending"),"displayPick('order')",v.sort==="custom")}</div>
+      ${v.sort==="custom"?`<p class="set-hint">Press and hold any card in your wallet to drag it into place.</p>`:""}
+      <h3 class="set-sec">Show on each card</h3><div class="set-group">
+      ${tog("showRate","Top reward rate")}${tog("showLast4","Last 4 digits")}</div>`;
+  }else{
+    body=`<div class="set-group" style="margin-top:8px">${filterDefs().map(d=>row(d.icon,d.label,(d.opts.find(o=>o[0]===v.f[d.k])||d.opts[0])[1],`displayPick('f.${d.k}')`)).join("")}</div>
+      <p class="set-hint">Showing ${walletFiltered(state.wallet,v.f).length} of ${state.wallet.length} cards.</p>`;
+  }
+  openSheet(`<div class="display-sheet">${displayHead(mode==="sort"?"Sort":"Filter")}${body}
+    <button class="reset-btn" onclick="resetDisplay()">Reset ${mode==="sort"?"sort":"filters"}</button></div>`,keep,null,{customTop:true});
+  function tog(k,label){return `<button class="set-row" onclick="viewDraft.${k}=!viewDraft.${k};openDisplay(displayMode,true)" role="switch" aria-checked="${v[k]}"><span class="set-label">${label}</span><span class="switch ${v[k]?"on":""}"></span></button>`}
+}
+function displayHead(title,back){
+  return `<div class="set-head">${back?`<button class="round-btn" onclick="${back}" aria-label="Back">${ic("chevL")}</button>`
+    :`<button class="round-btn" onclick="closeSheet()" aria-label="Cancel">${ic("x")}</button>`}
+    <h2>${esc(title)}</h2>${back?`<span class="round-btn ghost"></span>`:`<button class="round-btn ok" onclick="saveDisplay()" aria-label="Save">${ic("check")}</button>`}</div>`;
+}
+function displayPick(key){
+  const v=viewDraft;let title,opts,cur,hint="";
+  if(key==="group"){title="Grouping";cur=v.group==="person"&&!isPeople()?"none":v.group;opts=[["none","None"],...(isPeople()?[["person","Person"]]:[]),["bank","Bank"],["type","Reward type"]]}
+  else if(key==="sort"){title="Sorting";cur=v.sort;opts=Object.entries(SORTS)}
+  else if(key==="order"){title="Ordering";cur=v.order;opts=[["asc","Ascending"],["desc","Descending"]];
+    hint={rewards:"Descending shows the highest rates first.",name:"Ascending is A to Z.",bank:"Ascending is A to Z.",added:"Descending shows the newest cards first."}[v.sort]||""}
+  else{const d=filterDefs().find(x=>"f."+x.k===key);title=d.label;cur=v.f[d.k];opts=d.opts;hint=d.hint||""}
+  openSheet(`<div class="display-sheet">${displayHead(title,"openDisplay(displayMode,true)")}
+    ${hint?`<p class="set-hint" style="margin-top:0">${esc(hint)}</p>`:""}
+    <div class="set-group">${opts.map(([val,label])=>`<button class="set-row opt ${val===cur?"on":""}" onclick="setDraft('${key}','${val}')"><span class="set-label">${esc(label)}</span>${val===cur?ic("check"):""}</button>`).join("")}</div></div>`,
+    0.001,{label:displayMode==="sort"?"Sort":"Filter",fn:()=>openDisplay(displayMode,true)},{customTop:true});
+}
+function setDraft(key,val){
+  if(key.startsWith("f."))viewDraft.f[key.slice(2)]=val;
+  else{viewDraft[key]=val;if(key==="sort")viewDraft.order=SORT_NATURAL[val]}
+  openDisplay(displayMode,true);
+}
+function saveDisplay(){state.view=viewDraft;viewDraft=null;save();closeSheet();renderWallet()}
+function resetDisplay(){
+  if(displayMode==="sort"){const f=viewDraft.f;viewDraft={...JSON.parse(JSON.stringify(VIEW_DEFAULT)),f}}
+  else viewDraft.f={...FILTER_DEFAULT};
+  openDisplay(displayMode,true);
+}
+/* kept for older links in the menu */
+function openViewSheet(){openDisplay("sort")}
+function setView(k,val){viewOpt();if(k==="filter")return;state.view[k]=val;save();renderWallet()}
 
 /* ─── Per-card menu (from swipe or long list) ─── */
 function openCardMenu(id){
@@ -962,6 +1145,7 @@ function openCardMenu(id){
     </div>`);
 }
 function openRename(id){
+  if(!$("sheet").hidden&&drawerId===id&&$("sheet").querySelector(".drawer-head")){startInlineName(id);return}
   const w=walletById(id),p=P(w.product);
   openSheet(`<h2 class="sheet-title">Rename card</h2><p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}</p>
     <input class="field" id="rn" value="${esc(w.nickname||"")}" placeholder="${esc(p?p.short:"Card name")}" maxlength="40" autocomplete="off"
@@ -1137,25 +1321,34 @@ function renderPay(){
   }
   home.hidden=false;res.hidden=true;
   const rec=state.recents.filter(x=>catById(x.c)&&(!x.s||storeById(x.s)));
-  $("recents").innerHTML=rec.length?`<h2 class="sec">Recent</h2><div class="chips">${rec.map(x=>{
-    const s=x.s&&storeById(x.s);return `<button class="chip" onclick="openAnswer('${x.c}','${x.s||""}')">${ic(x.c)}${esc(s?s.name:catName(x.c))}</button>`}).join("")}</div>`:"";
+  $("recents").innerHTML=rec.length?`<div class="recent-wrap"><div class="recent-head"><h2 class="sec">Recent</h2><button class="link-btn" onclick="clearRecents()">Clear</button></div>
+    <div class="recent-strip no-swipe">${rec.map(x=>{
+    const s=x.s&&storeById(x.s);return `<button class="chip" onclick="openAnswer('${x.c}','${x.s||""}')">${ic(x.c)}${esc(s?s.name:catName(x.c))}</button>`}).join("")}</div></div>`:"";
   const vis=visibleCats(),vid=new Set(vis.map(c=>c.id));
   const byUse=vis.filter(c=>state.usage[c.id]).sort((a,b)=>state.usage[b.id]-state.usage[a.id]).map(c=>c.id);
   const favs=favItems();let top;
   if(favs.length){
     top=favs.filter(f=>!f.s).map(f=>f.c);
-    $("top-title").textContent="Favorites";$("fav-edit").textContent="Edit";
+    $("top-title").innerHTML=`${ic("star")}Favorites`;$("fav-edit").textContent="Edit";$("fav-hint").hidden=true;
     $("top").innerHTML=favs.map(favTile).join("");
   }else{
     top=[...new Set([...byUse,...DEFAULT_TOP.filter(id=>vid.has(id))])].slice(0,6);
-    $("top-title").textContent="Your top spots";$("fav-edit").textContent="Pick favorites";
+    $("top-title").innerHTML=`${ic("star")}Your top spots`;$("fav-edit").textContent="Pick favorites";
+    $("fav-hint").hidden=false;$("fav-hint").textContent="Star the places you pay most to keep them here.";
     $("top").innerHTML=top.map(id=>tile(catById(id))).join("");
   }
-  const rest=vis.filter(c=>!top.includes(c.id));
-  $("more-btn").innerHTML=`${moreOpen?"Fewer categories":`More categories (${rest.length})`}${ic(moreOpen?"chevD":"chevR","dim")}`;
-  $("all").hidden=!moreOpen;$("all").innerHTML=rest.map(tile).join("");
+  // All categories: grouped icon grid, always open (favorites are marked with a star)
+  const favSet=new Set(state.favs),placed=new Set();
+  const btn=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${favSet.has("c:"+c.id)?`<span class="fav-mark" aria-label="Favorite">${ic("star")}</span>`:""}${ic(c.id)}<span>${esc(c.label)}</span></button>`;
+  let h=`<div class="all-wrap"><h2 class="all-title">All categories</h2>`;
+  CAT_GROUPS.forEach(([name,ids],i)=>{
+    const list=(i===CAT_GROUPS.length-1?vis.filter(c=>!placed.has(c.id)):vis.filter(c=>ids.includes(c.id)));
+    list.forEach(c=>placed.add(c.id));
+    if(list.length)h+=`<div class="cat-group"><h3>${esc(name)}</h3><div class="tiles">${list.map(btn).join("")}</div></div>`;
+  });
+  $("all").innerHTML=h+`</div>`;
 }
-function toggleMore(){moreOpen=!moreOpen;renderPay()}
+function clearRecents(){const old=state.recents;state.recents=[];save();renderPay();toast("Recent cleared",()=>{state.recents=old;save();renderPay()})}
 
 /* ─── Favorites: categories (and stores starred from an answer) pinned to the top of Pay ─── */
 const favKey=(c,s)=>s?"s:"+s:"c:"+c;
@@ -1345,12 +1538,12 @@ function clearReports(){if(!clearArmed){clearArmed=true;toast("Tap Clear again t
    ══════════════════════════════════════════════════════════ */
 /* back = {label, fn}: shows a floating back bubble and turns on swipe-back */
 let sheetBack=null;
-function openSheet(html,keepScroll,back){
+function openSheet(html,keepScroll,back,opts={}){
   const s=$("sheet"),prev=keepScroll===true?s.querySelector(".sheet")?.scrollTop:(typeof keepScroll==="number"?keepScroll:0);
   sheetBack=back||null;
   s.hidden=false;s.onclick=e=>{if(e.target===s)closeSheet()};
-  s.innerHTML=`<div class="sheet ${keepScroll?"still":""}" role="dialog" aria-modal="true"><div class="sheet-top"><div class="handle"></div>${
-    back?`<button class="bubble" onclick="sheetGoBack()" aria-label="Back to ${esc(back.label)}">${ic("chevL")}${esc(back.label)}</button>`:""}<button class="bubble close" onclick="closeSheet()" aria-label="Close">${ic("x")}</button></div>${html}</div>`;
+  s.innerHTML=`<div class="sheet ${keepScroll?"still":""} ${opts.customTop?"custom-top":""}" role="dialog" aria-modal="true">${opts.customTop?`<div class="handle"></div>`:`<div class="sheet-top"><div class="handle"></div>${
+    back?`<button class="bubble back" onclick="sheetGoBack()" aria-label="Back to ${esc(back.label)}">${ic("chevL")}</button>`:""}<button class="bubble close" onclick="closeSheet()" aria-label="Close">${ic("x")}</button></div>`}${html}</div>`;
   const sh=s.querySelector(".sheet");if(sh){sh.scrollTop=prev||0;sheetGestures(sh,closeSheet,()=>sheetBack&&sheetBack.fn)}
   document.body.classList.add("locked");
 }
@@ -1400,7 +1593,13 @@ function cardArt(pid,miniWidth){
 
 /* ─── Card details ─── */
 let drawerId=null,removeArmed=false;
+let drawerRenaming=null,pickEdit=null; // pickEdit = {wid, draft:{slotId:[ids]}}
+function startInlineName(id){drawerRenaming=id;openDrawer(id,true);setTimeout(()=>{const i=$("rn-inline");if(i){i.focus();i.select()}},50)}
+function cancelInlineName(id){drawerRenaming=null;openDrawer(id,true)}
+function saveInlineName(id){const w=walletById(id),v=$("rn-inline").value.trim(),old=w.nickname;w.nickname=v;drawerRenaming=null;save();openDrawer(id,true);render();
+  toast(v?`Renamed to ${v}`:"Using the card's own name",()=>{w.nickname=old;save();render();if(drawerId===id&&!$("sheet").hidden)openDrawer(id,true)})}
 function openDrawer(id,keep){
+  if(!keep||drawerId!==id){drawerRenaming=null;pickEdit=null}
   const w=walletById(id);if(!w)return;const p=P(w.product);
   drawerId=id;if(!keep)removeArmed=false;
   if(!p){openSheet(`<h2 class="sheet-title">${esc(dn(w))}</h2><p class="sheet-sub">This card isn't in the catalog anymore.</p>
@@ -1419,7 +1618,11 @@ function openDrawer(id,keep){
   const s=p.source||{};
   openSheet(`
     <div class="drawer-head">${cardArt(w.product,72)}<div class="row-main">
-      <h2 class="sheet-title">${esc(dn(w))} ${ownerBadge(w)}</h2>
+      ${drawerRenaming===w.id?`<div class="rename-inline"><input class="field" id="rn-inline" value="${esc(w.nickname||"")}" placeholder="${esc(p.short)}" maxlength="40" autocomplete="off"
+          onkeydown="if(event.key==='Enter')saveInlineName('${w.id}');if(event.key==='Escape')cancelInlineName('${w.id}')">
+          <button class="icon-btn ok" onclick="saveInlineName('${w.id}')" aria-label="Save name">${ic("check")}</button>
+          <button class="icon-btn" onclick="cancelInlineName('${w.id}')" aria-label="Cancel">${ic("x")}</button></div>`
+        :`<h2 class="sheet-title title-edit"><span>${esc(dn(w))}</span><button class="pencil" onclick="startInlineName('${w.id}')" aria-label="Rename card">${ic("edit")}</button>${ownerBadge(w)}</h2>`}
       <p class="sheet-sub">${esc(brand.name)} ${esc(p.name)} · ${netLabel(netOf(w))}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p>
       ${p.status==="closed"?`<span class="pill warn">No longer offered to new applicants</span>`:""}
       ${w.inactive?`<span class="pill">Deactivated ${shortDate(isoToDate(w.inactive))}</span>`:""}</div></div>
@@ -1432,8 +1635,6 @@ function openDrawer(id,keep){
     ${p.type!=="cash"?`<p class="hint">Ranked at ${p.cpp||1}¢ per ${p.type==="miles"?"mile":"point"}.</p>`:""}
     ${notes.length?`<h3 class="sec">Notes & perks</h3><ul class="notes">${notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`:""}
     <h3 class="sec">Card details</h3>
-    <label class="flabel" for="f-nick">Nickname</label>
-    <input class="field" id="f-nick" value="${esc(w.nickname)}" placeholder="${esc(p.short)}" onchange="setField('${w.id}','nickname',this.value.trim())">
     <label class="flabel" for="f-last4">Last 4 digits</label>
     <input class="field mono" id="f-last4" inputmode="numeric" maxlength="4" value="${esc(w.last4)}" onchange="setField('${w.id}','last4',this.value.replace(/\\D/g,'').slice(0,4))">
     ${SHOW.accountDetails?`<label class="flabel" for="f-due">Due day</label><input class="field" id="f-due" inputmode="numeric" value="${w.dueDay||""}" onchange="setField('${w.id}','dueDay',parseInt(this.value)||null)">`:""}
@@ -1454,17 +1655,13 @@ function setupHTML(w){
         <button class="chip ${on?"on":""}" onclick="toggleAct('${w.id}','${k}')">${on?ic("check")+"Activated":"Mark activated"}</button></div>`}).join("");
     h+=`<p class="hint">${esc(r.activateHint||"Activate in your card's app first, then mark it here.")}</p>`;
   }
-  (p.choice||[]).forEach(s=>{
-    const x=w.sel[s.id]||{},cur=selOpts(w,s);
-    const stale=s.period==="quarter"&&x.opts&&x.opts.length&&(!x.quarter||x.quarter<PICK_Q);
-    h+=`<div class="flabel">${esc(s.label)} · choose ${s.pick}${s.period==="quarter"?` for ${qLabel(PICK_Q)}`:""}</div>
-      <div class="chips">${s.options.map(o=>`<button class="chip ${cur.includes(o.id)?"on":""}" onclick="togglePick('${w.id}','${s.id}','${o.id}')">${esc(o.label)}</button>`).join("")}</div>
-      ${stale?`<div class="btn-row"><span class="hint">Last set for ${qLabel(x.quarter||QK)}</span><button class="btn-sm" onclick="confirmSame('${w.id}',true)">Keep same picks</button></div>`:""}
-      ${isDefaultSel(w,s)?`<p class="hint">Using the card's default until you choose.</p>`:""}`;
-  });
+  if((p.choice||[]).length)h+=picksHTML(w,p);
   if(p.auto){
-    h+=`<div class="flabel">Where will you spend most this month?</div><p class="hint">Only that category earns 5%.</p>
-      <div class="chips">${p.auto.options.map(o=>`<button class="chip ${w.autoFocus===o?"on":""}" onclick="setField('${w.id}','autoFocus','${o}')">${esc(catName(o))}</button>`).join("")}</div>`;
+    h+=`<div class="pick-card"><div class="pick-slot"><div class="pick-rate mono">${fmtRate(p.auto.rate)}%</div><div class="pick-main">
+      <div class="pick-label">Where will you spend most this month?</div><p class="hint" style="margin:2px 0 8px">Only your top category earns ${fmtRate(p.auto.rate)}%. This is a guess you can change any time.</p>
+      <label class="select-wrap"><select class="select" onchange="setField('${w.id}','autoFocus',this.value)">
+        <option value="" ${w.autoFocus?"":"selected"} disabled>Choose a category</option>
+        ${p.auto.options.map(o=>`<option value="${o}" ${w.autoFocus===o?"selected":""}>${esc(catName(o))}</option>`).join("")}</select>${ic("chevD")}</label></div></div></div>`;
   }
   return h?`<h3 class="sec">${p.rotating?"Quarterly bonus":"Your categories"}</h3>${h}`:"";
 }
@@ -1474,6 +1671,48 @@ function ownerChips(sel,action){
 function setField(id,f,v){const w=walletById(id);if(!w)return;w[f]=v;save();openDrawer(id,true)}
 function toggleAct(id,k){const w=walletById(id);w.activated=w.activated.includes(k)?w.activated.filter(x=>x!==k):[...w.activated,k];save();
   if(!$("sheet").hidden&&drawerId===id)openDrawer(id,true);else render()}
+/* Chosen categories (U.S. Bank Cash+, BoA, Bilt, Citi Strata…): one dropdown per pick, then Save.
+   Once saved they're locked; changing them takes Edit → confirm → Save, for fixing a mistake. */
+function picksHTML(w,p){
+  const slots=p.choice,editing=pickEdit&&pickEdit.wid===w.id;
+  const saved=s=>{const x=w.sel[s.id];return !!(x&&x.opts&&x.opts.length)};
+  const needs=slots.some(s=>!saved(s)&&!isDefaultSel(w,s));
+  if(!editing&&needs){pickEdit={wid:w.id,draft:Object.fromEntries(slots.map(s=>[s.id,[...selOpts(w,s)]]))};return picksHTML(w,p)}
+  const per=slots.some(s=>s.period==="quarter")?` for ${qLabel(PICK_Q)}`:"";
+  if(!editing){
+    const stale=slots.filter(s=>s.period==="quarter"&&saved(s)&&(!w.sel[s.id].quarter||w.sel[s.id].quarter<PICK_Q));
+    return `<div class="pick-card saved">${slots.map(s=>`<div class="pick-slot"><div class="pick-rate mono">${fmtRate(s.rate)}%</div><div class="pick-main">
+        <div class="pick-label">${esc(s.label.replace(/^Your /,"").replace(/^\w/,c=>c.toUpperCase()))}</div>
+        <div class="pick-values">${selLabels(w,s).map(l=>`<span class="pick-val">${esc(l)}</span>`).join("")||`<span class="dim">Not set</span>`}${isDefaultSel(w,s)?`<span class="dim"> (card default)</span>`:""}</div></div></div>`).join("")}
+      <div class="pick-foot">${ic("check")}<span>${stale.length?`Saved for ${qLabel(w.sel[stale[0].id].quarter||QK)}`:`Saved${per}`}</span>
+        <button class="btn-sm alt" onclick="askEditPicks('${w.id}')">${ic("edit")}Edit</button></div>
+      ${stale.length?`<div class="pick-new">New quarter: keep the same picks for ${qLabel(PICK_Q)}? <button class="btn-sm" onclick="confirmSame('${w.id}',true)">Keep same</button></div>`:""}</div>`;
+  }
+  const d=pickEdit.draft,complete=slots.every(s=>(d[s.id]||[]).filter(Boolean).length===s.pick);
+  return `<div class="pick-card editing">${slots.map(s=>{
+      const cur=d[s.id]||[];
+      return `<div class="pick-slot"><div class="pick-rate mono">${fmtRate(s.rate)}%</div><div class="pick-main">
+        <div class="pick-label">Choose ${s.pick}${s.period==="quarter"?per:""}</div>${s.note?`<p class="hint" style="margin:0 0 6px">${esc(s.note)}</p>`:""}
+        ${Array.from({length:s.pick},(_,i)=>{const taken=cur.filter((v,j)=>j!==i&&v);
+          return `<label class="select-wrap"><select class="select" onchange="setPickDraft('${w.id}','${s.id}',${i},this.value)" aria-label="${esc(s.label)} pick ${i+1}">
+            <option value="" ${cur[i]?"":"selected"}>Choose a category</option>
+            ${s.options.filter(o=>!taken.includes(o.id)).map(o=>`<option value="${o.id}" ${cur[i]===o.id?"selected":""}>${esc(o.label)}</option>`).join("")}</select>${ic("chevD")}</label>`}).join("")}
+      </div></div>`}).join("")}
+    <p class="hint">Pick the same categories you chose with ${esc(B(p.brand).name)}. Most banks lock them until next quarter.</p>
+    <div class="pick-actions">${slots.some(saved)?`<button class="btn-outline" onclick="pickEdit=null;openDrawer('${w.id}',true)">Cancel</button>`:""}
+      <button class="btn" ${complete?"":"disabled"} onclick="savePicks('${w.id}')">Save categories</button></div></div>`;
+}
+function setPickDraft(wid,slotId,i,val){const a=pickEdit.draft[slotId]=pickEdit.draft[slotId]||[];a[i]=val||undefined;openDrawer(wid,true)}
+function askEditPicks(wid){
+  confirmDialog("Edit your saved categories?","Use this to fix a mistake or match a change you made with your bank. Your new picks replace the saved ones.","Edit",()=>{
+    const w=walletById(wid),p=P(w.product);pickEdit={wid,draft:Object.fromEntries(p.choice.map(s=>[s.id,[...selOpts(w,s)]]))};openDrawer(wid,true)},"primary");
+}
+function savePicks(wid){
+  const w=walletById(wid),p=P(w.product),before=JSON.parse(JSON.stringify(w.sel));
+  p.choice.forEach(s=>{w.sel[s.id]={opts:(pickEdit.draft[s.id]||[]).filter(Boolean).slice(0,s.pick),quarter:s.period==="quarter"?PICK_Q:undefined}});
+  pickEdit=null;save();openDrawer(wid,true);render();if(answerCtx)renderAnswer();
+  toast("Categories saved",()=>{w.sel=before;save();render();if(drawerId===wid&&!$("sheet").hidden)openDrawer(wid,true)});
+}
 function togglePick(id,slotId,opt){
   const w=walletById(id),s=P(w.product).choice.find(x=>x.id===slotId);
   const cur=(w.sel[slotId]&&w.sel[slotId].opts)||[];let next;
@@ -1529,17 +1768,24 @@ function confirmDialog(title,msg,okLabel,fn,kind="danger"){
 function closeDialog(){$("dialog").hidden=true;$("dialog").innerHTML="";dialogFn=null}
 
 /* ─── Wallet menu (⋮) and select mode ─── */
+/* ⋮ opens a small menu under the button (like Todoist), not a sheet */
 function openWalletMenu(){
-  const off=state.wallet.filter(w=>w.inactive).length;
-  const item=(icon,label,sub,fn)=>`<button class="row" onclick="${fn}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${label}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span></button>`;
-  openSheet(`<h2 class="sheet-title">Wallet</h2><div class="list" style="margin-top:12px">
-    ${item("plus","Add a card","","closeSheet();openAdd()")}
-    ${state.wallet.length?item("sort","Sort & view",`${SORTS[viewOpt().sort]} · grouped by ${GROUPS[viewOpt().group].toLowerCase()}`,"openViewSheet()"):""}
-    ${state.wallet.length?item("select","Select cards","Deactivate or remove several at once","closeSheet();startSelect()"):""}
-    ${off?item("archive",showInactive?"Hide deactivated cards":"Show deactivated cards",`${off} card${off>1?"s":""}`,"showInactive=!showInactive;closeSheet()"):""}
-    ${item("download","Back up or restore","Save your wallet to a file","openBackup()")}
-  </div>`);
+  const off=state.wallet.filter(w=>w.inactive).length,has=state.wallet.length;
+  const item=(icon,label,fn)=>`<button class="pop-item" role="menuitem" onclick="closePopover();${fn}">${ic(icon)}<span>${label}</span></button>`;
+  openPopover($("appbar-action").querySelector(".icon-btn"),`
+    ${item("plus","Add a card","openAdd()")}
+    ${has?item("select","Select cards","startSelect()"):""}
+    ${has?item("sort","Sort","openDisplay('sort')")+item("filter","Filter","openDisplay('filter')"):""}
+    ${off?`<div class="pop-sep"></div>`+item("archive",showInactive?"Hide deactivated cards":`Show deactivated cards (${off})`,"showInactive=!showInactive;renderWallet()"):""}
+    <div class="pop-sep"></div>${item("download","Back up or restore","openBackup()")}`);
 }
+function openPopover(anchor,html){
+  const p=$("popover"),r=anchor.getBoundingClientRect();
+  p.innerHTML=`<div class="pop-menu" role="menu" style="top:${Math.round(r.bottom+6)}px;right:${Math.round(innerWidth-r.right)}px">${html}</div>`;
+  p.hidden=false;p.onclick=e=>{if(e.target===p)closePopover()};
+}
+function closePopover(){const p=$("popover");p.hidden=true;p.innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("popover").hidden)closePopover()});
 function startSelect(){selectMode=new Set();render()}
 function endSelect(){selectMode=null;render()}
 function toggleSelect(id){selectMode.has(id)?selectMode.delete(id):selectMode.add(id);render()}
@@ -1603,7 +1849,7 @@ function renderBankCards(){
   const b=B(addIss),items=productsOf(addIss);
   openSheet(`<h2 class="sheet-title">${esc(b.name)}</h2><p class="sheet-sub">${b.note?esc(b.note):`${items.length} card${items.length>1?"s":""}`}</p>
     ${items.length>3?searchRow("bank-q",`Search ${b.short||b.name} cards`,bankQ,"bankQ=this.value;renderBankList()","clearBankSearch()"):""}
-    <div id="bank-list" class="offers"></div><button class="btn-outline" onclick="bankQ.trim()?clearBankSearch():renderBanks()">${ic("chevL")}Back to all banks</button>`,bankCardsScroll||0.001,{label:"All banks",fn:()=>renderBanks()});
+    <div id="bank-list" class="offers"></div>`,bankCardsScroll||0.001,{label:"All banks",fn:()=>renderBanks()});
   renderBankList();$("sheet").querySelector(".sheet").scrollTop=bankCardsScroll||0;
 }
 function cardFull(id){const p=P(id),owned=ownedCount(id)&&SINGLE_CARD_PER_PRODUCT;

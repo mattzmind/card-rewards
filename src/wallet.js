@@ -6,8 +6,10 @@
    - Pin cards to the top, rename, deactivate, delete
    ══════════════════════════════════════════════════════════ */
 let selectMode=null,showInactive=false;
-const VIEW_DEFAULT={sort:"custom",group:"person",filter:"all",showRate:true,showLast4:true};
-const viewOpt=()=>(state.view=Object.assign({},VIEW_DEFAULT,state.view||{}));
+const FILTER_DEFAULT={person:"all",earns:"all",type:"all",bank:"all",network:"all",fee:"all",status:"all"};
+const VIEW_DEFAULT={sort:"custom",order:"asc",group:"none",f:{...FILTER_DEFAULT},showRate:true,showLast4:true};
+/* Saved per phone; older versions stored a single "filter" string, so start those fresh */
+const viewOpt=()=>{const v=Object.assign({},VIEW_DEFAULT,state.view||{});v.f=Object.assign({},FILTER_DEFAULT,v.f||{});delete v.filter;return(state.view=v)};
 const SORTS={custom:"My order",rewards:"Highest rewards",name:"Name A–Z",bank:"Bank",added:"Recently added"};
 const GROUPS={person:"Person",bank:"Bank",type:"Reward type",none:"No groups"};
 const TYPE_LABEL={cash:"Cash back",points:"Points",miles:"Miles"};
@@ -23,23 +25,36 @@ function topRate(w){
 const addedAt=w=>w.added||(+(String(w.id).match(/^w(\d{12,})/)||[])[1]||0);
 const isPeople=()=>multiOwner()&&state.people.length>1;
 
-function walletFiltered(list){
-  const f=viewOpt().filter;
-  if(f==="attention")return list.filter(w=>!w.inactive&&tasksFor(w).length);
-  if(f==="cash")return list.filter(w=>P(w.product)?.type==="cash");
-  if(f==="points")return list.filter(w=>P(w.product)&&P(w.product).type!=="cash");
-  if(f.startsWith("person:"))return list.filter(w=>w.owner===f.slice(7));
-  return list;
+/* earns more than its everyday rate at this category */
+const earnsExtra=(w,catId)=>{const p=P(w.product),c=catById(catId);if(!p||!c)return false;const e=evalCard(w,c,null);
+  if(!e)return false;const mult=p.type==="cash"?1:(p.cpp||1),promo=e.extras.reduce((t,x)=>t+x.extra,0)*mult;
+  return e.rate-promo>(p.base||0)*mult+0.001}; // promos that boost everything don't count
+function walletFiltered(list,f=viewOpt().f){
+  return list.filter(w=>{const p=P(w.product);
+    if(f.person!=="all"&&w.owner!==f.person)return false;
+    if(f.earns!=="all"&&!earnsExtra(w,f.earns))return false;
+    if(f.type!=="all"&&(p?.type||"cash")!==f.type)return false;
+    if(f.bank!=="all"&&p?.brand!==f.bank)return false;
+    if(f.network!=="all"&&netOf(w)!==f.network)return false;
+    if(f.fee==="none"&&p&&p.fee>0)return false;
+    if(f.fee==="paid"&&!(p&&p.fee>0))return false;
+    if(f.status==="setup"&&!(!w.inactive&&tasksFor(w).length))return false;
+    if(f.status==="pinned"&&!w.pinned)return false;
+    if(f.status==="intro"&&!(w.introApr&&w.introApr>=TODAY))return false;
+    return true;});
 }
+const activeFilterCount=(f=viewOpt().f)=>Object.keys(FILTER_DEFAULT).filter(k=>f[k]!==FILTER_DEFAULT[k]).length;
+/* Each sort's natural direction: A–Z, highest first, newest first */
+const SORT_NATURAL={custom:"asc",rewards:"desc",name:"asc",bank:"asc",added:"desc"};
 function walletSorted(list){
-  const s=viewOpt().sort,idx=new Map(state.wallet.map((w,i)=>[w.id,i])),a=[...list];
+  const v=viewOpt(),s=v.sort,idx=new Map(state.wallet.map((w,i)=>[w.id,i])),a=[...list];
   const bank=w=>P(w.product)?B(P(w.product).brand).name:"~";
-  if(s==="rewards")a.sort((x,y)=>topRate(y)-topRate(x)||idx.get(x.id)-idx.get(y.id));
+  if(s==="rewards")a.sort((x,y)=>topRate(x)-topRate(y)||idx.get(x.id)-idx.get(y.id));
   else if(s==="name")a.sort((x,y)=>dn(x).localeCompare(dn(y)));
   else if(s==="bank")a.sort((x,y)=>bank(x).localeCompare(bank(y))||dn(x).localeCompare(dn(y)));
-  else if(s==="added")a.sort((x,y)=>addedAt(y)-addedAt(x)||idx.get(y.id)-idx.get(x.id));
-  else a.sort((x,y)=>idx.get(x.id)-idx.get(y.id));
-  return a;
+  else if(s==="added")a.sort((x,y)=>addedAt(x)-addedAt(y)||idx.get(x.id)-idx.get(y.id));
+  else{a.sort((x,y)=>idx.get(x.id)-idx.get(y.id));return a}
+  return v.order==="desc"?a.reverse():a;
 }
 function walletGroups(list){
   const g=viewOpt().group;
@@ -84,7 +99,7 @@ function renderWallet(){
   if(all.length)h+=walletToolbar();
   if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and the Pay tab ranks them for every purchase.</p>
     <button class="btn" onclick="openOnboard()">Pick your cards</button></div>`;
-  else if(!active.length&&v.filter!=="all")h+=`<div class="empty small"><p>No cards match this filter.</p><button class="btn-sm alt" onclick="setView('filter','all')">Show all cards</button></div>`;
+  else if(!active.length&&activeFilterCount())h+=`<div class="empty small"><p>No cards match these filters.</p><button class="btn-sm alt" onclick="clearFilter('*')">Clear filters</button></div>`;
   else if(!active.length)h+=`<p class="hint">All your cards are deactivated. Reactivate one below or tap + to add a card.</p>`;
   else{
     const pinned=active.filter(w=>w.pinned),rest=active.filter(w=>!w.pinned);
@@ -106,35 +121,88 @@ function renderWallet(){
   $("foot").innerHTML=`${Object.keys(CATALOG.products).length} cards and ${stores().length} stores in the catalog${d?`, updated ${d}`:""}.<br>Your cards stay on this phone. <button class="link-btn" onclick="openBackup()">Back up or restore</button>`;
 }
 
-/* Toolbar: sort/view button + quick filter chips (scroll sideways) */
+/* Toolbar: two pills, Sort and Filter, plus removable chips for active filters */
 function walletToolbar(){
-  const v=viewOpt(),n=t=>activeWallet().filter(t).length,att=n(w=>tasksFor(w).length);
-  const chips=[["all","All"]];
-  if(isPeople())state.people.forEach(pp=>chips.push(["person:"+pp.id,pp.name]));
-  if(att)chips.push(["attention",`Needs setup · ${att}`]);
-  if(n(w=>P(w.product)?.type==="cash")&&n(w=>P(w.product)&&P(w.product).type!=="cash"))chips.push(["cash","Cash back"],["points","Points & miles"]);
-  const changed=v.sort!=="custom"||v.group!==VIEW_DEFAULT.group;
+  const v=viewOpt(),n=activeFilterCount(),sortOn=v.sort!=="custom"||v.group!=="none";
+  const chips=Object.keys(FILTER_DEFAULT).filter(k=>v.f[k]!==FILTER_DEFAULT[k])
+    .map(k=>`<button class="chip on-soft f-chip" onclick="clearFilter('${k}')" aria-label="Remove filter ${esc(filterValueLabel(k,v.f[k]))}">${esc(filterValueLabel(k,v.f[k]))}${ic("x")}</button>`).join("");
   return `<div class="w-toolbar no-swipe">
-    <button class="chip view-chip ${changed?"on-soft":""}" onclick="openViewSheet()">${ic("sort")}${esc(SORTS[v.sort])}</button>
-    ${chips.map(([k,l])=>`<button class="chip ${v.filter===k?"on":""}" onclick="setView('filter','${k}')">${esc(l)}</button>`).join("")}</div>`;
+    <button class="pill-btn ${sortOn?"active":""}" onclick="openDisplay('sort')">${ic("sort")}<span>${esc(SORTS[v.sort])}</span>${ic("chevD","dim")}</button>
+    <button class="pill-btn ${n?"active":""}" onclick="openDisplay('filter')">${ic("filter")}<span>Filter${n?` · ${n}`:""}</span>${ic("chevD","dim")}</button>
+  </div>${chips?`<div class="w-toolbar f-chips no-swipe">${chips}<button class="link-btn" onclick="clearFilter('*')">Clear all</button></div>`:""}`;
 }
-function setView(k,val){viewOpt();state.view[k]=val;save();renderWallet();if(!$("sheet").hidden&&$("sheet").querySelector(".view-sheet"))openViewSheet(true)}
+function clearFilter(k){const v=viewOpt();if(k==="*")v.f={...FILTER_DEFAULT};else v.f[k]=FILTER_DEFAULT[k];save();renderWallet()}
 
-function openViewSheet(keep){
-  const v=viewOpt();
-  const opt=(k,val,label,sub)=>`<button class="radio ${v[k]===val?"on":""}" onclick="setView('${k}','${val}')"><span class="radio-dot"></span><span class="row-main"><span class="row-title">${label}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span></button>`;
-  const tog=(k,label)=>`<button class="toggle-row" onclick="setView('${k}',${!v[k]})" role="switch" aria-checked="${v[k]}"><span>${label}</span><span class="switch ${v[k]?"on":""}"></span></button>`;
-  openSheet(`<div class="view-sheet"><h2 class="sheet-title">Sort & view</h2>
-    <h3 class="sec">Sort by</h3><div class="stack-sm">
-      ${opt("sort","custom","My order","Press and hold a card to drag it")}
-      ${opt("sort","rewards","Highest rewards","Cards that can earn the most first")}
-      ${opt("sort","name","Name A–Z")}${opt("sort","bank","Bank")}${opt("sort","added","Recently added")}</div>
-    <h3 class="sec">Group by</h3><div class="stack-sm">
-      ${isPeople()?opt("group","person","Person"):""}${opt("group","bank","Bank")}${opt("group","type","Reward type","Cash back, points, miles")}${opt("group",isPeople()?"none":"person","No groups")}</div>
-    <h3 class="sec">Show on each card</h3><div class="list">${tog("showRate","Top reward rate")}${tog("showLast4","Last 4 digits")}</div>
-    <button class="btn" onclick="closeSheet()">Done</button>
-    <button class="btn-outline" style="margin-top:10px" onclick="state.view={...VIEW_DEFAULT};save();renderWallet();openViewSheet(true)">Reset to default</button></div>`,keep);
+/* ─── Sort & Filter sheets (Todoist-style: rows with current value → option list; ✓ saves, ✕ discards) ─── */
+let viewDraft=null,displayMode="sort";
+function filterDefs(){
+  const ws=state.wallet,ps=ws.map(w=>P(w.product)).filter(Boolean),uniq=a=>[...new Set(a)];
+  const defs=[];
+  if(isPeople())defs.push({k:"person",icon:"user",label:"Whose card",opts:[["all","Everyone"],...state.people.filter(pp=>ws.some(w=>w.owner===pp.id)).map(pp=>[pp.id,pp.name])]});
+  const cats=visibleCats().filter(c=>c.id!=="other"&&ws.some(w=>earnsExtra(w,c.id)));
+  defs.push({k:"earns",icon:"star",label:"Earns extra at",hint:"Cards that earn more than their everyday rate there",opts:[["all","Anywhere"],...cats.map(c=>[c.id,c.label])]});
+  const types=uniq(ps.map(p=>p.type));
+  if(types.length>1)defs.push({k:"type",icon:"gauge",label:"Reward type",opts:[["all","All"],...["cash","points","miles"].filter(t=>types.includes(t)).map(t=>[t,TYPE_LABEL[t]])]});
+  const banks=uniq(ps.map(p=>p.brand)).sort((a,b)=>B(a).name.localeCompare(B(b).name));
+  if(banks.length>1)defs.push({k:"bank",icon:"home",label:"Bank",opts:[["all","All banks"],...banks.map(b=>[b,B(b).name])]});
+  const nets=uniq(ws.map(netOf).filter(Boolean));
+  if(nets.length>1)defs.push({k:"network",icon:"pay",label:"Network",hint:"Handy where only some cards are accepted, like Costco (Visa)",opts:[["all","All networks"],...nets.sort().map(n=>[n,netLabel(n)])]});
+  if(ps.some(p=>p.fee>0)&&ps.some(p=>!(p.fee>0)))defs.push({k:"fee",icon:"tag",label:"Annual fee",opts:[["all","All"],["none","No annual fee"],["paid","Has an annual fee"]]});
+  defs.push({k:"status",icon:"flag",label:"Status",opts:[["all","All cards"],["setup","Needs setup"],["pinned","Pinned"],["intro","0% intro APR"]]});
+  return defs;
 }
+function filterValueLabel(k,val){const d=filterDefs().find(x=>x.k===k);const o=d&&d.opts.find(x=>x[0]===val);return o?o[1]:val}
+function openDisplay(mode,keep){
+  if(!keep){viewDraft=JSON.parse(JSON.stringify(viewOpt()));displayMode=mode}
+  const v=viewDraft,row=(icon,label,value,fn,disabled)=>`<button class="set-row" ${disabled?"disabled":""} onclick="${fn}"><span class="set-ic">${ic(icon)}</span><span class="set-label">${label}</span><span class="set-val">${esc(value)}</span>${ic("chevR","dim")}</button>`;
+  let body;
+  if(mode==="sort"){
+    body=`<div class="set-group" style="margin-top:8px">
+      ${row("layers","Grouping",GROUPS[v.group==="person"&&!isPeople()?"none":v.group],"displayPick('group')")}
+      ${row("sort","Sorting",SORTS[v.sort],"displayPick('sort')")}
+      ${row("arrowUp","Ordering",v.sort==="custom"?"Your order":(v.order==="asc"?"Ascending":"Descending"),"displayPick('order')",v.sort==="custom")}</div>
+      ${v.sort==="custom"?`<p class="set-hint">Press and hold any card in your wallet to drag it into place.</p>`:""}
+      <h3 class="set-sec">Show on each card</h3><div class="set-group">
+      ${tog("showRate","Top reward rate")}${tog("showLast4","Last 4 digits")}</div>`;
+  }else{
+    body=`<div class="set-group" style="margin-top:8px">${filterDefs().map(d=>row(d.icon,d.label,(d.opts.find(o=>o[0]===v.f[d.k])||d.opts[0])[1],`displayPick('f.${d.k}')`)).join("")}</div>
+      <p class="set-hint">Showing ${walletFiltered(state.wallet,v.f).length} of ${state.wallet.length} cards.</p>`;
+  }
+  openSheet(`<div class="display-sheet">${displayHead(mode==="sort"?"Sort":"Filter")}${body}
+    <button class="reset-btn" onclick="resetDisplay()">Reset ${mode==="sort"?"sort":"filters"}</button></div>`,keep,null,{customTop:true});
+  function tog(k,label){return `<button class="set-row" onclick="viewDraft.${k}=!viewDraft.${k};openDisplay(displayMode,true)" role="switch" aria-checked="${v[k]}"><span class="set-label">${label}</span><span class="switch ${v[k]?"on":""}"></span></button>`}
+}
+function displayHead(title,back){
+  return `<div class="set-head">${back?`<button class="round-btn" onclick="${back}" aria-label="Back">${ic("chevL")}</button>`
+    :`<button class="round-btn" onclick="closeSheet()" aria-label="Cancel">${ic("x")}</button>`}
+    <h2>${esc(title)}</h2>${back?`<span class="round-btn ghost"></span>`:`<button class="round-btn ok" onclick="saveDisplay()" aria-label="Save">${ic("check")}</button>`}</div>`;
+}
+function displayPick(key){
+  const v=viewDraft;let title,opts,cur,hint="";
+  if(key==="group"){title="Grouping";cur=v.group==="person"&&!isPeople()?"none":v.group;opts=[["none","None"],...(isPeople()?[["person","Person"]]:[]),["bank","Bank"],["type","Reward type"]]}
+  else if(key==="sort"){title="Sorting";cur=v.sort;opts=Object.entries(SORTS)}
+  else if(key==="order"){title="Ordering";cur=v.order;opts=[["asc","Ascending"],["desc","Descending"]];
+    hint={rewards:"Descending shows the highest rates first.",name:"Ascending is A to Z.",bank:"Ascending is A to Z.",added:"Descending shows the newest cards first."}[v.sort]||""}
+  else{const d=filterDefs().find(x=>"f."+x.k===key);title=d.label;cur=v.f[d.k];opts=d.opts;hint=d.hint||""}
+  openSheet(`<div class="display-sheet">${displayHead(title,"openDisplay(displayMode,true)")}
+    ${hint?`<p class="set-hint" style="margin-top:0">${esc(hint)}</p>`:""}
+    <div class="set-group">${opts.map(([val,label])=>`<button class="set-row opt ${val===cur?"on":""}" onclick="setDraft('${key}','${val}')"><span class="set-label">${esc(label)}</span>${val===cur?ic("check"):""}</button>`).join("")}</div></div>`,
+    0.001,{label:displayMode==="sort"?"Sort":"Filter",fn:()=>openDisplay(displayMode,true)},{customTop:true});
+}
+function setDraft(key,val){
+  if(key.startsWith("f."))viewDraft.f[key.slice(2)]=val;
+  else{viewDraft[key]=val;if(key==="sort")viewDraft.order=SORT_NATURAL[val]}
+  openDisplay(displayMode,true);
+}
+function saveDisplay(){state.view=viewDraft;viewDraft=null;save();closeSheet();renderWallet()}
+function resetDisplay(){
+  if(displayMode==="sort"){const f=viewDraft.f;viewDraft={...JSON.parse(JSON.stringify(VIEW_DEFAULT)),f}}
+  else viewDraft.f={...FILTER_DEFAULT};
+  openDisplay(displayMode,true);
+}
+/* kept for older links in the menu */
+function openViewSheet(){openDisplay("sort")}
+function setView(k,val){viewOpt();if(k==="filter")return;state.view[k]=val;save();renderWallet()}
 
 /* ─── Per-card menu (from swipe or long list) ─── */
 function openCardMenu(id){
@@ -153,6 +221,7 @@ function openCardMenu(id){
     </div>`);
 }
 function openRename(id){
+  if(!$("sheet").hidden&&drawerId===id&&$("sheet").querySelector(".drawer-head")){startInlineName(id);return}
   const w=walletById(id),p=P(w.product);
   openSheet(`<h2 class="sheet-title">Rename card</h2><p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}</p>
     <input class="field" id="rn" value="${esc(w.nickname||"")}" placeholder="${esc(p?p.short:"Card name")}" maxlength="40" autocomplete="off"
