@@ -123,8 +123,101 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--warn);color:var(--bg);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
 
 /* answer screen */
-.answer{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto;animation:fade .15s ease}
-.ans-inner{max-width:480px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 8px) 16px calc(env(safe-area-inset-bottom,0px) + 32px)}
+.ans-bg{position:fixed;inset:0;z-index:40;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;animation:fade .15s ease}
+.ans-panel{position:relative;width:100%;max-width:520px;height:calc(100% - env(safe-area-inset-top,0px) - 12px);background:var(--bg);border-radius:22px 22px 0 0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding-top:10px;animation:rise .25s cubic-bezier(.2,.9,.3,1);box-shadow:0 -10px 30px rgba(0,0,0,.18)}
+.ans-panel.settle,.sheet.settle{transition:transform .2s ease}
+.ans-panel>.handle{margin:0 auto 4px}
+.ans-inner{max-width:480px;margin:0 auto;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 32px)}
+.ans-bar .star-btn{justify-self:start}
+.ans-bar .bubble.close{justify-self:end}
+.ans-dollars b{color:var(--ink);font-weight:600}
+/* wallet: + button, menu, select mode, deactivated */
+.fab{position:fixed;right:18px;bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px) + 18px);z-index:35;width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;box-shadow:0 10px 24px rgba(15,118,110,.35),0 2px 6px rgba(0,0,0,.15);animation:popin .2s ease}
+.fab .ic{width:28px;height:28px}
+.fab:active{transform:scale(.94)}
+.icon-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);margin-right:-8px}
+.icon-btn:active{background:var(--surface-2)}
+.ic.fill circle{fill:currentColor}
+.btn-pill.quiet{background:var(--surface-2);color:var(--ink)}
+.card-row.inactive{opacity:.55}
+.card-row.inactive .art{filter:grayscale(1)}
+.card-row.selected{background:var(--surface-2)}
+.sel-box{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex-shrink:0;color:var(--on-accent)}
+.card-row.selected .sel-box{background:var(--accent);border-color:var(--accent)}
+.sel-box .ic{width:16px;height:16px}
+.more span{display:inline-flex;align-items:center;gap:8px}
+.inactive-list{margin-top:4px}
+.select-bar{position:fixed;left:12px;right:12px;bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px) + 12px);z-index:35;max-width:500px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px 10px 10px 16px;display:flex;align-items:center;gap:8px}
+.sel-count{flex:1;font-weight:600;font-size:14px}
+.btn-sm.danger,.btn.danger{background:var(--danger);color:var(--bg)}
+.btn-sm:disabled{opacity:.45}
+#view-wallet{padding-bottom:84px}
+.search-row{display:flex;align-items:center;gap:0}
+.search-row .search{flex:1;min-width:0}
+.search-cancel{color:var(--accent);font-weight:600;font-size:16px;padding:12px 0 12px 12px;display:none}
+.search-row.active .search-cancel{display:block}
+#add-bottom,.sheet .offers+.btn-outline{margin-top:16px}
+/* while a pop-up is open, show messages at the top so they never cover its buttons */
+body.locked .toast{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 12px)}
+/* wallet list: swipe actions, drag, toolbar */
+.swipe-wrap{position:relative;overflow:hidden;background:var(--surface);transition:transform .18s ease}
+.swipe-wrap+.swipe-wrap{border-top:1px solid var(--line)}
+.swipe-wrap .card-row{position:relative;z-index:1;border-top:none;background:var(--surface);transition:transform .2s ease;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.swipe-wrap .card-row.swiping{transition:none}
+.swipe-act{position:absolute;top:0;bottom:0;display:flex}
+.swipe-act.left{left:0;width:88px}
+.swipe-act.right{right:0;width:176px}
+.sw-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;color:#fff;text-align:center}
+.sw-btn .ic{width:22px;height:22px}
+.sw-btn.more{background:var(--accent);color:var(--on-accent)}
+.sw-btn.archive{background:#64748b}
+.sw-btn.restore{background:var(--rate);color:var(--bg)}
+.sw-btn.delete{background:var(--danger);color:var(--bg)}
+.swipe-wrap.dragging{z-index:5;transition:none;box-shadow:0 14px 30px rgba(0,0,0,.22);border-radius:12px;border-top-color:transparent}
+.list.drag-list{overflow:visible}
+.list.drag-list .swipe-wrap:not(.dragging){transition:transform .18s ease}
+body.no-select{user-select:none;-webkit-user-select:none}
+.row-end{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.w-rate{font-size:12px;color:var(--muted);white-space:nowrap}
+.w-rate b{color:var(--rate);font-weight:700;font-size:13px}
+.pin-ic{display:inline-flex;color:var(--accent);margin-right:4px;vertical-align:-2px}
+.pin-ic .ic,.sec .ic{width:14px;height:14px;vertical-align:-2px}
+.sec-n{color:var(--muted);font-weight:500;margin-left:4px;letter-spacing:0}
+.w-toolbar{display:flex;gap:8px;overflow-x:auto;margin:2px -16px 6px;padding:2px 16px 8px;scrollbar-width:none}
+.w-toolbar::-webkit-scrollbar{display:none}
+.w-toolbar .chip{flex-shrink:0;white-space:nowrap}
+.view-chip .ic{width:16px;height:16px}
+.chip.on-soft{border-color:var(--accent);color:var(--accent)}
+.empty.small{padding:28px 8px}
+.tip{font-size:13px;margin-top:12px}
+.stack-sm{display:flex;flex-direction:column;gap:8px}
+button.radio{width:100%;text-align:left}
+.radio-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center}
+.radio.on{border-color:var(--accent)}
+.radio.on .radio-dot{border-color:var(--accent)}
+.radio.on .radio-dot::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px;border-top:1px solid var(--line);font-weight:500}
+.list>.toggle-row:first-child{border-top:none}
+.switch{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;transition:background .15s;flex-shrink:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.switch.on{background:var(--accent)}
+.switch.on::after{transform:translateX(18px)}
+.danger-row .row-title,.danger-row .row-ic{color:var(--danger)}
+/* clear, tappable action buttons */
+.action-stack{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.action-stack .btn{margin-top:0}
+.btn-outline{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:16px}
+.btn-outline.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,var(--line))}
+.btn-outline .ic{width:20px;height:20px}
+.btn-outline:active{background:var(--surface-2)}
+/* confirm pop-up */
+.dialog-bg{position:fixed;inset:0;z-index:80;background:var(--scrim);display:grid;place-items:center;padding:24px;animation:fade .12s ease}
+.dialog{background:var(--bg);border-radius:20px;padding:22px 20px 18px;width:100%;max-width:340px;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:popin .18s ease}
+.dialog h2{font-family:var(--display);font-size:20px;margin-bottom:6px}
+.dialog p{color:var(--muted);font-size:15px}
+.dialog-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.dialog-btns .btn{margin:0}
+@keyframes popin{from{transform:scale(.92);opacity:0}}
 .ans-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:44px}
 .ans-where{font-weight:600;text-align:center;max-width:52vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ans-ctx{text-align:center;color:var(--muted);margin:6px 0 16px}
@@ -189,6 +282,36 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .bubble{display:inline-flex;align-items:center;gap:4px;height:38px;min-width:38px;padding:0 12px 0 8px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.14);font-weight:600;font-size:15px;color:var(--accent)}
 .bubble.close{padding:0;justify-content:center;color:var(--ink);margin-left:auto}
 .bubble .ic{width:20px;height:20px}
+/* opening splash */
+#splash{position:fixed;inset:0;z-index:200;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;
+  background:linear-gradient(165deg,#064e46 0%,#0f766e 38%,#0d9488 62%,#f59e0b 135%);
+  animation:spOut .55s cubic-bezier(.75,0,.25,1) 1.45s forwards}
+#splash.skip{animation:spOut .35s cubic-bezier(.75,0,.25,1) forwards}
+.sp-glow{position:absolute;border-radius:50%;filter:blur(40px);opacity:.55}
+.sp-glow.g1{width:260px;height:260px;background:#f472b6;top:-60px;right:-80px;animation:drift 2s ease-in-out infinite alternate}
+.sp-glow.g2{width:300px;height:300px;background:#fbbf24;bottom:-90px;left:-110px;animation:drift 2.4s ease-in-out infinite alternate-reverse}
+.sp-glow.g3{width:180px;height:180px;background:#38bdf8;top:30%;left:-60px;opacity:.35}
+.sp-stack{position:relative;width:168px;height:106px;margin-bottom:26px}
+.sp-card{position:absolute;inset:0;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.2);opacity:0;transform:translateY(120px) scale(.8)}
+.sp-card i{position:absolute;left:14px;top:38px;width:26px;height:20px;border-radius:5px;background:linear-gradient(135deg,#fde68a,#d4a017 55%,#fcd34d)}
+.sp-card.c1{background:linear-gradient(135deg,#fb923c,#c2410c);animation:fanL .6s cubic-bezier(.2,1.3,.4,1) .1s forwards}
+.sp-card.c2{background:linear-gradient(135deg,#60a5fa,#1d4ed8);animation:fanR .6s cubic-bezier(.2,1.3,.4,1) .2s forwards}
+.sp-card.c3{background:linear-gradient(135deg,#111827,#374151);animation:fanC .6s cubic-bezier(.2,1.3,.4,1) .3s forwards}
+.sp-card b{position:absolute;right:-14px;top:-16px;background:#fff;color:#047857;font-family:var(--display);font-weight:700;font-size:20px;padding:6px 11px;border-radius:999px;box-shadow:0 8px 20px rgba(0,0,0,.25);transform:scale(0);animation:pop .4s cubic-bezier(.2,1.6,.4,1) .85s forwards}
+.sp-word{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.02em;opacity:0;transform:translateY(14px);animation:rise2 .5s ease .5s forwards}
+.sp-tag{font-size:17px;font-weight:500;opacity:0;transform:translateY(10px);animation:rise2 .5s ease .7s forwards;color:rgba(255,255,255,.9)}
+@keyframes fanL{to{opacity:1;transform:translate(-34px,6px) rotate(-14deg)}}
+@keyframes fanR{to{opacity:1;transform:translate(34px,6px) rotate(14deg)}}
+@keyframes fanC{to{opacity:1;transform:translateY(-6px)}}
+@keyframes pop{to{transform:scale(1)}}
+@keyframes rise2{to{opacity:1;transform:none}}
+@keyframes drift{to{transform:translate(30px,24px) scale(1.1)}}
+@keyframes spOut{to{transform:translateY(-100%);border-radius:0 0 40px 40px}}
+@media (prefers-reduced-motion:reduce){
+  #splash,#splash *{animation-duration:.01s!important;animation-delay:0s!important}
+  #splash{animation:spFade .3s ease .6s forwards!important}
+  @keyframes spFade{to{opacity:0}}
+}
 /* sheets */
 .sheet-bg{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;animation:fade .12s ease}
 .sheet{background:var(--bg);border-radius:22px 22px 0 0;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:12px 18px calc(env(safe-area-inset-bottom,0px) + 22px);animation:rise .2s ease}
@@ -291,7 +414,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   <button id="tab-updates" onclick="go('updates')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg>Updates<span id="tab-badge" class="badge" hidden></span></button>
 </nav>
 
-<div id="answer" class="answer" hidden></div>
+<div id="answer" class="ans-bg" hidden><div id="ans-panel" class="ans-panel" role="dialog" aria-modal="true"><div class="handle"></div><div id="ans-body"></div></div></div>
+<button id="fab" class="fab" onclick="openAdd()" aria-label="Add a card" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<div id="select-bar" class="select-bar" hidden></div>
+<div id="dialog" class="dialog-bg" hidden></div>
 <div id="sheet" class="sheet-bg" hidden></div>
 <div id="onboard" class="onboard" hidden>
   <div class="ob-inner">
@@ -305,9 +431,21 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 </div>
 <div id="toast" class="toast" hidden role="status"></div>
 
+<!-- Opening splash: plays once per launch, tap to skip. Turn off in cats.js (SHOW.splash). -->
+<div id="splash" aria-hidden="true">
+  <div class="sp-glow g1"></div><div class="sp-glow g2"></div><div class="sp-glow g3"></div>
+  <div class="sp-stack">
+    <div class="sp-card c1"><i></i></div>
+    <div class="sp-card c2"><i></i></div>
+    <div class="sp-card c3"><i></i><b>5%</b></div>
+  </div>
+  <div class="sp-word">Card Max</div>
+  <div class="sp-tag">Right card. Every time.</div>
+</div>
+
 <script>
 /* v2 feature switches: hidden features stay in the code, turn back on here */
-const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */};
+const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
 
 /* ══════════════════════════════════════════════════════════
@@ -357,6 +495,17 @@ const ICONS={
   gauge:'<path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   star:'<path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z"/>',
+  archive:'<rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/>',
+  trash:'<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/>',
+  restore:'<path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/>',
+  select:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12.5l3 3 5-6"/>',
+  download:'<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
+  more:'<circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/>',
+  arrowUp:'<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>',
+  arrowDown:'<path d="M12 5v14"/><path d="M6 13l6 6 6-6"/>',
+  sort:'<path d="M7 4v16M3.5 7.5L7 4l3.5 3.5"/><path d="M17 20V4M13.5 16.5L17 20l3.5-3.5"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  grip:'<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
   pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
 };
 const ic=(n,cls)=>`<svg class="ic ${cls||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||ICONS.other}</svg>`;
@@ -411,7 +560,7 @@ const DEFAULT_TOP=["grocery","dining","gas","fast_food","amazon","costco"];
    The embedded copy is catalog.json at build time. When CATALOG_URL
    is set, the app checks it on open and keeps whichever is newer.
    ══════════════════════════════════════════════════════════ */
-const CATALOG_URL = "catalog.json";
+const CATALOG_URL = "catalog.json"; // e.g. "https://<you>.github.io/card-maximizer/catalog.json"
 const EMBEDDED_CATALOG = {"version":"2026.10.02-v1","updated":"2026-09-29","brands":{"amex":{"name":"American Express","short":"Amex","mono":"AX","colors":["#2563eb","#1e3a8a"]},"boa":{"name":"Bank of America","short":"Bank of America","mono":"BA","colors":["#e11d48","#1e3a8a"],"login":"https://www.bankofamerica.com/"},"capone":{"name":"Capital One","short":"Capital One","mono":"C1","colors":["#0f4c81","#9a3412"]},"chase":{"name":"Chase","short":"Chase","mono":"CH","colors":["#1d4ed8","#172554"],"login":"https://secure.chase.com/web/auth/dashboard"},"citi":{"name":"Citi","short":"Citi","mono":"CI","colors":["#0ea5e9","#075985"],"login":"https://online.citi.com/"},"discover":{"name":"Discover","short":"Discover","mono":"DI","colors":["#f97316","#9a3412"],"note":"Owned by Capital One","login":"https://www.discover.com/login/"},"usbank":{"name":"U.S. Bank","short":"U.S. Bank","mono":"US","colors":["#dc2626","#1e3a8a"],"login":"https://www.usbank.com/"},"wells":{"name":"Wells Fargo","short":"Wells Fargo","mono":"WF","colors":["#dc2626","#a16207"]},"apple":{"name":"Apple","short":"Apple","mono":"AP","colors":["#e5e7eb","#6b7280"]},"ollo":{"name":"Ollo","short":"Ollo","mono":"OL","colors":["#7c3aed","#4c1d95"],"note":"Formerly Ally credit cards; issued by Merrick Bank"},"barclays":{"name":"Barclays","short":"Barclays","mono":"BC","colors":["#0ea5e9","#0c4a6e"]},"bilt":{"name":"Bilt","short":"Bilt","mono":"BI","colors":["#18181b","#52525b"],"note":"Issued by Cardless since Feb 2026","login":"https://www.biltrewards.com/"},"walmart":{"name":"Walmart (OnePay)","short":"OnePay","mono":"WM","colors":["#2563eb","#facc15"],"note":"Issued by Synchrony"},"target":{"name":"Target","short":"Target","mono":"TG","colors":["#dc2626","#991b1b"],"note":"Issued by TD Bank"},"amazon":{"name":"Amazon","short":"Amazon","mono":"AZ","colors":["#f59e0b","#1f2937"],"note":"Store card by Synchrony. Prime Visa is under Chase."},"lowes":{"name":"Lowe's","short":"Lowe's","mono":"LW","colors":["#1d4ed8","#1e3a8a"],"note":"Issued by Synchrony"},"bestbuy":{"name":"Best Buy","short":"Best Buy","mono":"BB","colors":["#1d4ed8","#facc15"],"note":"Issued by Citi"},"samsclub":{"name":"Sam's Club","short":"Sam's Club","mono":"SC","colors":["#1d4ed8","#0c4a6e"],"note":"Issued by Synchrony"},"paypal":{"name":"PayPal","short":"PayPal","mono":"PP","colors":["#1d4ed8","#0ea5e9"],"note":"Issued by Synchrony"},"venmo":{"name":"Venmo","short":"Venmo","mono":"VE","colors":["#0ea5e9","#0369a1"],"note":"Issued by Synchrony"},"verizon":{"name":"Verizon","short":"Verizon","mono":"VZ","colors":["#dc2626","#111827"],"note":"Issued by Synchrony"},"navyfederal":{"name":"Navy Federal Credit Union","short":"Navy Federal","mono":"NF","colors":["#1e3a8a","#ca8a04"],"note":"Membership required"},"penfed":{"name":"PenFed Credit Union","short":"PenFed","mono":"PF","colors":["#1e40af","#0f172a"]},"usaa":{"name":"USAA","short":"USAA","mono":"UA","colors":["#1e3a8a","#0f172a"],"note":"Membership required"},"fidelity":{"name":"Fidelity","short":"Fidelity","mono":"FI","colors":["#15803d","#14532d"],"note":"Issued by Elan"},"robinhood":{"name":"Robinhood","short":"Robinhood","mono":"RH","colors":["#ca8a04","#422006"]},"creditone":{"name":"Credit One Bank","short":"Credit One","mono":"CO","colors":["#1e3a8a","#0f172a"]}},"products":{"amex_blue_cash_preferred":{"brand":"amex","name":"Blue Cash Preferred","short":"Amex Blue Cash","network":"amex","fee":95,"feeNote":"$0 intro annual fee the first year","type":"cash","base":1,"rules":[{"cats":["grocery"],"rate":6,"label":"U.S. supermarkets","note":"Up to $6,000/yr, then 1%"},{"cats":["streaming"],"rate":6,"label":"Select U.S. streaming"},{"cats":["transit"],"rate":3,"label":"Transit","note":"Taxis, rideshare, parking, tolls, trains, buses"},{"cats":["gas"],"rate":3,"label":"U.S. gas stations"}],"perks":["Up to $10/month Disney streaming credit","2.7% foreign transaction fee"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/","checked":"2026-09-29"}},"amex_blue_cash_everyday":{"brand":"amex","name":"Blue Cash Everyday","short":"Amex BCE","network":"amex","fee":0,"type":"cash","base":1,"rules":[{"cats":["grocery"],"rate":3,"label":"U.S. supermarkets","note":"Up to $6,000/yr, then 1%"},{"cats":["online"],"rate":3,"label":"U.S. online retail","note":"Up to $6,000/yr, then 1%"},{"cats":["gas"],"rate":3,"label":"U.S. gas stations","note":"Up to $6,000/yr, then 1%"}],"perks":["Up to $7/month Disney streaming credit","2.7% foreign transaction fee"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/blue-cash-everyday/","checked":"2026-09-29"}},"amex_gold":{"brand":"amex","name":"Gold Card","short":"Amex Gold","network":"amex","fee":325,"type":"points","cpp":1,"base":1,"rules":[{"cats":["dining"],"rate":4,"label":"Restaurants worldwide","note":"Up to $50,000/yr, then 1x"},{"cats":["grocery"],"rate":4,"label":"U.S. supermarkets","note":"Up to $25,000/yr, then 1x"},{"cats":["travel"],"rate":5,"label":"Prepaid hotels","cond":"Only when booked through Amex Travel"},{"cats":["travel"],"rate":3,"label":"Flights","cond":"Booked with the airline or through Amex Travel","m":["airline"]}],"perks":["2x on prepaid car rentals and cruises through Amex Travel"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/gold-card/","checked":"2026-09-29"}},"chase_freedom_unlimited":{"brand":"chase","name":"Freedom Unlimited","short":"Chase Freedom","network":"visa","fee":0,"type":"cash","base":1.5,"rules":[{"cats":["travel"],"rate":5,"label":"Chase Travel","cond":"Only when booked through Chase Travel"},{"cats":["dining"],"rate":3,"label":"Dining, takeout & delivery"},{"cats":["drugstore"],"rate":3,"label":"Drugstores"},{"cats":["transit"],"rate":2,"label":"Lyft","cond":"Lyft rides only, through Sep 30, 2027","m":["lyft"]}],"perks":[],"source":{"url":"https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited","checked":"2026-09-29"}},"chase_freedom_flex":{"brand":"chase","name":"Freedom Flex","short":"Chase Freedom Flex","network":"mastercard","fee":0,"type":"cash","base":1,"rules":[{"cats":["travel"],"rate":5,"label":"Chase Travel","cond":"Only when booked through Chase Travel"},{"cats":["dining"],"rate":3,"label":"Dining, takeout & delivery"},{"cats":["drugstore"],"rate":3,"label":"Drugstores"}],"rotating":{"rate":5,"cap":"Up to $1,500/quarter combined, then 1%","retroactive":true,"deadlineDay":14,"activateHint":"Activation opens around the 15th of the month before each quarter. Activate by the 14th of the quarter's last month; it counts back to the start of the quarter.","schedule":{"2026-Q1":{"cats":["dining"],"label":"Restaurants"},"2026-Q2":{"cats":["amazon","wholefoods"],"label":"Amazon, Whole Foods & Chase Travel"},"2026-Q3":{"cats":["gas","entertainment","transit"],"label":"Gas & EV charging, live entertainment, public transit"},"2026-Q4":{"cats":["grocery","dining"],"label":"Grocery stores (not Walmart or Target) & dining","opens":"2026-09-15"}}},"perks":[],"source":{"url":"https://creditcards.chase.com/cash-back-credit-cards/freedom/flex","checked":"2026-09-29","note":"2026 calendar from NerdWallet's Chase Freedom calendar; Q4 confirmed on Chase's page. Network confirm on your card."}},"chase_sapphire_preferred":{"brand":"chase","name":"Sapphire Preferred","short":"Chase Sapphire","network":"visa","fee":95,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":5,"label":"Chase Travel","cond":"Only when booked through Chase Travel"},{"cats":["travel"],"rate":2,"label":"Other travel"},{"cats":["dining"],"rate":3,"label":"Dining, takeout & delivery"},{"cats":["gas"],"rate":3,"label":"Gas stations & EV charging"},{"cats":["streaming"],"rate":3,"label":"Top streaming services"},{"cats":["grocery"],"rate":3,"label":"Online grocery","cond":"Online orders only; not Target, Walmart or warehouse clubs"}],"perks":["3x on select vacation home brands","5x on Lyft through Sep 30, 2027"],"source":{"url":"https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred","checked":"2026-09-29"}},"chase_prime_visa":{"brand":"chase","name":"Prime Visa","short":"Prime Visa","network":"visa","fee":0,"type":"cash","base":1,"rules":[{"cats":["amazon","wholefoods"],"rate":5,"label":"Amazon, Audible & Whole Foods","note":"Needs a Prime membership, otherwise 3%"},{"cats":["travel"],"rate":5,"label":"Chase Travel","cond":"Only when booked through Chase Travel"},{"cats":["gas"],"rate":2,"label":"Gas stations"},{"cats":["dining"],"rate":2,"label":"Restaurants"},{"cats":["transit"],"rate":2,"label":"Local transit & rideshare"}],"perks":["Requires an eligible Amazon Prime membership for 5%"],"source":{"url":"https://creditcards.chase.com/cash-back-credit-cards/amazon-prime-rewards","checked":"2026-09-29"}},"citi_double_cash":{"brand":"citi","name":"Double Cash","short":"Citi Double Cash","network":"mastercard","fee":0,"type":"cash","base":2,"baseLabel":"1% when you buy + 1% when you pay","rules":[{"cats":["travel"],"rate":5,"label":"Citi Travel","cond":"Hotels, car rentals & attractions through Citi Travel"}],"perks":["Pay at least the minimum on time to earn"],"source":{"url":"https://www.citi.com/credit-cards/citi-double-cash-credit-card","checked":"2026-09-29"}},"citi_strata":{"brand":"citi","name":"Strata","short":"Citi Strata","network":"mastercard","fee":0,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":5,"label":"Citi Travel","cond":"Hotels, car rentals & attractions through Citi Travel"},{"cats":["grocery"],"rate":3,"label":"Supermarkets"},{"cats":["gas"],"rate":3,"label":"Gas & EV charging"},{"cats":["transit"],"rate":3,"label":"Select transit"},{"cats":["dining"],"rate":2,"label":"Restaurants"}],"choice":[{"id":"select","rate":3,"pick":1,"period":"persistent","default":"streaming","label":"Your 3x pick","note":"Starts as streaming. Can change once per quarter.","options":[{"id":"streaming","label":"Streaming","cats":["streaming"]},{"id":"fitness","label":"Fitness clubs","cats":["fitness"]},{"id":"entertainment","label":"Live entertainment","cats":["entertainment"]},{"id":"beauty","label":"Salons & cosmetics","cats":["beauty"]},{"id":"pets","label":"Pet supplies","cats":["pets"]}]}],"perks":[],"source":{"url":"https://www.citi.com/credit-cards/citi-strata-credit-card","checked":"2026-09-29"}},"citi_custom_cash":{"brand":"citi","name":"Custom Cash","short":"Citi Custom Cash","network":"mastercard","fee":0,"type":"cash","base":1,"status":"closed","auto":{"rate":5,"note":"Up to $500 per billing cycle, then 1%","options":["grocery","dining","gas","streaming","drugstore","home","fitness","travel","transit","entertainment"]},"perks":["5% goes automatically to your top eligible category each billing cycle","Closed to new applicants since May 28, 2026; existing cards keep their rewards"],"source":{"url":"https://www.nerdwallet.com/credit-cards/news/citi-custom-cash-closed-to-new-applications","checked":"2026-09-29","note":"Citi's page no longer lists terms because the card closed to new applicants"}},"citi_costco":{"brand":"citi","name":"Costco Anywhere Visa","short":"Costco Visa","network":"visa","fee":0,"feeNote":"Requires a paid Costco membership","type":"cash","base":1,"rules":[{"cats":["costco_gas"],"rate":5,"label":"Gas at Costco","note":"5% + 4% gas share $7,000/yr, then 1%"},{"cats":["gas"],"rate":4,"label":"Other gas & EV charging","note":"5% + 4% gas share $7,000/yr, then 1%","excl":["costco_gas"]},{"cats":["dining"],"rate":3,"label":"Restaurants"},{"cats":["travel"],"rate":3,"label":"Travel, including Costco Travel"},{"cats":["costco"],"rate":2,"label":"Costco & Costco.com"}],"perks":["Cash back comes once a year as a certificate redeemable at Costco"],"source":{"url":"https://www.citi.com/credit-cards/citi-costco-anywhere-visa-credit-card","checked":"2026-09-29"}},"capone_venture":{"brand":"capone","name":"Venture","short":"Capital One Venture","network":"visa","networkOptions":["visa","mastercard","discover"],"fee":95,"type":"miles","cpp":1,"base":2,"rules":[{"cats":["travel"],"rate":5,"label":"Capital One Travel","cond":"Hotels, vacation rentals & rental cars through Capital One Travel"},{"cats":["entertainment"],"rate":5,"label":"Capital One Entertainment","cond":"Tickets bought through Capital One Entertainment"}],"perks":[],"source":{"url":"https://www.capitalone.com/credit-cards/venture/","checked":"2026-09-29","note":"Capital One now issues on Visa, Mastercard or Discover; check your card"}},"capone_savor":{"brand":"capone","name":"Savor","short":"Capital One Savor","network":"mastercard","networkOptions":["visa","mastercard","discover"],"fee":0,"type":"cash","base":1,"rules":[{"cats":["dining"],"rate":3,"label":"Dining"},{"cats":["grocery"],"rate":3,"label":"Grocery stores","note":"Not superstores like Walmart and Target"},{"cats":["entertainment"],"rate":3,"label":"Entertainment"},{"cats":["streaming"],"rate":3,"label":"Popular streaming"},{"cats":["travel"],"rate":5,"label":"Capital One Travel","cond":"Hotels, vacation rentals & rental cars through Capital One Travel"}],"perks":[],"source":{"url":"https://www.capitalone.com/credit-cards/savor/","checked":"2026-09-29","note":"Capital One now issues on Visa, Mastercard or Discover; check your card"}},"capone_quicksilver":{"brand":"capone","name":"Quicksilver","short":"Quicksilver","network":"mastercard","networkOptions":["visa","mastercard","discover"],"fee":0,"type":"cash","base":1.5,"perks":[],"source":{"url":"https://www.capitalone.com/credit-cards/quicksilver/","checked":"2026-09-29","note":"Some Quicksilver cards now run on Discover; check your card"}},"discover_it_cash_back":{"brand":"discover","name":"it Cash Back","short":"Discover","network":"discover","fee":0,"type":"cash","base":1,"rotating":{"rate":5,"cap":"Up to $1,500/quarter combined, then 1%","retroactive":false,"activateHint":"Activate in the Discover or Capital One app. Not retroactive, so activate before you spend.","schedule":{"2026-Q1":{"cats":["grocery","costco","streaming","warehouse"],"label":"Grocery, wholesale clubs & select streaming"},"2026-Q2":{"cats":["dining","home"],"label":"Restaurants & home improvement"},"2026-Q3":{"cats":["gas","transit","drugstore"],"label":"Gas & EV charging, airlines & public transit, drugstores"},"2026-Q4":{"cats":["dining","entertainment","utilities"],"label":"Restaurants, entertainment & utilities","opens":"2026-09-01"}}},"perks":["New cardholders: all cash back matched at the end of year one","Accounts are moving to Capital One; rewards stay the same"],"source":{"url":"https://www.discover.com/credit-cards/cash-back/it-card.html","checked":"2026-09-29","note":"2026 calendar from The Points Guy (Discover's calendar page was down)"}},"boa_customized_cash":{"brand":"boa","name":"Customized Cash Rewards","short":"BOA","network":"visa","fee":0,"type":"cash","base":1,"rules":[{"cats":["grocery","costco","warehouse"],"rate":2,"label":"Grocery stores & wholesale clubs","note":"Shares the $2,500/quarter cap with your 3% choice"}],"choice":[{"id":"choice","rate":3,"pick":1,"period":"persistent","label":"Your 3% choice","note":"$2,500/quarter shared cap. Can change once a month.","options":[{"id":"gas","label":"Gas & EV charging","cats":["gas"]},{"id":"online","label":"Online shopping, phone, internet & streaming","cats":["online","amazon","phone","streaming"]},{"id":"dining","label":"Dining","cats":["dining"]},{"id":"travel","label":"Travel","cats":["travel"]},{"id":"drugstore","label":"Drugstores","cats":["drugstore"]},{"id":"home","label":"Home improvement & furniture","cats":["home","furniture"]}]}],"perks":["New cardholders earn 6% in the choice category the first year"],"source":{"url":"https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/","checked":"2026-09-29"}},"wells_autograph":{"brand":"wells","name":"Autograph","short":"Wells Autograph","network":"visa","fee":0,"type":"points","cpp":1,"base":1,"rules":[{"cats":["dining"],"rate":3,"label":"Restaurants"},{"cats":["travel"],"rate":3,"label":"Travel"},{"cats":["gas"],"rate":3,"label":"Gas stations"},{"cats":["transit"],"rate":3,"label":"Transit"},{"cats":["streaming"],"rate":3,"label":"Streaming"},{"cats":["phone"],"rate":3,"label":"Phone plans"}],"perks":["No foreign transaction fees"],"source":{"url":"https://creditcards.wellsfargo.com/autograph-visa-credit-card/","checked":"2026-09-29"}},"wells_active_cash":{"brand":"wells","name":"Active Cash","short":"Wells Active Cash","network":"visa","fee":0,"type":"cash","base":2,"perks":["3% foreign transaction fee"],"source":{"url":"https://creditcards.wellsfargo.com/active-cash-credit-card/","checked":"2026-09-29"}},"usbank_cash_plus":{"brand":"usbank","name":"Cash+","short":"US Bank Cash+","network":"visa","fee":0,"type":"cash","base":1,"rules":[{"cats":["travel"],"rate":5,"label":"U.S. Bank Travel Center","cond":"Prepaid travel booked in the Travel Center"}],"choice":[{"id":"five","rate":5,"pick":2,"period":"quarter","label":"Your 5% picks","note":"Up to $2,000/quarter combined","options":[{"id":"fast_food","label":"Fast food","cats":["fast_food"]},{"id":"department","label":"Department stores","cats":["department"]},{"id":"phone","label":"Cell phone","cats":["phone"]},{"id":"utilities","label":"Home utilities","cats":["utilities"]},{"id":"streaming","label":"TV, internet & streaming","cats":["streaming"]},{"id":"transit","label":"Ground transportation","cats":["transit"]},{"id":"fitness","label":"Gyms & fitness","cats":["fitness"]},{"id":"movies","label":"Movie theaters","cats":["entertainment"]},{"id":"electronics","label":"Electronics stores","cats":["electronics"]},{"id":"furniture","label":"Furniture stores","cats":["furniture"]},{"id":"clothing","label":"Select clothing stores","cats":["clothing"]},{"id":"sporting","label":"Sporting goods","cats":["sporting"]}]},{"id":"two","rate":2,"pick":1,"period":"quarter","label":"Your 2% pick","note":"No cap. Gas and grocery exclude superstores and warehouse clubs.","options":[{"id":"gas","label":"Gas & EV charging","cats":["gas"]},{"id":"grocery","label":"Grocery stores","cats":["grocery"]},{"id":"dining","label":"Restaurants","cats":["dining"]}]}],"perks":["Choose your 5% and 2% categories every quarter, or everything earns 1%"],"source":{"url":"https://www.usbank.com/credit-cards/cash-plus-visa-signature-credit-card.html","checked":"2026-09-29"}},"usbank_altitude_go":{"brand":"usbank","name":"Altitude Go","short":"US Bank Alt Go","network":"visa","fee":0,"type":"points","cpp":1,"base":1,"rules":[{"cats":["dining"],"rate":4,"label":"Dining, takeout & delivery","note":"Up to $2,000/quarter, then 1x"},{"cats":["grocery"],"rate":2,"label":"Grocery stores","note":"Not discount stores, supercenters or warehouse clubs"},{"cats":["gas"],"rate":2,"label":"Gas & EV charging","note":"Not warehouse clubs or supercenters","excl":["costco_gas"]},{"cats":["streaming"],"rate":2,"label":"Streaming"}],"perks":[],"source":{"url":"https://www.usbank.com/credit-cards/altitude-go-visa-signature-credit-card.html","checked":"2026-09-29"}},"apple_card":{"brand":"apple","name":"Apple Card","short":"Apple Card","network":"mastercard","fee":0,"type":"cash","base":2,"baseLabel":"Paying with Apple Pay (1% with the physical card)","baseExcept":{"cats":["walmart"],"rate":1,"label":"Physical card (Walmart doesn't take Apple Pay)"},"perks":["3% at Apple and select merchants with Apple Pay (Walgreens, Exxon Mobil, Uber, Nike and others)","Walmart and Costco don't take Apple Pay, so it earns 1% there","No fees of any kind, including foreign transaction"],"source":{"url":"https://www.apple.com/apple-card/","checked":"2026-09-29"}},"ollo_everyday_rewards":{"brand":"ollo","name":"Everyday Rewards","short":"Ollo","network":"mastercard","fee":0,"feeNote":"$0 to $39 depending on credit","type":"cash","base":1,"rules":[{"cats":["gas"],"rate":3,"label":"Gas & EV charging"},{"cats":["grocery"],"rate":3,"label":"Grocery stores"},{"cats":["drugstore"],"rate":3,"label":"Drugstores"}],"perks":["Ally credit cards moved to Ollo (Merrick Bank) in April 2026"],"source":{"url":"https://www.nerdwallet.com/credit-cards/learn/ollo-card","checked":"2026-09-29","note":"Ollo's own page requires JavaScript; rates from NerdWallet. Confirm your former Ally card earns the same."}},"chase_sapphire_reserve":{"brand":"chase","name":"Sapphire Reserve","short":"Sapphire Reserve","network":"visa","fee":795,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":8,"label":"Chase Travel","cond":"Only when booked through Chase Travel"},{"cats":["travel"],"rate":4,"label":"Flights & hotels booked direct","cond":"Booked directly with the airline or hotel","m":["airline","hotel"]},{"cats":["dining"],"rate":3,"label":"Dining worldwide"}],"perks":["5x on Lyft through Sep 30, 2027","Purchases covered by the card's credits don't earn points"],"source":{"url":"https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve","checked":"2026-09-29"}},"chase_freedom_rise":{"brand":"chase","name":"Freedom Rise","short":"Freedom Rise","network":"visa","fee":0,"type":"cash","base":1.5,"rules":[{"cats":["transit"],"rate":2,"label":"Lyft","cond":"Lyft rides only, through Sep 30, 2027","m":["lyft"]}],"perks":["Built for new credit; $25 credit for setting up autopay"],"source":{"url":"https://creditcards.chase.com/cash-back-credit-cards/freedom/rise","checked":"2026-09-29"}},"chase_amazon_visa":{"brand":"chase","name":"Amazon Visa","short":"Amazon Visa","network":"visa","fee":0,"type":"cash","base":1,"rules":[{"cats":["amazon","wholefoods"],"rate":3,"label":"Amazon, Audible & Whole Foods"},{"cats":["travel"],"rate":3,"label":"Chase Travel","cond":"Only when booked through Chase Travel"},{"cats":["gas"],"rate":2,"label":"Gas stations"},{"cats":["dining"],"rate":2,"label":"Restaurants"},{"cats":["transit"],"rate":2,"label":"Local transit & rideshare"}],"perks":["No Prime membership needed (Prime Visa earns 5% with Prime)"],"source":{"url":"https://creditcards.chase.com/cash-back-credit-cards/amazon-rewards","checked":"2026-09-29"}},"chase_united_explorer":{"brand":"chase","name":"United Explorer","short":"United Explorer","network":"visa","fee":150,"feeNote":"$0 the first year, then $150","type":"miles","cpp":1.2,"base":1,"rules":[{"cats":["travel"],"rate":3,"label":"United purchases","cond":"United flights & purchases only (6x more on your own fare)","m":["united"]},{"cats":["travel"],"rate":2,"label":"Hotels","cond":"Booked directly with the hotel","m":["hotel"]},{"cats":["dining"],"rate":2,"label":"Dining & delivery"}],"perks":["Miles valued at 1.2¢ for ranking","10,000-mile award discount after $20,000 spend a year"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/united/united-explorer","checked":"2026-09-29"}},"chase_united_quest":{"brand":"chase","name":"United Quest","short":"United Quest","network":"visa","fee":350,"type":"miles","cpp":1.2,"base":1,"rules":[{"cats":["travel"],"rate":4,"label":"United purchases","cond":"United flights & purchases only (6x more on your own fare)","m":["united"]},{"cats":["travel","transit"],"rate":2,"label":"Travel & transit","note":"Airfare, hotels, rental cars, rideshare, tolls"},{"cats":["dining"],"rate":2,"label":"Dining & delivery"},{"cats":["streaming"],"rate":2,"label":"Select streaming"}],"perks":["Miles valued at 1.2¢ for ranking"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/united/united-quest","checked":"2026-09-29"}},"chase_southwest_plus":{"brand":"chase","name":"Southwest Rapid Rewards Plus","short":"Southwest Plus","network":"visa","fee":99,"type":"points","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":2,"label":"Southwest purchases","cond":"Southwest flights & Getaways only","m":["southwest"]},{"cats":["gas","grocery"],"rate":2,"label":"Gas & grocery","note":"First $5,000/yr combined, then 1x"}],"perks":["Points valued at 1.3¢ for ranking","3,000 bonus points each anniversary"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/southwest/plus","checked":"2026-09-29"}},"chase_southwest_priority":{"brand":"chase","name":"Southwest Rapid Rewards Priority","short":"Southwest Priority","network":"visa","fee":229,"type":"points","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":4,"label":"Southwest purchases","cond":"Southwest flights & Getaways only","m":["southwest"]},{"cats":["gas"],"rate":2,"label":"Gas stations"},{"cats":["dining"],"rate":2,"label":"Restaurants"}],"perks":["Points valued at 1.3¢ for ranking","7,500 bonus points each anniversary"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/southwest/priority","checked":"2026-09-29"}},"chase_marriott_boundless":{"brand":"chase","name":"Marriott Bonvoy Boundless","short":"Marriott Boundless","network":"visa","fee":95,"type":"points","cpp":0.7,"base":2,"rules":[{"cats":["travel"],"rate":6,"label":"Marriott hotels","cond":"Marriott Bonvoy hotels only","m":["marriott"]},{"cats":["gas","grocery","dining"],"rate":3,"label":"Gas, grocery & dining","note":"First $6,000/yr combined, then 2x"}],"perks":["Points valued at 0.7¢ for ranking","Free night award each anniversary"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless","checked":"2026-09-29"}},"chase_ihg_premier":{"brand":"chase","name":"IHG One Rewards Premier","short":"IHG Premier","network":"mastercard","fee":99,"type":"points","cpp":0.5,"base":3,"rules":[{"cats":["travel"],"rate":10,"label":"IHG hotels","cond":"IHG hotels booked direct only","m":["ihg"]},{"cats":["travel"],"rate":5,"label":"Other travel"},{"cats":["dining"],"rate":5,"label":"Dining"},{"cats":["gas"],"rate":5,"label":"Gas stations"}],"perks":["Points valued at 0.5¢ for ranking","$100 credit + 10,000 points after $20,000 spend a year"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/premier","checked":"2026-09-29"}},"chase_world_of_hyatt":{"brand":"chase","name":"World of Hyatt","short":"World of Hyatt","network":"visa","fee":95,"type":"points","cpp":1.5,"base":1,"rules":[{"cats":["travel"],"rate":4,"label":"Hyatt hotels","cond":"Hyatt hotels only","m":["hyatt"]},{"cats":["travel"],"rate":2,"label":"Airline tickets","cond":"Bought directly from the airline","m":["airline"]},{"cats":["dining"],"rate":2,"label":"Restaurants"},{"cats":["transit"],"rate":2,"label":"Local transit & commuting"},{"cats":["fitness"],"rate":2,"label":"Gyms & fitness clubs"}],"perks":["Points valued at 1.5¢ for ranking","No foreign transaction fees"],"source":{"url":"https://creditcards.chase.com/travel-credit-cards/world-of-hyatt-credit-card","checked":"2026-09-29"}},"chase_disney_premier":{"brand":"chase","name":"Disney Premier Visa","short":"Disney Premier","network":"visa","fee":49,"type":"cash","base":1,"rules":[{"cats":["streaming"],"rate":5,"label":"Disney+, Hulu & ESPN","cond":"Bought directly at DisneyPlus.com, Hulu.com or ESPN","m":["disneyplus","hulu","espnplus"]},{"cats":["gas"],"rate":2,"label":"Gas stations"},{"cats":["grocery"],"rate":2,"label":"Grocery stores"},{"cats":["dining"],"rate":2,"label":"Restaurants"}],"perks":["Earns Disney Rewards Dollars (1 dollar = $1 at Disney)","2% at Disney locations in the U.S."],"source":{"url":"https://creditcards.chase.com/rewards-credit-cards/disney/premier","checked":"2026-09-29"}},"chase_ink_cash":{"brand":"chase","name":"Ink Business Cash","short":"Ink Cash","network":"visa","business":true,"fee":0,"type":"cash","base":1,"rules":[{"cats":["office","utilities","phone"],"rate":5,"label":"Office supplies, internet, cable & phone","note":"First $25,000/yr combined, then 1%"},{"cats":["gas","dining"],"rate":2,"label":"Gas & restaurants","note":"First $25,000/yr combined, then 1%"},{"cats":["transit"],"rate":5,"label":"Lyft","cond":"Lyft rides only, through Sep 30, 2027","m":["lyft"]}],"perks":["Business card"],"source":{"url":"https://creditcards.chase.com/business-credit-cards/ink/cash","checked":"2026-09-29"}},"chase_ink_unlimited":{"brand":"chase","name":"Ink Business Unlimited","short":"Ink Unlimited","network":"visa","business":true,"fee":0,"type":"cash","base":1.5,"rules":[{"cats":["transit"],"rate":5,"label":"Lyft","cond":"Lyft rides only, through Sep 30, 2027","m":["lyft"]}],"perks":["Business card"],"source":{"url":"https://creditcards.chase.com/business-credit-cards/ink/unlimited","checked":"2026-09-29"}},"chase_ink_preferred":{"brand":"chase","name":"Ink Business Preferred","short":"Ink Preferred","network":"visa","business":true,"fee":95,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel","utilities","phone"],"rate":3,"label":"Travel, internet, cable & phone","note":"Plus shipping & ads. First $150,000/yr combined, then 1x"},{"cats":["transit"],"rate":5,"label":"Lyft","cond":"Lyft rides only, through Sep 30, 2027","m":["lyft"]}],"perks":["Business card","No foreign transaction fees"],"source":{"url":"https://creditcards.chase.com/business-credit-cards/ink/business-preferred","checked":"2026-09-29"}},"amex_platinum":{"brand":"amex","name":"Platinum Card","short":"Amex Platinum","network":"amex","fee":895,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":5,"label":"Flights & prepaid hotels","cond":"Flights direct with the airline or Amex Travel; hotels prepaid on Amex Travel","m":["airline"]}],"perks":["5x on flights capped at $500,000/yr"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/platinum/","checked":"2026-09-29"}},"amex_green":{"brand":"amex","name":"Green Card","short":"Amex Green","network":"amex","fee":150,"type":"points","cpp":1,"base":1,"status":"closed","rules":[{"cats":["travel","transit"],"rate":3,"label":"Travel & transit","note":"Flights, hotels, rideshare, trains, tolls, parking"},{"cats":["dining"],"rate":3,"label":"Restaurants worldwide"}],"perks":["Closed to new applicants since July 2026; existing cards keep their rewards"],"source":{"url":"https://www.nerdwallet.com/credit-cards/reviews/american-express-green","checked":"2026-09-29","note":"Amex's page didn't load; rates from NerdWallet"}},"amex_delta_gold":{"brand":"amex","name":"Delta SkyMiles Gold","short":"Delta Gold","network":"amex","fee":150,"feeNote":"$0 the first year, then $150","type":"miles","cpp":1.1,"base":1,"rules":[{"cats":["travel"],"rate":2,"label":"Delta purchases","cond":"Bought directly from Delta","m":["delta"]},{"cats":["dining"],"rate":2,"label":"U.S. restaurants"},{"cats":["grocery"],"rate":2,"label":"U.S. supermarkets"}],"perks":["Miles valued at 1.1¢ for ranking"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/","checked":"2026-09-29"}},"amex_delta_platinum":{"brand":"amex","name":"Delta SkyMiles Platinum","short":"Delta Platinum","network":"amex","fee":350,"type":"miles","cpp":1.1,"base":1,"rules":[{"cats":["travel"],"rate":3,"label":"Delta & hotels","cond":"Bought directly from Delta or the hotel","m":["delta","hotel"]},{"cats":["dining"],"rate":2,"label":"U.S. restaurants"},{"cats":["grocery"],"rate":2,"label":"U.S. supermarkets"}],"perks":["Miles valued at 1.1¢ for ranking"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-platinum-american-express-card/","checked":"2026-09-29"}},"amex_delta_reserve":{"brand":"amex","name":"Delta SkyMiles Reserve","short":"Delta Reserve","network":"amex","fee":650,"type":"miles","cpp":1.1,"base":1,"rules":[{"cats":["travel"],"rate":3,"label":"Delta purchases","cond":"Bought directly from Delta","m":["delta"]}],"perks":["Miles valued at 1.1¢ for ranking","$1 MQD for every $10 spent"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-reserve-american-express-card/","checked":"2026-09-29"}},"amex_hilton":{"brand":"amex","name":"Hilton Honors","short":"Hilton Honors","network":"amex","fee":0,"type":"points","cpp":0.5,"base":3,"rules":[{"cats":["travel"],"rate":7,"label":"Hilton hotels","cond":"Booked directly with Hilton hotels","m":["hilton"]},{"cats":["dining"],"rate":5,"label":"U.S. restaurants"},{"cats":["grocery"],"rate":5,"label":"U.S. supermarkets"},{"cats":["gas"],"rate":5,"label":"U.S. gas stations"}],"perks":["Points valued at 0.5¢ for ranking"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/hilton-honors/","checked":"2026-09-29"}},"amex_hilton_surpass":{"brand":"amex","name":"Hilton Honors Surpass","short":"Hilton Surpass","network":"amex","fee":150,"feeNote":"$0 the first year, then $150","type":"points","cpp":0.5,"base":3,"rules":[{"cats":["travel"],"rate":12,"label":"Hilton hotels","cond":"Booked directly with Hilton hotels","m":["hilton"]},{"cats":["dining"],"rate":6,"label":"U.S. restaurants"},{"cats":["grocery"],"rate":6,"label":"U.S. supermarkets"},{"cats":["gas"],"rate":6,"label":"U.S. gas stations"},{"cats":["online"],"rate":4,"label":"U.S. online retail"}],"perks":["Points valued at 0.5¢ for ranking","Free night after $15,000 spend a year"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/hilton-honors-surpass/","checked":"2026-09-29"}},"amex_hilton_aspire":{"brand":"amex","name":"Hilton Honors Aspire","short":"Hilton Aspire","network":"amex","fee":550,"type":"points","cpp":0.5,"base":3,"rules":[{"cats":["travel"],"rate":14,"label":"Hilton hotels","cond":"Booked directly with Hilton hotels","m":["hilton"]},{"cats":["travel"],"rate":7,"label":"Select travel","cond":"Flights direct or on Amex Travel; select car rentals"},{"cats":["dining"],"rate":7,"label":"U.S. restaurants"}],"perks":["Points valued at 0.5¢ for ranking"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/hilton-honors-aspire/","checked":"2026-09-29"}},"amex_marriott_brilliant":{"brand":"amex","name":"Marriott Bonvoy Brilliant","short":"Marriott Brilliant","network":"amex","fee":650,"type":"points","cpp":0.7,"base":2,"rules":[{"cats":["travel"],"rate":6,"label":"Marriott hotels","cond":"Marriott Bonvoy hotels only","m":["marriott"]},{"cats":["travel"],"rate":3,"label":"Flights","cond":"Booked directly with the airline","m":["airline"]},{"cats":["dining"],"rate":3,"label":"Restaurants worldwide"}],"perks":["Points valued at 0.7¢ for ranking"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-brilliant/","checked":"2026-09-29"}},"amex_marriott_bevy":{"brand":"amex","name":"Marriott Bonvoy Bevy","short":"Marriott Bevy","network":"amex","fee":250,"type":"points","cpp":0.7,"base":2,"rules":[{"cats":["travel"],"rate":6,"label":"Marriott hotels","cond":"Marriott Bonvoy hotels only","m":["marriott"]},{"cats":["dining","grocery"],"rate":4,"label":"Restaurants & U.S. supermarkets","note":"First $15,000/yr combined, then 2x"}],"perks":["Points valued at 0.7¢ for ranking","Free night after $15,000 spend a year"],"source":{"url":"https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-bevy/","checked":"2026-09-29"}},"amex_blue_business_plus":{"brand":"amex","name":"Blue Business Plus","short":"Blue Business Plus","network":"amex","business":true,"fee":0,"type":"points","cpp":1,"base":2,"baseLabel":"Everything (first $50,000/yr, then 1x)","perks":["Business card"],"source":{"url":"https://www.nerdwallet.com/business/credit-cards/reviews/amex-blue-business-plus","checked":"2026-09-29","note":"Amex's business page moved; rates from NerdWallet"}},"citi_strata_premier":{"brand":"citi","name":"Strata Premier","short":"Strata Premier","network":"mastercard","fee":95,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":10,"label":"Citi Travel","cond":"Hotels, car rentals & attractions through Citi Travel"},{"cats":["travel"],"rate":3,"label":"Air travel & other hotels"},{"cats":["dining"],"rate":3,"label":"Restaurants"},{"cats":["grocery"],"rate":3,"label":"Supermarkets"},{"cats":["gas"],"rate":3,"label":"Gas & EV charging"}],"perks":[],"source":{"url":"https://www.citi.com/credit-cards/citi-strata-premier-credit-card","checked":"2026-09-29"}},"citi_strata_elite":{"brand":"citi","name":"Strata Elite","short":"Strata Elite","network":"mastercard","fee":595,"type":"points","cpp":1,"base":1.5,"rules":[{"cats":["travel"],"rate":12,"label":"Citi Travel hotels & cars","cond":"Hotels, car rentals & attractions through Citi Travel"},{"cats":["travel"],"rate":6,"label":"Citi Travel flights","cond":"Flights booked through Citi Travel"},{"cats":["dining"],"rate":3,"label":"Restaurants","note":"6x Fri & Sat 6 PM–6 AM ET (Citi Nights)"}],"perks":[],"source":{"url":"https://www.citi.com/credit-cards/citi-strata-elite-credit-card","checked":"2026-09-29","note":"Annual fee from One Mile at a Time; Citi's page didn't show it"}},"citi_aadvantage_platinum":{"brand":"citi","name":"AAdvantage Platinum Select","short":"AAdvantage Platinum","network":"mastercard","fee":99,"feeNote":"$0 the first year, then $99","type":"miles","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":2,"label":"American Airlines","cond":"American Airlines purchases only","m":["american"]},{"cats":["dining"],"rate":2,"label":"Restaurants"},{"cats":["gas"],"rate":2,"label":"Gas stations"}],"perks":["Miles valued at 1.3¢ for ranking"],"source":{"url":"https://www.citi.com/credit-cards/citi-aadvantage-platinum-select-world-elite-mastercard","checked":"2026-09-29"}},"citi_aadvantage_executive":{"brand":"citi","name":"AAdvantage Executive","short":"AAdvantage Executive","network":"mastercard","fee":695,"type":"miles","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":12,"label":"AAdvantage Hotels & Cars","cond":"Booked through AAdvantage Hotels or Cars"},{"cats":["travel"],"rate":4,"label":"American Airlines","cond":"American Airlines purchases only (5x after $150,000/yr)","m":["american"]}],"perks":["Miles valued at 1.3¢ for ranking"],"source":{"url":"https://www.citi.com/credit-cards/citi-aadvantage-executive-world-legend-mastercard","checked":"2026-09-29","note":"Annual fee from NerdWallet (raised to $695 in 2026)"}},"citi_aadvantage_globe":{"brand":"citi","name":"AAdvantage Globe","short":"AAdvantage Globe","network":"mastercard","fee":350,"type":"miles","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":6,"label":"AAdvantage Hotels","cond":"Booked through AAdvantage Hotels"},{"cats":["travel"],"rate":3,"label":"American Airlines","cond":"American Airlines purchases only","m":["american"]},{"cats":["dining"],"rate":2,"label":"Restaurants"},{"cats":["transit"],"rate":2,"label":"Rides & rails","note":"Taxis, rideshare, public transit"}],"perks":["Miles valued at 1.3¢ for ranking"],"source":{"url":"https://www.citi.com/credit-cards/citi-aadvantage-globe-mastercard","checked":"2026-09-29","note":"Annual fee from Doctor of Credit"}},"capone_venture_x":{"brand":"capone","name":"Venture X","short":"Venture X","network":"visa","networkOptions":["visa","mastercard","discover"],"fee":395,"type":"miles","cpp":1,"base":2,"rules":[{"cats":["travel"],"rate":10,"label":"Capital One Travel hotels & cars","cond":"Hotels & rental cars through Capital One Travel"},{"cats":["travel"],"rate":5,"label":"Capital One Travel flights","cond":"Flights & vacation rentals through Capital One Travel"},{"cats":["entertainment"],"rate":5,"label":"Capital One Entertainment","cond":"Tickets bought through Capital One Entertainment"}],"perks":[],"source":{"url":"https://www.capitalone.com/credit-cards/venture-x/","checked":"2026-09-29"}},"capone_ventureone":{"brand":"capone","name":"VentureOne","short":"VentureOne","network":"visa","networkOptions":["visa","mastercard","discover"],"fee":0,"type":"miles","cpp":1,"base":1.25,"rules":[{"cats":["travel"],"rate":5,"label":"Capital One Travel","cond":"Hotels, vacation rentals & rental cars through Capital One Travel"}],"perks":["No foreign transaction fees"],"source":{"url":"https://www.capitalone.com/credit-cards/ventureone/","checked":"2026-09-29"}},"capone_quicksilverone":{"brand":"capone","name":"QuicksilverOne","short":"QuicksilverOne","network":"mastercard","networkOptions":["visa","mastercard","discover"],"fee":39,"type":"cash","base":1.5,"perks":["For fair credit"],"source":{"url":"https://www.capitalone.com/credit-cards/quicksilverone/","checked":"2026-09-29"}},"capone_quicksilver_secured":{"brand":"capone","name":"Quicksilver Secured","short":"Quicksilver Secured","network":"mastercard","networkOptions":["visa","mastercard","discover"],"fee":0,"type":"cash","base":1.5,"perks":["$200 minimum refundable deposit"],"source":{"url":"https://www.capitalone.com/credit-cards/quicksilver-secured/","checked":"2026-09-29"}},"capone_savor_student":{"brand":"capone","name":"Savor for Students","short":"Savor Student","network":"mastercard","networkOptions":["visa","mastercard","discover"],"fee":0,"type":"cash","base":1,"rules":[{"cats":["dining"],"rate":3,"label":"Dining"},{"cats":["grocery"],"rate":3,"label":"Grocery stores","note":"Not superstores like Walmart and Target"},{"cats":["entertainment"],"rate":3,"label":"Entertainment"},{"cats":["streaming"],"rate":3,"label":"Popular streaming"}],"perks":[],"source":{"url":"https://www.capitalone.com/credit-cards/savor-student/","checked":"2026-09-29"}},"chase_freedom":{"brand":"chase","name":"Freedom (original)","short":"Chase Freedom (original)","network":"visa","status":"closed","fee":0,"type":"cash","base":1,"rotating":{"rate":5,"cap":"Up to $1,500/quarter combined, then 1%","retroactive":true,"deadlineDay":14,"activateHint":"Activation opens around the 15th of the month before each quarter. Activate by the 14th of the quarter's last month; it counts back to the start of the quarter.","schedule":{"2026-Q1":{"cats":["dining"],"label":"Restaurants"},"2026-Q2":{"cats":["amazon","wholefoods"],"label":"Amazon, Whole Foods & Chase Travel"},"2026-Q3":{"cats":["gas","entertainment","transit"],"label":"Gas & EV charging, live entertainment, public transit"},"2026-Q4":{"cats":["grocery","dining"],"label":"Grocery stores (not Walmart or Target) & dining","opens":"2026-09-15"}}},"perks":["No longer offered, but existing cards earn the same quarterly 5% as Freedom Flex"],"source":{"url":"https://www.nerdwallet.com/credit-cards/learn/chase-freedom-calendar","checked":"2026-09-29","note":"Same quarterly calendar as Freedom Flex"}},"discover_it_miles":{"brand":"discover","name":"it Miles","short":"Discover Miles","network":"discover","fee":0,"type":"miles","cpp":1,"base":1.5,"perks":["New cardholders: all miles matched at the end of year one"],"source":{"url":"https://www.discover.com/credit-cards/travel/","checked":"2026-09-29"}},"discover_it_chrome":{"brand":"discover","name":"it Chrome","short":"Discover Chrome","network":"discover","fee":0,"type":"cash","base":1,"rules":[{"cats":["gas","dining"],"rate":2,"label":"Gas stations & restaurants","note":"First $1,000/quarter combined, then 1%"}],"perks":["New cardholders: all cash back matched at the end of year one"],"source":{"url":"https://www.discover.com/credit-cards/cash-back/chrome/","checked":"2026-09-29"}},"discover_it_student":{"brand":"discover","name":"it Student Cash Back","short":"Discover Student","network":"discover","fee":0,"type":"cash","base":1,"rotating":{"rate":5,"cap":"Up to $1,500/quarter combined, then 1%","retroactive":false,"activateHint":"Activate in the Discover or Capital One app. Not retroactive, so activate before you spend.","schedule":{"2026-Q1":{"cats":["grocery","costco","streaming","warehouse"],"label":"Grocery, wholesale clubs & select streaming"},"2026-Q2":{"cats":["dining","home"],"label":"Restaurants & home improvement"},"2026-Q3":{"cats":["gas","transit","drugstore"],"label":"Gas & EV charging, airlines & public transit, drugstores"},"2026-Q4":{"cats":["dining","entertainment","utilities"],"label":"Restaurants, entertainment & utilities","opens":"2026-09-01"}}},"perks":["Same quarterly 5% calendar as Discover it Cash Back"],"source":{"url":"https://www.discover.com/credit-cards/student/it-card.html","checked":"2026-09-29"}},"discover_it_secured":{"brand":"discover","name":"it Secured","short":"Discover Secured","network":"discover","fee":0,"type":"cash","base":1,"rotating":{"rate":5,"cap":"Up to $1,500/quarter combined, then 1%","retroactive":false,"activateHint":"Activate in the Discover or Capital One app. Not retroactive, so activate before you spend.","schedule":{"2026-Q1":{"cats":["grocery","costco","streaming","warehouse"],"label":"Grocery, wholesale clubs & select streaming"},"2026-Q2":{"cats":["dining","home"],"label":"Restaurants & home improvement"},"2026-Q3":{"cats":["gas","transit","drugstore"],"label":"Gas & EV charging, airlines & public transit, drugstores"},"2026-Q4":{"cats":["dining","entertainment","utilities"],"label":"Restaurants, entertainment & utilities","opens":"2026-09-01"}}},"perks":["Refundable deposit from $49","Same quarterly 5% calendar as Discover it Cash Back"],"source":{"url":"https://www.discover.com/credit-cards/secured/","checked":"2026-09-29"}},"boa_unlimited_cash":{"brand":"boa","name":"Unlimited Cash Rewards","short":"BofA Unlimited Cash","network":"visa","fee":0,"type":"cash","base":1.5,"perks":[],"source":{"url":"https://www.bankofamerica.com/credit-cards/products/unlimited-cash-back-credit-card/","checked":"2026-09-29"}},"boa_travel_rewards":{"brand":"boa","name":"Travel Rewards","short":"BofA Travel Rewards","network":"visa","fee":0,"type":"points","cpp":1,"base":1.5,"perks":["No foreign transaction fees"],"source":{"url":"https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/","checked":"2026-09-29"}},"boa_premium_rewards":{"brand":"boa","name":"Premium Rewards","short":"BofA Premium Rewards","network":"visa","fee":95,"type":"points","cpp":1,"base":1.5,"rules":[{"cats":["travel","transit"],"rate":2,"label":"Travel"},{"cats":["dining"],"rate":2,"label":"Dining"}],"perks":["Up to $100 airline incidental credit each year","No foreign transaction fees"],"source":{"url":"https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/","checked":"2026-09-29"}},"boa_atmos_ascent":{"brand":"boa","name":"Atmos Rewards Ascent","short":"Alaska Atmos Ascent","network":"visa","fee":95,"type":"points","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":3,"label":"Alaska & Hawaiian Airlines","cond":"Alaska and Hawaiian Airlines purchases only","m":["alaska","hawaiian"]},{"cats":["gas"],"rate":2,"label":"Gas & EV charging"},{"cats":["transit"],"rate":2,"label":"Local transit & rideshare"},{"cats":["streaming","utilities"],"rate":2,"label":"Cable & select streaming"}],"perks":["Points valued at 1.3¢ for ranking","Companion fare after $6,000 spend a year"],"source":{"url":"https://onemileatatime.com/guides/atmos-rewards-ascent-visa-card/","checked":"2026-09-29","note":"Formerly the Alaska Airlines Visa"}},"wells_autograph_journey":{"brand":"wells","name":"Autograph Journey","short":"Autograph Journey","network":"visa","fee":95,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":5,"label":"Hotels","cond":"Hotel and motel purchases","m":["hotel"]},{"cats":["travel"],"rate":4,"label":"Airlines","cond":"Airline purchases","m":["airline"]},{"cats":["travel"],"rate":3,"label":"Other travel"},{"cats":["dining"],"rate":3,"label":"Restaurants"}],"perks":["$50 airline credit each year"],"source":{"url":"https://creditcards.wellsfargo.com/autograph-journey-visa-credit-card/","checked":"2026-09-29"}},"wells_one_key":{"brand":"wells","name":"One Key","short":"One Key","network":"mastercard","fee":0,"type":"points","cpp":1,"base":1.5,"rules":[{"cats":["travel"],"rate":3,"label":"Expedia, Hotels.com & Vrbo","cond":"Booked on Expedia, Hotels.com or Vrbo","m":["expedia","hotelscom","vrbo"]},{"cats":["gas"],"rate":3,"label":"Gas stations"},{"cats":["grocery"],"rate":3,"label":"Grocery stores"},{"cats":["dining"],"rate":3,"label":"Dining"}],"perks":["Earns OneKeyCash, usable only on Expedia, Hotels.com and Vrbo"],"source":{"url":"https://awardwallet.com/credit-cards/hotels/one-key-credit-card/","checked":"2026-09-29","note":"Wells Fargo's page didn't load"}},"usbank_altitude_connect":{"brand":"usbank","name":"Altitude Connect","short":"Altitude Connect","network":"visa","fee":0,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":5,"label":"U.S. Bank Travel Center","cond":"Prepaid hotels & car rentals in the Travel Center"},{"cats":["travel","transit"],"rate":4,"label":"Travel","note":"Airlines, hotels, car rentals, taxis, trains, cruises"},{"cats":["gas"],"rate":4,"label":"Gas & EV charging","note":"First $1,000/quarter, then 1x"},{"cats":["dining"],"rate":2,"label":"Dining"},{"cats":["streaming"],"rate":2,"label":"Streaming"},{"cats":["grocery"],"rate":2,"label":"Grocery stores","note":"Not discount stores, supercenters or warehouse clubs"}],"perks":[],"source":{"url":"https://www.usbank.com/credit-cards/altitude-connect-visa-signature-credit-card.html","checked":"2026-09-29"}},"usbank_smartly":{"brand":"usbank","name":"Smartly","short":"US Bank Smartly","network":"visa","fee":0,"type":"cash","base":2,"perks":["Up to 4% on the first $10,000 each billing cycle with a U.S. Bank Smartly Savings balance tier"],"source":{"url":"https://www.usbank.com/credit-cards/smartly-visa-signature-credit-card.html","checked":"2026-09-29"}},"barclays_aviator_red":{"brand":"barclays","name":"AAdvantage Aviator Red","short":"Aviator Red","network":"mastercard","fee":95,"type":"miles","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":2,"label":"American Airlines","cond":"American Airlines purchases only","m":["american"]}],"perks":["Miles valued at 1.3¢ for ranking"],"source":{"url":"https://cards.barclaycardus.com/banking/cards/aadvantage-aviator-red-world-elite-mastercard/","checked":"2026-09-29"}},"barclays_jetblue_plus":{"brand":"barclays","name":"JetBlue Plus","short":"JetBlue Plus","network":"mastercard","fee":99,"type":"points","cpp":1.3,"base":1,"rules":[{"cats":["travel"],"rate":6,"label":"JetBlue","cond":"JetBlue purchases only","m":["jetblue"]},{"cats":["dining"],"rate":2,"label":"Restaurants"},{"cats":["grocery"],"rate":2,"label":"Grocery stores"}],"perks":["Points valued at 1.3¢ for ranking","5,000 bonus points each anniversary"],"source":{"url":"https://cards.barclaycardus.com/banking/cards/jetblue-plus-card/","checked":"2026-09-29"}},"walmart_onepay":{"brand":"walmart","name":"OnePay CashRewards","short":"Walmart OnePay","network":"mastercard","fee":0,"type":"cash","base":1.5,"rules":[{"cats":["walmart"],"rate":5,"label":"Walmart","note":"5% with Walmart+, otherwise 3%"}],"perks":["Replaced the Capital One Walmart card"],"source":{"url":"https://www.onepay.com/credit-card","checked":"2026-09-29"}},"target_circle":{"brand":"target","name":"Target Circle Card","short":"Target Circle Card","network":"store","storeOnly":["target"],"fee":0,"type":"cash","base":0,"rules":[{"cats":["target"],"rate":5,"label":"5% off at Target","note":"Instant discount at checkout, in store and online"}],"perks":["Works only at Target (the credit card version)","Also 5% off at Starbucks inside Target"],"source":{"url":"https://www.target.com/circlecard","checked":"2026-09-29"}},"amazon_store_card":{"brand":"amazon","name":"Amazon Store Card","short":"Amazon Store Card","network":"store","storeOnly":["amazon","wholefoods"],"fee":0,"type":"cash","base":0,"rules":[{"cats":["amazon","wholefoods"],"rate":5,"label":"Amazon & Whole Foods","note":"5% with Prime"}],"perks":["Works only at Amazon and Whole Foods"],"source":{"url":"https://upgradedpoints.com/credit-cards/best-store-credit-cards/","checked":"2026-09-29"}},"lowes_mylowes":{"brand":"lowes","name":"MyLowe's Rewards Card","short":"Lowe's Card","network":"store","storeOnly":["home"],"fee":0,"type":"cash","base":0,"rules":[{"cats":["home"],"rate":5,"label":"5% off at Lowe's","cond":"Lowe's only","m":["lowes"]}],"perks":["Works only at Lowe's; 5% off or special financing"],"source":{"url":"https://upgradedpoints.com/credit-cards/best-store-credit-cards/","checked":"2026-09-29"}},"bestbuy_visa":{"brand":"bestbuy","name":"My Best Buy Visa","short":"Best Buy Visa","network":"visa","fee":0,"feeNote":"Some accounts have an annual fee depending on credit","type":"cash","base":1,"rules":[{"cats":["electronics"],"rate":5,"label":"Best Buy","cond":"Best Buy purchases only","m":["bestbuy"]},{"cats":["gas"],"rate":3,"label":"Gas"},{"cats":["grocery"],"rate":2,"label":"Grocery"},{"cats":["dining"],"rate":2,"label":"Dining & takeout"}],"perks":["Rewards come as Best Buy certificates","No foreign transaction fees"],"source":{"url":"https://www.citi.com/credit-cards/citi-best-buy-credit-cards","checked":"2026-09-29"}},"samsclub_mastercard":{"brand":"samsclub","name":"Sam's Club Mastercard","short":"Sam's Club Card","network":"mastercard","fee":0,"feeNote":"Requires a Sam's Club membership","type":"cash","base":1,"rules":[{"cats":["gas"],"rate":5,"label":"Gas","note":"First $6,000/yr, then 1%"},{"cats":["dining"],"rate":3,"label":"Dining"}],"perks":["Plus members may earn more at Sam's Club"],"source":{"url":"https://upgradedpoints.com/credit-cards/best-store-credit-cards/","checked":"2026-09-29"}},"paypal_cashback":{"brand":"paypal","name":"PayPal Cashback Mastercard","short":"PayPal Card","network":"mastercard","fee":0,"type":"cash","base":1.5,"rules":[{"cats":["online","amazon"],"rate":3,"label":"Checking out with PayPal","cond":"Only when you pay through PayPal","m":["paypal"]}],"perks":[],"source":{"url":"https://www.paypal.com/us/digital-wallet/manage-money/paypal-cashback-mastercard","checked":"2026-09-29"}},"venmo_card":{"brand":"venmo","name":"Venmo Credit Card","short":"Venmo Card","network":"visa","fee":0,"type":"cash","base":1,"rules":[{"cats":["dining","entertainment","streaming"],"rate":3,"label":"Dining, entertainment & streaming","note":"+1% when friends pay you back through Venmo"},{"cats":["online"],"rate":3,"label":"Paying with Venmo","cond":"Only when you pay with Venmo"}],"perks":[],"source":{"url":"https://venmo.com/about/creditcard/","checked":"2026-09-29"}},"verizon_visa":{"brand":"verizon","name":"Verizon Visa","short":"Verizon Visa","network":"visa","fee":0,"type":"cash","base":1,"rules":[{"cats":["grocery","gas","dining"],"rate":4,"label":"Grocery, gas & dining"},{"cats":["phone"],"rate":4,"label":"Verizon","cond":"Verizon purchases only","m":["verizon"]}],"perks":["Rewards redeem toward your Verizon bill"],"source":{"url":"https://upgradedpoints.com/credit-cards/best-store-credit-cards/","checked":"2026-09-29"}},"bilt_blue":{"brand":"bilt","name":"Bilt Blue Card","short":"Bilt Blue","network":"mastercard","fee":0,"type":"points","cpp":1,"base":1,"perks":["Also earns 4% in Bilt Cash, used to unlock points on rent or mortgage (not counted in ranking)"],"source":{"url":"https://upgradedpoints.com/news/bilt-new-credit-card-details/","checked":"2026-09-29"}},"bilt_obsidian":{"brand":"bilt","name":"Bilt Obsidian Card","short":"Bilt Obsidian","network":"mastercard","fee":95,"type":"points","cpp":1,"base":1,"rules":[{"cats":["travel"],"rate":2,"label":"Travel"}],"choice":[{"id":"pick","rate":3,"pick":1,"period":"persistent","label":"Your 3x pick","note":"First $25,000/yr, then 1x. Can change once a year.","options":[{"id":"dining","label":"Dining","cats":["dining"]},{"id":"grocery","label":"Grocery","cats":["grocery"]}]}],"perks":["Also earns 4% in Bilt Cash (not counted in ranking)"],"source":{"url":"https://upgradedpoints.com/news/bilt-new-credit-card-details/","checked":"2026-09-29"}},"bilt_palladium":{"brand":"bilt","name":"Bilt Palladium Card","short":"Bilt Palladium","network":"mastercard","fee":495,"type":"points","cpp":1,"base":2,"perks":["Also earns 4% in Bilt Cash (not counted in ranking)"],"source":{"url":"https://upgradedpoints.com/news/bilt-new-credit-card-details/","checked":"2026-09-29"}},"nfcu_cashrewards":{"brand":"navyfederal","name":"cashRewards","short":"NFCU cashRewards","network":"visa","networkOptions":["visa","mastercard"],"fee":0,"type":"cash","base":1.5,"perks":["cashRewards Plus (limits of $5,000+) earns 2%"],"source":{"url":"https://www.navyfederal.org/loans-cards/credit-cards/cash-rewards.html","checked":"2026-09-29"}},"nfcu_cashrewards_plus":{"brand":"navyfederal","name":"cashRewards Plus","short":"NFCU cashRewards Plus","network":"visa","networkOptions":["visa","mastercard"],"fee":0,"type":"cash","base":2,"perks":[],"source":{"url":"https://www.navyfederal.org/loans-cards/credit-cards/cash-rewards.html","checked":"2026-09-29"}},"nfcu_more_rewards":{"brand":"navyfederal","name":"More Rewards","short":"NFCU More Rewards","network":"amex","fee":0,"type":"points","cpp":1,"base":1,"rules":[{"cats":["dining"],"rate":3,"label":"Restaurants & delivery"},{"cats":["grocery"],"rate":3,"label":"Supermarkets"},{"cats":["gas","transit"],"rate":3,"label":"Gas & transit"}],"perks":["Points valued at 1¢ for ranking; some redemptions are worth less"],"source":{"url":"https://www.navyfederal.org/loans-cards/credit-cards/more-rewards.html","checked":"2026-09-29"}},"penfed_power_cash":{"brand":"penfed","name":"Power Cash Rewards","short":"PenFed Power Cash","network":"visa","fee":0,"type":"cash","base":1.5,"perks":["2% with Honors Advantage (military, or a qualifying PenFed checking account)"],"source":{"url":"https://www.penfed.org/credit-cards/power-cash-honors-advantage","checked":"2026-09-29"}},"usaa_preferred_cash":{"brand":"usaa","name":"Preferred Cash Rewards","short":"USAA Preferred Cash","network":"visa","fee":0,"type":"cash","base":1.5,"perks":[],"source":{"url":"https://awardwallet.com/credit-cards/cash-back/usaa-preferred-cash-rewards/","checked":"2026-09-29","note":"USAA's page needs a login/cookies"}},"fidelity_rewards":{"brand":"fidelity","name":"Rewards Visa Signature","short":"Fidelity Visa","network":"visa","fee":0,"type":"cash","base":2,"baseLabel":"Everything (deposited into a Fidelity account)","perks":["No foreign transaction fees"],"source":{"url":"https://www.fidelity.com/cash-management/visa-signature-card","checked":"2026-09-29"}},"robinhood_gold":{"brand":"robinhood","name":"Robinhood Gold Card","short":"Robinhood Gold","network":"visa","fee":0,"feeNote":"Requires Robinhood Gold ($50/yr)","type":"points","cpp":1,"base":3,"rules":[{"cats":["travel"],"rate":5,"label":"Robinhood travel portal","cond":"Booked through Robinhood's travel portal"}],"perks":["Points worth 1¢ for travel or investing; cash redemptions are worth less"],"source":{"url":"https://upgradedpoints.com/news/robinhood-gold-card-pros-cons/","checked":"2026-09-29"}},"creditone_platinum":{"brand":"creditone","name":"Platinum Rewards Visa","short":"Credit One Platinum","network":"visa","fee":0,"type":"cash","base":0,"rules":[{"cats":["gas"],"rate":1,"label":"Gas"},{"cats":["grocery"],"rate":1,"label":"Grocery"},{"cats":["utilities","phone"],"rate":1,"label":"Internet, cable, satellite & phone"}],"perks":["No-annual-fee version; other Credit One cards may differ"],"source":{"url":"https://www.creditonebank.com/credit-cards/platinum-no-fee","checked":"2026-09-29"}}},"stores":[{"id":"costco","name":"Costco","cat":"costco","note":"Costco takes only Visa credit cards"},{"id":"costco_gas","name":"Costco Gas","cat":"costco_gas","aka":"costco fuel costco gas station","note":"Costco takes only Visa credit cards"},{"id":"samsclub","name":"Sam's Club","cat":"warehouse","aka":"sams","note":"Warehouse clubs usually don't count as grocery"},{"id":"bjs","name":"BJ's Wholesale","cat":"warehouse","aka":"bjs","note":"Warehouse clubs usually don't count as grocery"},{"id":"walmart","name":"Walmart","cat":"walmart","aka":"walmart supercenter","note":"Walmart doesn't take Apple Pay, and most cards don't count it as grocery"},{"id":"target","name":"Target","cat":"target","note":"Most cards don't count Target as grocery"},{"id":"amazon","name":"Amazon","cat":"amazon","aka":"amazon.com prime audible"},{"id":"wholefoods","name":"Whole Foods","cat":"wholefoods","aka":"whole foods market"},{"id":"safeway","name":"Safeway","cat":"grocery"},{"id":"kroger","name":"Kroger","cat":"grocery"},{"id":"albertsons","name":"Albertsons","cat":"grocery"},{"id":"vons","name":"Vons","cat":"grocery"},{"id":"ralphs","name":"Ralphs","cat":"grocery"},{"id":"publix","name":"Publix","cat":"grocery"},{"id":"traderjoes","name":"Trader Joe's","cat":"grocery"},{"id":"aldi","name":"Aldi","cat":"grocery"},{"id":"heb","name":"H-E-B","cat":"grocery"},{"id":"wegmans","name":"Wegmans","cat":"grocery"},{"id":"sprouts","name":"Sprouts","cat":"grocery"},{"id":"foodlion","name":"Food Lion","cat":"grocery"},{"id":"stopshop","name":"Stop & Shop","cat":"grocery"},{"id":"giant","name":"Giant","cat":"grocery"},{"id":"meijer","name":"Meijer","cat":"grocery"},{"id":"fredmeyer","name":"Fred Meyer","cat":"grocery"},{"id":"winco","name":"WinCo","cat":"grocery"},{"id":"smartfinal","name":"Smart & Final","cat":"grocery"},{"id":"lucky","name":"Lucky","cat":"grocery"},{"id":"savemart","name":"Save Mart","cat":"grocery"},{"id":"harristeeter","name":"Harris Teeter","cat":"grocery"},{"id":"hyvee","name":"Hy-Vee","cat":"grocery"},{"id":"staterbros","name":"Stater Bros","cat":"grocery"},{"id":"winndixie","name":"Winn-Dixie","cat":"grocery"},{"id":"shoprite","name":"ShopRite","cat":"grocery"},{"id":"jewelosco","name":"Jewel-Osco","cat":"grocery"},{"id":"kingsoopers","name":"King Soopers","cat":"grocery"},{"id":"frysfood","name":"Fry's Food","cat":"grocery"},{"id":"food4less","name":"Food 4 Less","cat":"grocery"},{"id":"groceryoutlet","name":"Grocery Outlet","cat":"grocery"},{"id":"99ranch","name":"99 Ranch","cat":"grocery"},{"id":"hmart","name":"H Mart","cat":"grocery"},{"id":"mcdonalds","name":"McDonald's","cat":"fast_food"},{"id":"chipotle","name":"Chipotle","cat":"fast_food"},{"id":"starbucks","name":"Starbucks","cat":"fast_food","note":"Usually counts as fast food or dining"},{"id":"chickfila","name":"Chick-fil-A","cat":"fast_food"},{"id":"tacobell","name":"Taco Bell","cat":"fast_food"},{"id":"wendys","name":"Wendy's","cat":"fast_food"},{"id":"burgerking","name":"Burger King","cat":"fast_food"},{"id":"subway","name":"Subway","cat":"fast_food"},{"id":"pandaexpress","name":"Panda Express","cat":"fast_food"},{"id":"innout","name":"In-N-Out","cat":"fast_food"},{"id":"dominos","name":"Domino's","cat":"fast_food"},{"id":"pizzahut","name":"Pizza Hut","cat":"fast_food"},{"id":"dunkin","name":"Dunkin'","cat":"fast_food"},{"id":"panera","name":"Panera","cat":"fast_food"},{"id":"jackinthebox","name":"Jack in the Box","cat":"fast_food"},{"id":"sonic","name":"Sonic","cat":"fast_food"},{"id":"kfc","name":"KFC","cat":"fast_food"},{"id":"popeyes","name":"Popeyes","cat":"fast_food"},{"id":"fiveguys","name":"Five Guys","cat":"fast_food"},{"id":"shakeshack","name":"Shake Shack","cat":"fast_food"},{"id":"jerseymikes","name":"Jersey Mike's","cat":"fast_food"},{"id":"wingstop","name":"Wingstop","cat":"fast_food"},{"id":"dutchbros","name":"Dutch Bros","cat":"fast_food"},{"id":"raisingcanes","name":"Raising Cane's","cat":"fast_food"},{"id":"deltaco","name":"Del Taco","cat":"fast_food"},{"id":"elpolloloco","name":"El Pollo Loco","cat":"fast_food"},{"id":"carlsjr","name":"Carl's Jr.","cat":"fast_food"},{"id":"arbys","name":"Arby's","cat":"fast_food"},{"id":"culvers","name":"Culver's","cat":"fast_food"},{"id":"whataburger","name":"Whataburger","cat":"fast_food"},{"id":"peetscoffee","name":"Peet's Coffee","cat":"fast_food"},{"id":"jamba","name":"Jamba","cat":"fast_food"},{"id":"littlecaesars","name":"Little Caesars","cat":"fast_food"},{"id":"papajohns","name":"Papa John's","cat":"fast_food"},{"id":"noodlescompany","name":"Noodles & Company","cat":"fast_food"},{"id":"qdoba","name":"Qdoba","cat":"fast_food"},{"id":"sweetgreen","name":"Sweetgreen","cat":"fast_food"},{"id":"cava","name":"CAVA","cat":"fast_food"},{"id":"olivegarden","name":"Olive Garden","cat":"dining"},{"id":"applebees","name":"Applebee's","cat":"dining"},{"id":"chilis","name":"Chili's","cat":"dining"},{"id":"cheesecakefactory","name":"Cheesecake Factory","cat":"dining"},{"id":"redrobin","name":"Red Robin","cat":"dining"},{"id":"ihop","name":"IHOP","cat":"dining"},{"id":"dennys","name":"Denny's","cat":"dining"},{"id":"buffalowildwings","name":"Buffalo Wild Wings","cat":"dining"},{"id":"outback","name":"Outback","cat":"dining"},{"id":"texasroadhouse","name":"Texas Roadhouse","cat":"dining"},{"id":"p.f.changs","name":"P.F. Chang's","cat":"dining"},{"id":"redlobster","name":"Red Lobster","cat":"dining"},{"id":"bjsrestaurant","name":"BJ's Restaurant","cat":"dining"},{"id":"crackerbarrel","name":"Cracker Barrel","cat":"dining"},{"id":"benihana","name":"Benihana","cat":"dining"},{"id":"doordash","name":"DoorDash","cat":"dining","aka":"door dash"},{"id":"ubereats","name":"Uber Eats","cat":"dining"},{"id":"grubhub","name":"Grubhub","cat":"dining"},{"id":"instacart","name":"Instacart","cat":"grocery","note":"Often counts as grocery; some cards treat it as online"},{"id":"shell","name":"Shell","cat":"gas"},{"id":"chevron","name":"Chevron","cat":"gas"},{"id":"exxon","name":"Exxon","cat":"gas"},{"id":"mobil","name":"Mobil","cat":"gas"},{"id":"arco","name":"ARCO","cat":"gas"},{"id":"76","name":"76","cat":"gas"},{"id":"bp","name":"BP","cat":"gas"},{"id":"valero","name":"Valero","cat":"gas"},{"id":"circlek","name":"Circle K","cat":"gas"},{"id":"speedway","name":"Speedway","cat":"gas"},{"id":"quiktrip","name":"QuikTrip","cat":"gas"},{"id":"wawa","name":"Wawa","cat":"gas"},{"id":"sheetz","name":"Sheetz","cat":"gas"},{"id":"marathon","name":"Marathon","cat":"gas"},{"id":"sunoco","name":"Sunoco","cat":"gas"},{"id":"caseys","name":"Casey's","cat":"gas"},{"id":"bucees","name":"Buc-ee's","cat":"gas"},{"id":"kwiktrip","name":"Kwik Trip","cat":"gas"},{"id":"texaco","name":"Texaco","cat":"gas"},{"id":"citgo","name":"Citgo","cat":"gas"},{"id":"phillips66","name":"Phillips 66","cat":"gas"},{"id":"conoco","name":"Conoco","cat":"gas"},{"id":"sinclair","name":"Sinclair","cat":"gas"},{"id":"cvs","name":"CVS","cat":"drugstore","aka":"cvs pharmacy"},{"id":"walgreens","name":"Walgreens","cat":"drugstore"},{"id":"riteaid","name":"Rite Aid","cat":"drugstore"},{"id":"homedepot","name":"Home Depot","cat":"home","aka":"the home depot"},{"id":"lowes","name":"Lowe's","cat":"home","aka":"lowes"},{"id":"acehardware","name":"Ace Hardware","cat":"home","aka":"ace"},{"id":"menards","name":"Menards","cat":"home"},{"id":"truevalue","name":"True Value","cat":"home"},{"id":"macys","name":"Macy's","cat":"department"},{"id":"nordstrom","name":"Nordstrom","cat":"department"},{"id":"kohls","name":"Kohl's","cat":"department"},{"id":"jcpenney","name":"JCPenney","cat":"department"},{"id":"dillards","name":"Dillard's","cat":"department"},{"id":"bloomingdales","name":"Bloomingdale's","cat":"department"},{"id":"belk","name":"Belk","cat":"department"},{"id":"nordstromrack","name":"Nordstrom Rack","cat":"department"},{"id":"saks","name":"Saks","cat":"department"},{"id":"oldnavy","name":"Old Navy","cat":"clothing"},{"id":"gap","name":"Gap","cat":"clothing"},{"id":"hm","name":"H&M","cat":"clothing"},{"id":"zara","name":"Zara","cat":"clothing"},{"id":"uniqlo","name":"Uniqlo","cat":"clothing"},{"id":"tjmaxx","name":"TJ Maxx","cat":"clothing"},{"id":"marshalls","name":"Marshalls","cat":"clothing"},{"id":"ross","name":"Ross","cat":"clothing"},{"id":"nike","name":"Nike","cat":"clothing"},{"id":"lululemon","name":"Lululemon","cat":"clothing"},{"id":"bananarepublic","name":"Banana Republic","cat":"clothing"},{"id":"burlington","name":"Burlington","cat":"clothing"},{"id":"bestbuy","name":"Best Buy","cat":"electronics"},{"id":"applestore","name":"Apple Store","cat":"electronics","aka":"apple"},{"id":"ikea","name":"IKEA","cat":"furniture"},{"id":"wayfair","name":"Wayfair","cat":"furniture"},{"id":"ashley","name":"Ashley","cat":"furniture","aka":"ashley furniture"},{"id":"dicks","name":"Dick's Sporting Goods","cat":"sporting","aka":"dicks"},{"id":"rei","name":"REI","cat":"sporting"},{"id":"academy","name":"Academy Sports","cat":"sporting"},{"id":"petco","name":"Petco","cat":"pets"},{"id":"petsmart","name":"PetSmart","cat":"pets"},{"id":"chewy","name":"Chewy","cat":"pets"},{"id":"ulta","name":"Ulta Beauty","cat":"beauty","aka":"ulta"},{"id":"sephora","name":"Sephora","cat":"beauty"},{"id":"greatclips","name":"Great Clips","cat":"beauty","aka":"haircut"},{"id":"staples","name":"Staples","cat":"office"},{"id":"officedepot","name":"Office Depot","cat":"office","aka":"office max officemax"},{"id":"netflix","name":"Netflix","cat":"streaming"},{"id":"hulu","name":"Hulu","cat":"streaming"},{"id":"disneyplus","name":"Disney+","cat":"streaming"},{"id":"spotify","name":"Spotify","cat":"streaming"},{"id":"youtubetv","name":"YouTube TV","cat":"streaming"},{"id":"max","name":"Max","cat":"streaming"},{"id":"peacock","name":"Peacock","cat":"streaming"},{"id":"appletvplus","name":"Apple TV+","cat":"streaming"},{"id":"paramountplus","name":"Paramount+","cat":"streaming"},{"id":"espnplus","name":"ESPN+","cat":"streaming"},{"id":"sling","name":"Sling","cat":"streaming"},{"id":"verizon","name":"Verizon","cat":"phone"},{"id":"att","name":"AT&T","cat":"phone","aka":"at&t att"},{"id":"tmobile","name":"T-Mobile","cat":"phone","aka":"tmobile"},{"id":"xfinity","name":"Xfinity","cat":"utilities","aka":"comcast"},{"id":"spectrum","name":"Spectrum","cat":"utilities"},{"id":"uber","name":"Uber","cat":"transit"},{"id":"lyft","name":"Lyft","cat":"transit"},{"id":"amc","name":"AMC Theatres","cat":"entertainment","aka":"amc"},{"id":"regal","name":"Regal","cat":"entertainment"},{"id":"ticketmaster","name":"Ticketmaster","cat":"entertainment"},{"id":"disneyland","name":"Disneyland / Disney World","cat":"entertainment","aka":"disney parks"},{"id":"planetfitness","name":"Planet Fitness","cat":"fitness"},{"id":"24hourfitness","name":"24 Hour Fitness","cat":"fitness"},{"id":"lafitness","name":"LA Fitness","cat":"fitness"},{"id":"orangetheory","name":"Orangetheory","cat":"fitness"},{"id":"equinox","name":"Equinox","cat":"fitness"},{"id":"ebay","name":"eBay","cat":"online"},{"id":"etsy","name":"Etsy","cat":"online"},{"id":"walmartcom","name":"Walmart.com","cat":"online","aka":"walmart online"},{"id":"paypal","name":"PayPal checkout","cat":"online","aka":"paypal","note":"Pick this when you pay through PayPal online"},{"id":"delta","name":"Delta","cat":"travel","aka":"delta airlines","tags":["airline"]},{"id":"united","name":"United","cat":"travel","aka":"united airlines","tags":["airline"]},{"id":"american","name":"American Airlines","cat":"travel","aka":"aa","tags":["airline"]},{"id":"southwest","name":"Southwest","cat":"travel","aka":"southwest airlines","tags":["airline"]},{"id":"alaska","name":"Alaska Airlines","cat":"travel","aka":"alaska","tags":["airline"]},{"id":"hawaiian","name":"Hawaiian Airlines","cat":"travel","aka":"hawaiian","tags":["airline"]},{"id":"jetblue","name":"JetBlue","cat":"travel","aka":"jet blue","tags":["airline"]},{"id":"spirit","name":"Spirit","cat":"travel","aka":"spirit airlines","tags":["airline"]},{"id":"frontier","name":"Frontier","cat":"travel","aka":"frontier airlines","tags":["airline"]},{"id":"marriott","name":"Marriott","cat":"travel","aka":"bonvoy westin sheraton ritz courtyard","tags":["hotel"]},{"id":"hilton","name":"Hilton","cat":"travel","aka":"hampton doubletree embassy","tags":["hotel"]},{"id":"hyatt","name":"Hyatt","cat":"travel","tags":["hotel"]},{"id":"ihg","name":"IHG","cat":"travel","aka":"holiday inn intercontinental","tags":["hotel"]},{"id":"bestwestern","name":"Best Western","cat":"travel","tags":["hotel"]},{"id":"airbnb","name":"Airbnb","cat":"travel"},{"id":"expedia","name":"Expedia","cat":"travel"},{"id":"hotelscom","name":"Hotels.com","cat":"travel"},{"id":"vrbo","name":"Vrbo","cat":"travel"},{"id":"hertz","name":"Hertz","cat":"travel","aka":"rental car"},{"id":"enterprise","name":"Enterprise","cat":"travel","aka":"rental car"}]};
 
 /* Old product IDs from earlier app versions → catalog IDs */
@@ -450,7 +599,9 @@ const ART = {
 /* ══════════════════════════════════════════════════════════
    3. YOUR WALLET (private, lives only on this phone)
    ══════════════════════════════════════════════════════════ */
-const SEED = {people:[{id:"G",name:"Gabby"},{id:"M",name:"Matt"}],wallet:[]};
+/* New users start empty and pick cards on the first-run screen.
+   For local testing you can preload a wallet in seed.local.js (git-ignored, never published). */
+const SEED = (typeof LOCAL_SEED!=="undefined")?LOCAL_SEED:{people:[{id:"me",name:"Me"}],wallet:[]};
 
 /* ══════════════════════════════════════════════════════════
    4. STORAGE & MIGRATION
@@ -517,6 +668,8 @@ const catById=id=>CATS.find(c=>c.id===id);
 const catName=id=>catById(id)?.label||id;
 const fmtRate=r=>Number.isInteger(r)?String(r):String(+r.toFixed(2));
 const walletById=id=>state.wallet.find(w=>w.id===id);
+/* Deactivated cards (w.inactive = date) stay in the wallet's history but never rank or nag */
+const activeWallet=()=>state.wallet.filter(w=>!w.inactive);
 const dn=w=>w.nickname||P(w.product)?.short||"Card";
 const unitOf=p=>p&&p.type!=="cash"?"x":"%";
 const capWord=w=>w?w[0].toUpperCase()+w.slice(1):"";
@@ -601,19 +754,19 @@ function evalCard(w,cat,store){
   const special=conds.map(r=>({rate:Math.round((r.rate+bump)*mult*100)/100,label:r.label,cond:r.cond}))
     .filter(x=>x.rate>rate).sort((a,b)=>b.rate-a.rate)[0]||null;
   const apr=w.introApr&&w.introApr>=TODAY?w.introApr:null;
-  return {w,p,rate:Math.round(rate*100)/100,label:best.label,note:best.note,flags:best.flags,cap:best.cap,extras,apr,special};
+  return {w,p,earn:Math.round((best.rate+bump)*100)/100,rate:Math.round(rate*100)/100,label:best.label,note:best.note,flags:best.flags,cap:best.cap,extras,apr,special};
 }
 function rank(cat,store){
-  return state.wallet.map(w=>evalCard(w,cat,store)).filter(Boolean)
+  return activeWallet().map(w=>evalCard(w,cat,store)).filter(Boolean)
     .sort((a,b)=>b.rate-a.rate||a.flags.length-b.flags.length);
 }
 function networkHidden(cat){
   if(!cat.networks)return 0;
-  return state.wallet.filter(w=>{const p=P(w.product);return p&&!p.storeOnly&&!cat.networks.includes(netOf(w))}).length;
+  return activeWallet().filter(w=>{const p=P(w.product);return p&&!p.storeOnly&&!cat.networks.includes(netOf(w))}).length;
 }
 /* does any wallet card name this category directly (not via parent)? */
 function directHit(cat){
-  return state.wallet.some(w=>{
+  return activeWallet().some(w=>{
     const p=P(w.product);if(!p)return false;
     if((p.rules||[]).some(r=>r.cats.includes(cat.id)))return true;
     if((p.choice||[]).some(s=>selCats(w,s).includes(cat.id)))return true;
@@ -651,8 +804,272 @@ function tasksFor(w){
   if(p.auto&&!w.autoFocus)t.push({kind:"pick",text:"Set which category you expect to earn 5%",sub:p.auto.note});
   return t.filter(x=>!x.key||!w.dismissed.includes(x.key));
 }
-function allTasks(){return state.wallet.flatMap(w=>tasksFor(w).map(t=>({...t,w})))}
+function allTasks(){return activeWallet().flatMap(w=>tasksFor(w).map(t=>({...t,w})))}
 
+
+/* ══════════════════════════════════════════════════════════
+   WALLET TAB: your list, your way
+   - Press and hold a card, then drag to rearrange
+   - Swipe right on a card for its ⋯ menu; swipe left for Deactivate / Delete
+   - Sort, group and filter (saved per phone in state.view)
+   - Pin cards to the top, rename, deactivate, delete
+   ══════════════════════════════════════════════════════════ */
+let selectMode=null,showInactive=false;
+const VIEW_DEFAULT={sort:"custom",group:"person",filter:"all",showRate:true,showLast4:true};
+const viewOpt=()=>(state.view=Object.assign({},VIEW_DEFAULT,state.view||{}));
+const SORTS={custom:"My order",rewards:"Highest rewards",name:"Name A–Z",bank:"Bank",added:"Recently added"};
+const GROUPS={person:"Person",bank:"Bank",type:"Reward type",none:"No groups"};
+const TYPE_LABEL={cash:"Cash back",points:"Points",miles:"Miles"};
+
+/* Best rate a card can earn anywhere, counted in cents per dollar (points valued at their ¢ estimate) */
+function topRate(w){
+  const p=P(w.product);if(!p)return 0;
+  const mult=p.type==="cash"?1:(p.cpp||1);
+  const rates=[p.base||0,...(p.rules||[]).filter(r=>!r.cond).map(r=>r.rate),...(p.choice||[]).map(s=>s.rate)];
+  if(p.rotating)rates.push(p.rotating.rate);if(p.auto)rates.push(p.auto.rate);
+  return Math.round(Math.max(...rates)*mult*100)/100;
+}
+const addedAt=w=>w.added||(+(String(w.id).match(/^w(\d{12,})/)||[])[1]||0);
+const isPeople=()=>multiOwner()&&state.people.length>1;
+
+function walletFiltered(list){
+  const f=viewOpt().filter;
+  if(f==="attention")return list.filter(w=>!w.inactive&&tasksFor(w).length);
+  if(f==="cash")return list.filter(w=>P(w.product)?.type==="cash");
+  if(f==="points")return list.filter(w=>P(w.product)&&P(w.product).type!=="cash");
+  if(f.startsWith("person:"))return list.filter(w=>w.owner===f.slice(7));
+  return list;
+}
+function walletSorted(list){
+  const s=viewOpt().sort,idx=new Map(state.wallet.map((w,i)=>[w.id,i])),a=[...list];
+  const bank=w=>P(w.product)?B(P(w.product).brand).name:"~";
+  if(s==="rewards")a.sort((x,y)=>topRate(y)-topRate(x)||idx.get(x.id)-idx.get(y.id));
+  else if(s==="name")a.sort((x,y)=>dn(x).localeCompare(dn(y)));
+  else if(s==="bank")a.sort((x,y)=>bank(x).localeCompare(bank(y))||dn(x).localeCompare(dn(y)));
+  else if(s==="added")a.sort((x,y)=>addedAt(y)-addedAt(x)||idx.get(y.id)-idx.get(x.id));
+  else a.sort((x,y)=>idx.get(x.id)-idx.get(y.id));
+  return a;
+}
+function walletGroups(list){
+  const g=viewOpt().group;
+  if(g==="none"||(g==="person"&&!isPeople()))return[{key:"all",title:"",items:list}];
+  const map=new Map(),add=(k,t,w)=>{if(!map.has(k))map.set(k,{key:k,title:t,items:[]});map.get(k).items.push(w)};
+  if(g==="person"){
+    state.people.forEach(pp=>map.set(pp.id,{key:pp.id,title:`${pp.name}'s cards`,items:[]}));
+    list.forEach(w=>map.has(w.owner)?map.get(w.owner).items.push(w):add("none","Unassigned",w));
+  }else if(g==="bank"){
+    walletSorted(list).forEach(w=>{const p=P(w.product),k=p?p.brand:"other";add(k,p?B(k).name:"Other",w)});
+    return[...map.values()].sort((a,b)=>a.title.localeCompare(b.title)).map(x=>({...x,items:walletSorted(x.items)}));
+  }else if(g==="type"){
+    ["cash","points","miles"].forEach(t=>map.set(t,{key:t,title:TYPE_LABEL[t],items:[]}));
+    list.forEach(w=>{const t=P(w.product)?.type||"cash";map.get(t).items.push(w)});
+  }
+  return[...map.values()].filter(x=>x.items.length);
+}
+
+function walletRow(w,{drag=true}={}){
+  const p=P(w.product),v=viewOpt(),has=!w.inactive&&tasksFor(w).length>0,sel=selectMode&&selectMode.has(w.id);
+  const sub=w.inactive?`Deactivated ${shortDate(isoToDate(w.inactive))}${w.inactive.slice(0,4)!==TODAY.slice(0,4)?", "+w.inactive.slice(0,4):""}`
+    :(w.nickname&&p)||!p?(p?`${B(p.brand).name} ${p.name}`:"Not in the catalog"):"";
+  const rate=v.showRate&&!w.inactive&&p?`<span class="w-rate">up to <b>${fmtRate(topRate(w))}%</b></span>`:"";
+  const right=(v.showLast4&&w.last4?`<span class="mono last4">•••• ${esc(w.last4)}</span>`:"")+rate;
+  return `<div class="swipe-wrap" data-id="${w.id}" data-drag="${drag&&!selectMode?1:0}">
+    <div class="swipe-act left"><button class="sw-btn more" onclick="openCardMenu('${w.id}')" aria-label="More options for ${esc(dn(w))}">${ic("more","fill")}<span>More</span></button></div>
+    <div class="swipe-act right">${w.inactive
+      ?`<button class="sw-btn restore" onclick="setInactive(['${w.id}'],false)">${ic("restore")}<span>Reactivate</span></button>`
+      :`<button class="sw-btn archive" onclick="setInactive(['${w.id}'],true)">${ic("archive")}<span>Deactivate</span></button>`}
+      <button class="sw-btn delete" onclick="removeCards(['${w.id}'])">${ic("trash")}<span>Delete</span></button></div>
+    <button class="card-row ${w.inactive?"inactive":""} ${sel?"selected":""}" onclick="rowTap('${w.id}')" ${selectMode?`aria-pressed="${!!sel}"`:""}>
+      ${selectMode?`<span class="sel-box">${sel?ic("check"):""}</span>`:""}${cardArt(w.product,52)}
+      <span class="row-main"><span class="row-title">${w.pinned&&!w.inactive?`<span class="pin-ic" aria-label="Pinned">${ic("pin")}</span>`:""}${esc(dn(w))}${has?'<span class="dot" aria-label="needs an update"></span>':""}</span>
+      ${sub?`<span class="row-sub">${esc(sub)}</span>`:""}</span>
+      ${right?`<span class="row-end">${right}</span>`:""}</button></div>`;
+}
+
+function renderWallet(){
+  const v=viewOpt(),all=state.wallet;
+  const active=walletFiltered(activeWallet()),off=walletFiltered(all.filter(w=>w.inactive)).sort((a,b)=>b.inactive.localeCompare(a.inactive));
+  let h="";
+  if(all.length)h+=walletToolbar();
+  if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and the Pay tab ranks them for every purchase.</p>
+    <button class="btn" onclick="openOnboard()">Pick your cards</button></div>`;
+  else if(!active.length&&v.filter!=="all")h+=`<div class="empty small"><p>No cards match this filter.</p><button class="btn-sm alt" onclick="setView('filter','all')">Show all cards</button></div>`;
+  else if(!active.length)h+=`<p class="hint">All your cards are deactivated. Reactivate one below or tap + to add a card.</p>`;
+  else{
+    const pinned=active.filter(w=>w.pinned),rest=active.filter(w=>!w.pinned);
+    if(pinned.length)h+=`<h2 class="sec">${ic("pin")} Pinned</h2><div class="list" data-list="pinned">${walletSorted(pinned).map(w=>walletRow(w)).join("")}</div>`;
+    walletGroups(walletSorted(rest)).forEach(g=>{
+      h+=`${g.title?`<h2 class="sec">${esc(g.title)} <span class="sec-n">${g.items.length}</span></h2>`:(pinned.length?`<h2 class="sec">All cards</h2>`:"")}
+        <div class="list" data-list="${g.key}">${g.items.map(w=>walletRow(w)).join("")}</div>`});
+    if(!state.dragTipSeen&&active.length>1&&!selectMode)h+=`<p class="hint center tip">Tip: press and hold a card to move it. Swipe a card for more options.
+      <button class="link-btn" onclick="state.dragTipSeen=true;save();renderWallet()">Got it</button></p>`;
+  }
+  if(off.length){
+    const open=showInactive||!!selectMode;
+    h+=`<button class="more" onclick="showInactive=!showInactive;renderWallet()" aria-expanded="${open}">
+      <span>${ic("archive")} Deactivated cards (${off.length})</span>${ic(open?"chevD":"chevR","dim")}</button>
+      ${open?`<p class="hint">Cards you no longer use. They don't show up on Pay or in Updates.</p><div class="list inactive-list" data-list="off">${off.map(w=>walletRow(w,{drag:false})).join("")}</div>`:""}`;
+  }
+  $("wallet-list").innerHTML=h;
+  const d=CATALOG.updated?shortDate(isoToDate(CATALOG.updated)):"";
+  $("foot").innerHTML=`${Object.keys(CATALOG.products).length} cards and ${stores().length} stores in the catalog${d?`, updated ${d}`:""}.<br>Your cards stay on this phone. <button class="link-btn" onclick="openBackup()">Back up or restore</button>`;
+}
+
+/* Toolbar: sort/view button + quick filter chips (scroll sideways) */
+function walletToolbar(){
+  const v=viewOpt(),n=t=>activeWallet().filter(t).length,att=n(w=>tasksFor(w).length);
+  const chips=[["all","All"]];
+  if(isPeople())state.people.forEach(pp=>chips.push(["person:"+pp.id,pp.name]));
+  if(att)chips.push(["attention",`Needs setup · ${att}`]);
+  if(n(w=>P(w.product)?.type==="cash")&&n(w=>P(w.product)&&P(w.product).type!=="cash"))chips.push(["cash","Cash back"],["points","Points & miles"]);
+  const changed=v.sort!=="custom"||v.group!==VIEW_DEFAULT.group;
+  return `<div class="w-toolbar no-swipe">
+    <button class="chip view-chip ${changed?"on-soft":""}" onclick="openViewSheet()">${ic("sort")}${esc(SORTS[v.sort])}</button>
+    ${chips.map(([k,l])=>`<button class="chip ${v.filter===k?"on":""}" onclick="setView('filter','${k}')">${esc(l)}</button>`).join("")}</div>`;
+}
+function setView(k,val){viewOpt();state.view[k]=val;save();renderWallet();if(!$("sheet").hidden&&$("sheet").querySelector(".view-sheet"))openViewSheet(true)}
+
+function openViewSheet(keep){
+  const v=viewOpt();
+  const opt=(k,val,label,sub)=>`<button class="radio ${v[k]===val?"on":""}" onclick="setView('${k}','${val}')"><span class="radio-dot"></span><span class="row-main"><span class="row-title">${label}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span></button>`;
+  const tog=(k,label)=>`<button class="toggle-row" onclick="setView('${k}',${!v[k]})" role="switch" aria-checked="${v[k]}"><span>${label}</span><span class="switch ${v[k]?"on":""}"></span></button>`;
+  openSheet(`<div class="view-sheet"><h2 class="sheet-title">Sort & view</h2>
+    <h3 class="sec">Sort by</h3><div class="stack-sm">
+      ${opt("sort","custom","My order","Press and hold a card to drag it")}
+      ${opt("sort","rewards","Highest rewards","Cards that can earn the most first")}
+      ${opt("sort","name","Name A–Z")}${opt("sort","bank","Bank")}${opt("sort","added","Recently added")}</div>
+    <h3 class="sec">Group by</h3><div class="stack-sm">
+      ${isPeople()?opt("group","person","Person"):""}${opt("group","bank","Bank")}${opt("group","type","Reward type","Cash back, points, miles")}${opt("group",isPeople()?"none":"person","No groups")}</div>
+    <h3 class="sec">Show on each card</h3><div class="list">${tog("showRate","Top reward rate")}${tog("showLast4","Last 4 digits")}</div>
+    <button class="btn" onclick="closeSheet()">Done</button>
+    <button class="btn-outline" style="margin-top:10px" onclick="state.view={...VIEW_DEFAULT};save();renderWallet();openViewSheet(true)">Reset to default</button></div>`,keep);
+}
+
+/* ─── Per-card menu (from swipe or long list) ─── */
+function openCardMenu(id){
+  closeSwipes();const w=walletById(id);if(!w)return;const p=P(w.product);
+  const item=(icon,label,fn,cls="")=>`<button class="row ${cls}" onclick="${fn}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${label}</span></span></button>`;
+  openSheet(`<div class="drawer-head">${cardArt(w.product,64)}<div class="row-main"><h2 class="sheet-title">${esc(dn(w))}</h2>
+      <p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p></div></div>
+    <div class="list" style="margin-top:8px">
+      ${item("edit","Rename",`openRename('${id}')`)}
+      ${item("info","Edit details & rewards",`closeSheet();openDrawer('${id}')`)}
+      ${w.inactive?"":item("pin",w.pinned?"Unpin":"Pin to top",`togglePin('${id}')`)}
+      ${w.inactive?"":item("arrowUp","Move to top",`moveTo('${id}','top')`)}
+      ${w.inactive?"":item("arrowDown","Move to bottom",`moveTo('${id}','bottom')`)}
+      ${w.inactive?item("restore","Reactivate",`setInactive(['${id}'],false)`):item("archive","Deactivate",`setInactive(['${id}'],true)`)}
+      ${item("trash","Delete",`removeCards(['${id}'])`,"danger-row")}
+    </div>`);
+}
+function openRename(id){
+  const w=walletById(id),p=P(w.product);
+  openSheet(`<h2 class="sheet-title">Rename card</h2><p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}</p>
+    <input class="field" id="rn" value="${esc(w.nickname||"")}" placeholder="${esc(p?p.short:"Card name")}" maxlength="40" autocomplete="off"
+      onkeydown="if(event.key==='Enter')saveRename('${id}')">
+    <p class="hint">Leave it empty to use the card's own name.</p>
+    <button class="btn" onclick="saveRename('${id}')">Save</button>`,false,{label:"Back",fn:()=>openCardMenu(id)});
+  setTimeout(()=>{const i=$("rn");if(i){i.focus();i.select()}},250);
+}
+function saveRename(id){const w=walletById(id),v=$("rn").value.trim(),old=w.nickname;w.nickname=v;save();closeSheet();
+  toast(v?`Renamed to ${v}`:"Using the card's own name",()=>{w.nickname=old;save();render()})}
+function togglePin(id){const w=walletById(id);w.pinned=!w.pinned;save();closeSheet();toast(w.pinned?`${dn(w)} pinned to the top`:`${dn(w)} unpinned`)}
+function moveTo(id,where){
+  freezeOrder();const i=state.wallet.findIndex(w=>w.id===id),[w]=state.wallet.splice(i,1);
+  where==="top"?state.wallet.unshift(w):state.wallet.push(w);save();closeSheet();toast(`${dn(w)} moved to the ${where}`);
+}
+/* Switch to "My order" keeping exactly what's on screen, so a manual move never scrambles the list */
+function freezeOrder(){
+  const v=viewOpt();if(v.sort==="custom")return false;
+  const shown=[...document.querySelectorAll("#wallet-list .swipe-wrap")].map(e=>e.dataset.id);
+  const rest=state.wallet.filter(w=>!shown.includes(w.id));
+  state.wallet=[...shown.map(walletById).filter(Boolean),...rest];v.sort="custom";save();return true;
+}
+function rowTap(id){
+  if(swipeOpen){closeSwipes();return}
+  if(dragJustEnded)return;
+  selectMode?toggleSelect(id):openDrawer(id);
+}
+
+/* ─── Touch: swipe to reveal actions, press-and-hold to drag ─── */
+let swipeOpen=null,dragJustEnded=false;
+function closeSwipes(){document.querySelectorAll(".swipe-wrap.open-l,.swipe-wrap.open-r").forEach(e=>{e.classList.remove("open-l","open-r");e.querySelector(".card-row").style.transform=""});swipeOpen=null}
+(function(){
+  const LEFT=88,RIGHT=176,HOLD=380;
+  let wrap=null,row=null,x0=0,y0=0,mode=null,dx=0,timer=null,base=0;
+  let drag=null; // {list, el, startY, startScroll, rows, h, from, to}
+  const root=$("wallet-list");
+  root.addEventListener("touchstart",e=>{
+    if(e.touches.length>1)return;
+    const wr=e.target.closest(".swipe-wrap");if(!wr||e.target.closest(".swipe-act"))return;
+    if(swipeOpen&&swipeOpen!==wr)closeSwipes();
+    wrap=wr;row=wr.querySelector(".card-row");const t=e.touches[0];x0=t.clientX;y0=t.clientY;dx=0;mode=null;
+    base=wr.classList.contains("open-l")?LEFT:wr.classList.contains("open-r")?-RIGHT:0;
+    clearTimeout(timer);
+    if(wr.dataset.drag==="1"&&!base)timer=setTimeout(()=>startDrag(t.clientY),HOLD);
+  },{passive:true});
+  root.addEventListener("touchmove",e=>{
+    if(!wrap)return;const t=e.touches[0];
+    if(mode==="drag"){e.preventDefault();moveDrag(t.clientY);return}
+    dx=t.clientX-x0;const dy=t.clientY-y0;
+    if(!mode){
+      if(Math.abs(dx)<8&&Math.abs(dy)<8)return;
+      clearTimeout(timer);
+      if(!selectMode&&Math.abs(dx)>Math.abs(dy)*1.3){mode="swipe";row.classList.add("swiping")}else{mode="scroll";wrap=null;return}
+    }
+    if(mode==="swipe"){e.preventDefault();
+      let x=base+dx;x=Math.max(-RIGHT-30,Math.min(LEFT+30,x));row.style.transform=`translateX(${x}px)`;}
+  },{passive:false});
+  const end=()=>{
+    clearTimeout(timer);
+    if(mode==="drag")endDrag();
+    else if(mode==="swipe"){
+      const x=base+dx;row.classList.remove("swiping");wrap.classList.remove("open-l","open-r");
+      if(x>LEFT*.5){wrap.classList.add("open-l");row.style.transform=`translateX(${LEFT}px)`;swipeOpen=wrap}
+      else if(x<-RIGHT*.4){wrap.classList.add("open-r");row.style.transform=`translateX(${-RIGHT}px)`;swipeOpen=wrap}
+      else{row.style.transform="";if(swipeOpen===wrap)swipeOpen=null}
+      dragJustEnded=true;setTimeout(()=>dragJustEnded=false,60);
+    }
+    wrap=null;mode=null;
+  };
+  root.addEventListener("touchend",end);root.addEventListener("touchcancel",end);
+  // Long-press on a phone also brings up the system menu; stop that on cards
+  root.addEventListener("contextmenu",e=>{if(e.target.closest(".swipe-wrap"))e.preventDefault()});
+
+  function startDrag(y){
+    if(!wrap)return;mode="drag";
+    try{navigator.vibrate&&navigator.vibrate(12)}catch{}
+    const list=wrap.parentElement,items=[...list.children];
+    drag={list,el:wrap,startY:y,startScroll:scrollY,items,h:wrap.getBoundingClientRect().height,from:items.indexOf(wrap),to:items.indexOf(wrap)};
+    drag.mids=items.map(it=>{const r=it.getBoundingClientRect();return r.top+scrollY+r.height/2});
+    wrap.classList.add("dragging");list.classList.add("drag-list");document.body.classList.add("no-select");
+  }
+  function moveDrag(y){
+    const d=drag;if(!d)return;
+    if(y>innerHeight-110)scrollBy(0,8);else if(y<120)scrollBy(0,-8);
+    const off=(y+scrollY)-(d.startY+d.startScroll);
+    d.el.style.transform=`translateY(${off}px) scale(1.02)`;
+    const center=d.mids[d.from]+off;let to=d.from;
+    d.mids.forEach((m,i)=>{if(i<d.from&&center<m)to=Math.min(to,i);if(i>d.from&&center>m)to=Math.max(to,i)});
+    d.to=to;
+    d.items.forEach((it,i)=>{if(it===d.el)return;let s=0;
+      if(d.from<to&&i>d.from&&i<=to)s=-d.h;else if(d.from>to&&i>=to&&i<d.from)s=d.h;
+      it.style.transform=s?`translateY(${s}px)`:"";});
+  }
+  function endDrag(){
+    const d=drag;drag=null;if(!d)return;
+    d.items.forEach(it=>it.style.transform="");d.el.classList.remove("dragging");d.list.classList.remove("drag-list");document.body.classList.remove("no-select");
+    dragJustEnded=true;setTimeout(()=>dragJustEnded=false,350);
+    if(d.to===d.from)return;
+    const ids=d.items.map(it=>it.dataset.id);const [m]=ids.splice(d.from,1);ids.splice(d.to,0,m);
+    const switched=freezeOrder();
+    // put these cards back into the same slots in the wallet, in the new order
+    const slots=state.wallet.map((w,i)=>ids.includes(w.id)?i:-1).filter(i=>i>=0);
+    const byId=Object.fromEntries(state.wallet.map(w=>[w.id,w]));
+    slots.forEach((s,k)=>state.wallet[s]=byId[ids[k]]);
+    save();renderWallet();
+    if(switched)toast(`Sorted by My order`);
+  }
+})();
 
 const refreshAll=()=>render();
 /* ══════════════════════════════════════════════════════════
@@ -667,11 +1084,19 @@ function go(t){
   tab=t;
   ["pay","wallet","updates"].forEach(x=>{$("view-"+x).hidden=x!==t;const b=$("tab-"+x);b.classList.toggle("on",x===t);b.setAttribute("aria-current",x===t?"page":"false")});
   $("title").textContent=TITLES[t];
-  $("appbar-action").innerHTML=t==="wallet"?`<button class="btn-pill" onclick="openAdd()">${ic("plus")}Add card</button>`:"";
+  if(t!=="wallet")selectMode=null;
   render();window.scrollTo(0,0);
 }
+function renderAppbar(){
+  const a=$("appbar-action");
+  if(tab!=="wallet"){a.innerHTML="";$("fab").hidden=true;$("select-bar").hidden=true;return}
+  a.innerHTML=selectMode?`<button class="btn-pill quiet" onclick="endSelect()">Done</button>`
+    :`<button class="icon-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button>`;
+  $("fab").hidden=!!selectMode;
+  renderSelectBar();
+}
 function render(){
-  renderPay();renderWallet();renderUpdates();
+  renderPay();renderWallet();renderUpdates();renderAppbar();
   const n=allTasks().length;$("tab-badge").textContent=n;$("tab-badge").hidden=!n;
 }
 let toastTimer=null;
@@ -696,7 +1121,7 @@ const tile=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${ic(c.id)}<
 const placeRow=(catId,storeId,title,sub)=>`<button class="row" onclick="openAnswer('${catId}','${storeId||""}')">
   <span class="row-ic">${ic(catId)}</span><span class="row-main"><span class="row-title">${esc(title)}</span><span class="row-sub">${esc(sub)}</span></span>${ic("chevR","dim")}</button>`;
 function renderPay(){
-  const empty=!state.wallet.length;
+  const empty=!activeWallet().length;
   $("pay-empty").hidden=!empty;$("pay-main").hidden=empty;
   if(empty)return;
   const res=$("pay-results"),home=$("pay-home");
@@ -765,12 +1190,21 @@ function openAnswer(catId,storeId){
   state.usage[catId]=(state.usage[catId]||0)+1;
   state.recents=[{c:catId,s:storeId},...state.recents.filter(x=>!(x.c===catId&&(x.s||null)===storeId))].slice(0,6);
   save();renderAnswer();
-  $("answer").hidden=false;$("answer").scrollTop=0;document.body.classList.add("locked");
+  const pn=$("ans-panel");pn.style.transform="";pn.style.opacity="";pn.classList.remove("settle");
+  $("answer").hidden=false;pn.scrollTop=0;document.body.classList.add("locked");
 }
-function closeAnswer(){answerCtx=null;$("answer").hidden=true;document.body.classList.remove("locked");render()}
+function closeAnswer(){
+  if(!answerCtx)return;answerCtx=null;
+  const pn=$("ans-panel");pn.classList.add("settle");pn.style.transform="translateY(100%)";
+  setTimeout(()=>{$("answer").hidden=true;pn.style.transform="";pn.classList.remove("settle");
+    if($("sheet").hidden&&$("onboard").hidden)document.body.classList.remove("locked");render()},200);
+}
+/* "Spend $100, earn $2 back" / "Spend $100, earn 300 points (about $3.90)" */
 function dollarsLine(x){
-  const d="$"+(x.rate).toFixed(2);
-  return x.p.type==="cash"?`${d} back on a $100 bill`:`About ${d} in ${x.p.type} on a $100 bill`;
+  const money=v=>"$"+(Math.round(v*100)%100?v.toFixed(2):v.toFixed(0));
+  if(x.p.type==="cash")return `Spend $100, earn <b>${money(x.rate)} back</b>`;
+  const pts=Math.round(x.earn*100).toLocaleString("en-US"),unit=x.p.type==="miles"?"miles":"points";
+  return `Spend $100, earn <b>${pts} ${unit}</b> (about ${money(x.rate)})`;
 }
 function capLabel(w,key){
   const p=P(w.product);if(!p)return key;
@@ -782,11 +1216,11 @@ function renderAnswer(){
   if(!answerCtx)return;
   const cat=catById(answerCtx.catId),store=answerCtx.storeId?storeById(answerCtx.storeId):null;
   const r=rank(cat,store),where=store?store.name:cat.label;
-  const bar=`<div class="ans-bar"><button class="back" onclick="closeAnswer()">${ic("chevL")}Back</button><span class="ans-where">${esc(where)}</span>${(()=>{const k=favKey(cat.id,store&&store.id),on=state.favs.includes(k);
-    return `<button class="star-btn ${on?"on":""}" onclick="toggleFav('${k}')" aria-pressed="${on}" aria-label="${on?"Remove from":"Add to"} favorites">${ic("star")}</button>`})()}</div>`;
+  const bar=`<div class="ans-bar">${(()=>{const k=favKey(cat.id,store&&store.id),on=state.favs.includes(k);
+    return `<button class="star-btn ${on?"on":""}" onclick="toggleFav('${k}')" aria-pressed="${on}" aria-label="${on?"Remove from":"Add to"} favorites">${ic("star")}</button>`})()}<span class="ans-where">${esc(where)}</span><button class="bubble close" onclick="closeAnswer()" aria-label="Close">${ic("x")}</button></div>`;
   const ctx=`<p class="ans-ctx">${store?`${esc(store.name)} counts as <b>${esc(cat.label.toLowerCase())}</b>`:`Best card for <b>${esc(cat.label.toLowerCase())}</b>`}</p>`;
   if(!r.length){
-    $("answer").innerHTML=`<div class="ans-inner">${bar}${ctx}<div class="ans-none"><h2>None of your cards work here</h2>
+    $("ans-body").innerHTML=`<div class="ans-inner">${bar}${ctx}<div class="ans-none"><h2>None of your cards work here</h2>
       <p>${cat.networks?"Costco only takes Visa credit cards. Add a Visa card to your wallet to see an answer.":"Add more cards to your wallet to see an answer."}</p></div></div>`;
     return;
   }
@@ -804,7 +1238,7 @@ function renderAnswer(){
   const sp=r.filter(x=>x.special&&x.special.rate>b.rate).sort((a,c)=>c.special.rate-a.special.rate).slice(0,4);
   const others=r.slice(1,4).map(x=>`${esc(dn(x.w))} ${fmtRate(x.rate)}%`).join(", ");
   const src=b.p.source||{};
-  $("answer").innerHTML=`<div class="ans-inner">${bar}${ctx}
+  $("ans-body").innerHTML=`<div class="ans-inner">${bar}${ctx}
     <div class="ans-card" onclick="openDrawer('${b.w.id}')">${cardArt(b.w.product)}</div>
     <div class="ans-name">${esc(dn(b.w))}${b.w.last4?` <span class="mono">•••• ${esc(b.w.last4)}</span>`:""} ${ownerBadge(b.w,"lg")}</div>
     <div class="ans-rate mono">${fmtRate(b.rate)}%</div>
@@ -839,44 +1273,23 @@ function undoCap(wid,key){const w=walletById(wid);delete w.capped[key];save();re
 const REASONS=["Another card earns more here","This card isn't accepted here","The store is in the wrong category","The rate shown is wrong"];
 function openReport(){
   openSheet(`<h2 class="sheet-title">What went wrong?</h2>
-    <p class="sheet-sub">Reports are saved on your phone in Updates so you can send them in.</p>
+    <p class="sheet-sub">Your feedback is saved in Updates so you can send it in.</p>
     <div class="radio-list">${REASONS.map((r,i)=>`<label class="radio"><input type="radio" name="reason" id="reason-${i}" value="${i}" ${i===0?"checked":""}><span>${r}</span></label>`).join("")}</div>
     <label class="flabel" for="report-note">Details (optional)</label>
     <textarea id="report-note" class="field" rows="3" placeholder="For example: Costco charged this as gas, not warehouse"></textarea>
-    <button class="btn" onclick="saveReport()">Save report</button>
+    <button class="btn" onclick="saveReport()">Submit feedback</button>
     <button class="btn-ghost" onclick="closeSheet()">Cancel</button>`);
 }
 function saveReport(){
   const cat=catById(answerCtx.catId),store=answerCtx.storeId?storeById(answerCtx.storeId):null,b=rank(cat,store)[0];
   const i=+(document.querySelector('input[name="reason"]:checked')||{value:0}).value;
   state.reports.unshift({at:TODAY,where:store?store.name:cat.label,cat:cat.label,card:b?dn(b.w)+" "+fmtRate(b.rate)+"%":"none",reason:REASONS[i],note:$("report-note").value.trim()});
-  save();closeSheet();toast("Report saved in Updates");
+  save();closeSheet();toast("Thanks! Feedback saved in Updates");
 }
 
 /* ─── Wallet ─── */
 function ownerBadge(w,size){return multiOwner()?badge(w.owner,size):""}
 function multiOwner(){return new Set(state.wallet.map(w=>w.owner)).size>1}
-function renderWallet(){
-  const list=state.wallet;
-  const row=w=>{const p=P(w.product),has=tasksFor(w).length>0;
-    return `<button class="card-row" onclick="openDrawer('${w.id}')">${cardArt(w.product,52)}
-      <span class="row-main"><span class="row-title">${esc(dn(w))}${has?'<span class="dot" aria-label="needs an update"></span>':""}</span>
-      ${(w.nickname&&p)||!p?`<span class="row-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:"Not in the catalog"}</span>`:""}</span>
-      ${w.last4?`<span class="mono last4">•••• ${esc(w.last4)}</span>`:""}</button>`};
-  let h="";
-  if(!list.length)h=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and the Pay tab ranks them for every purchase.</p>
-    <button class="btn" onclick="openOnboard()">Pick your cards</button></div>`;
-  else if(multiOwner()){
-    state.people.forEach(pp=>{const mine=list.filter(w=>w.owner===pp.id);if(!mine.length)return;
-      h+=`<h2 class="sec">${esc(pp.name)}'s cards</h2><div class="list">${mine.map(row).join("")}</div>`});
-    const rest=list.filter(w=>!state.people.some(pp=>pp.id===w.owner));
-    if(rest.length)h+=`<h2 class="sec">Unassigned</h2><div class="list">${rest.map(row).join("")}</div>`;
-  } else h=`<div class="list">${list.map(row).join("")}</div>`;
-  $("wallet-list").innerHTML=h;
-  const d=CATALOG.updated?shortDate(isoToDate(CATALOG.updated)):"";
-  $("foot").innerHTML=`${Object.keys(CATALOG.products).length} cards and ${stores().length} stores in the catalog${d?`, updated ${d}`:""}.<br>Your cards stay on this phone.`;
-}
-
 /* ─── Updates ─── */
 function renderUpdates(){
   const t=allTasks();
@@ -938,17 +1351,18 @@ function openSheet(html,keepScroll,back){
   s.hidden=false;s.onclick=e=>{if(e.target===s)closeSheet()};
   s.innerHTML=`<div class="sheet ${keepScroll?"still":""}" role="dialog" aria-modal="true"><div class="sheet-top"><div class="handle"></div>${
     back?`<button class="bubble" onclick="sheetGoBack()" aria-label="Back to ${esc(back.label)}">${ic("chevL")}${esc(back.label)}</button>`:""}<button class="bubble close" onclick="closeSheet()" aria-label="Close">${ic("x")}</button></div>${html}</div>`;
-  const sh=s.querySelector(".sheet");if(sh){sh.scrollTop=prev||0;sheetGestures(sh)}
+  const sh=s.querySelector(".sheet");if(sh){sh.scrollTop=prev||0;sheetGestures(sh,closeSheet,()=>sheetBack&&sheetBack.fn)}
   document.body.classList.add("locked");
 }
 function sheetGoBack(){if(sheetBack)sheetBack.fn()}
-/* Swipe down from the top to close; swipe sideways to go back when there is a back step */
-function sheetGestures(sh){
-  let x0=0,y0=0,sc0=0,mode=null,dx=0,dy=0;
+/* Swipe down from the top to close; swipe sideways to go back when there is a back step.
+   Used by every pop-up (sheets and the Pay answer) so they all feel the same. */
+function sheetGestures(sh,close,getBack){
+  let x0=0,y0=0,sc0=0,mode=null,dx=0,dy=0,t0=0;
   const reset=()=>{sh.classList.add("settle");sh.style.transform="";sh.style.opacity="";setTimeout(()=>sh.classList.remove("settle"),220)};
   sh.addEventListener("touchstart",e=>{
     if(e.touches.length>1){mode="none";return}
-    const t=e.touches[0];x0=t.clientX;y0=t.clientY;sc0=sh.scrollTop;dx=dy=0;
+    const t=e.touches[0];x0=t.clientX;y0=t.clientY;sc0=sh.scrollTop;dx=dy=0;t0=performance.now();
     mode=e.target.closest("input,textarea,select")?"none":null;
   },{passive:true});
   sh.addEventListener("touchmove",e=>{
@@ -956,7 +1370,7 @@ function sheetGestures(sh){
     const t=e.touches[0];dx=t.clientX-x0;dy=t.clientY-y0;
     if(!mode){
       if(Math.abs(dx)+Math.abs(dy)<10)return;
-      if(sheetBack&&Math.abs(dx)>Math.abs(dy)*1.4)mode="h";
+      if(getBack()&&Math.abs(dx)>Math.abs(dy)*1.4)mode="h";
       else if(dy>0&&sc0<=0&&sh.scrollTop<=0&&dy>Math.abs(dx))mode="v";
       else{mode="none";return}
     }
@@ -966,9 +1380,9 @@ function sheetGestures(sh){
   },{passive:false});
   const end=()=>{
     if(mode==="v"){
-      if(dy>90){sh.classList.add("settle");sh.style.transform="translateY(100%)";setTimeout(closeSheet,180)}else reset();
+      if(dy>90||(dy>40&&performance.now()-t0<250)){sh.classList.add("settle");sh.style.transform="translateY(100%)";setTimeout(close,180)}else reset();
     }else if(mode==="h"){
-      if(Math.abs(dx)>70)sheetGoBack();else reset();
+      const fn=getBack();if(Math.abs(dx)>70&&fn)fn();else reset();
     }
     mode=null;
   };
@@ -990,7 +1404,7 @@ function openDrawer(id,keep){
   const w=walletById(id);if(!w)return;const p=P(w.product);
   drawerId=id;if(!keep)removeArmed=false;
   if(!p){openSheet(`<h2 class="sheet-title">${esc(dn(w))}</h2><p class="sheet-sub">This card isn't in the catalog anymore.</p>
-    <button class="btn-ghost" onclick="closeSheet()">Done</button><button class="btn-danger" onclick="removeCard('${w.id}')">${removeArmed?"Tap again to remove":"Remove from wallet"}</button>`,keep);return}
+    ${drawerButtons(w)}`,keep);return}
   const unit=unitOf(p),brand=B(p.brand),tiers=[];
   (p.rules||[]).forEach(r=>tiers.push({rate:r.rate,t:r.label,s:[r.cond,r.note].filter(Boolean).join(" · ")}));
   (p.choice||[]).forEach(s=>{const l=selLabels(w,s);tiers.push({rate:s.rate,t:`${s.label}: ${l.length?l.join(", "):"not set"}${isDefaultSel(w,s)?" (default)":""}`,s:s.note||""})});
@@ -1007,7 +1421,8 @@ function openDrawer(id,keep){
     <div class="drawer-head">${cardArt(w.product,72)}<div class="row-main">
       <h2 class="sheet-title">${esc(dn(w))} ${ownerBadge(w)}</h2>
       <p class="sheet-sub">${esc(brand.name)} ${esc(p.name)} · ${netLabel(netOf(w))}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p>
-      ${p.status==="closed"?`<span class="pill warn">No longer offered to new applicants</span>`:""}</div></div>
+      ${p.status==="closed"?`<span class="pill warn">No longer offered to new applicants</span>`:""}
+      ${w.inactive?`<span class="pill">Deactivated ${shortDate(isoToDate(w.inactive))}</span>`:""}</div></div>
     ${SHOW.accountDetails?`<div class="stats"><div><b>Due</b>${ordinal(w.dueDay)}</div><div><b>Limit</b>${esc(w.limit)||"—"}</div><div><b>Fee</b>$${p.fee}</div><div><b>Rewards</b>${esc(w.rewards)||"—"}</div></div>`:""}
     ${setupHTML(w)}
     ${caps.length?`<h3 class="sec">Caps reached</h3><div class="list">${caps.map(([k,u])=>`<div class="row static"><span class="row-main"><span class="row-title">${esc(capLabel(w,k))}</span><span class="row-sub">Counts again after ${shortDate(isoToDate(u))}</span></span><button class="btn-sm alt" onclick="undoCap('${w.id}','${k}');openDrawer('${w.id}',true)">Undo</button></div>`).join("")}</div>`:""}
@@ -1025,8 +1440,7 @@ function openDrawer(id,keep){
     ${p.networkOptions?`<div class="flabel">Logo on your card</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${netOf(w)===n?"on":""}" onclick="setField('${w.id}','network','${n}')">${capWord(n)}</button>`).join("")}</div>`:""}
     ${state.people.length>1?`<div class="flabel">Whose card</div><div class="chips">${ownerChips(w.owner,`setField('${w.id}','owner','$ID')`)}</div>`:""}
     <p class="source">${s.checked?`Terms checked ${isoToDate(s.checked).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}`:"Terms not yet checked"}${s.url?` · <a href="${esc(s.url)}" target="_blank" rel="noopener">View source</a>`:""}${s.note?`<br>${esc(s.note)}`:""}<br>Always confirm terms with your card issuer.</p>
-    <button class="btn-ghost" onclick="closeSheet()">Done</button>
-    <button class="btn-danger" onclick="removeCard('${w.id}')">${removeArmed?"Tap again to remove":"Remove from wallet"}</button>
+    ${drawerButtons(w)}
   `,keep);
 }
 function setupHTML(w){
@@ -1069,10 +1483,73 @@ function togglePick(id,slotId,opt){
 function confirmSame(id,fromDrawer){const w=walletById(id);
   (P(w.product).choice||[]).forEach(s=>{if(s.period==="quarter"&&w.sel[s.id])w.sel[s.id].quarter=PICK_Q});
   save();if(fromDrawer)openDrawer(id,true);else{render();toast("Picks confirmed")}}
-function removeCard(id){
-  if(!removeArmed){removeArmed=true;openDrawer(id,true);return}
-  const w=walletById(id),idx=state.wallet.indexOf(w);state.wallet.splice(idx,1);save();removeArmed=false;closeSheet();
-  toast(`${dn(w)} removed`,()=>{state.wallet.splice(idx,0,w);save();render()});
+function drawerButtons(w){
+  return `<div class="action-stack">
+    <button class="btn" onclick="closeSheet()">Done</button>
+    ${w.inactive?`<button class="btn-outline" onclick="setInactive(['${w.id}'],false)">${ic("restore")}Reactivate card</button>`
+      :`<button class="btn-outline" onclick="setInactive(['${w.id}'],true)">${ic("archive")}Deactivate card</button>`}
+    <button class="btn-outline danger" onclick="removeCard('${w.id}')">${ic("trash")}Remove from wallet</button></div>
+    ${w.inactive?"":`<p class="hint center">Deactivate keeps the card in your history but stops using it on Pay.</p>`}`;
+}
+function removeCard(id){removeCards([id])}
+function removeCards(ids){
+  const ws=ids.map(walletById).filter(Boolean);if(!ws.length)return;
+  const name=ws.length===1?dn(ws[0]):`${ws.length} cards`;
+  confirmDialog(`Remove ${name}?`,ws.length===1?"It will be deleted from your wallet and its history. To keep it in your history, deactivate it instead."
+      :"They will be deleted from your wallet and its history. To keep them in your history, deactivate them instead.","Remove",()=>{
+    const before=[...state.wallet];state.wallet=state.wallet.filter(w=>!ids.includes(w.id));save();
+    selectMode=null;closeSheet();if(answerCtx)renderAnswer();
+    toast(`${name} removed`,()=>{state.wallet=before;save();render();if(answerCtx)renderAnswer()});
+  });
+}
+function setInactive(ids,off,confirmed){
+  if(off&&!confirmed){
+    const ws=ids.map(walletById).filter(Boolean);if(!ws.length)return;
+    const one=ws.length===1,name=one?dn(ws[0]):`${ws.length} cards`;
+    confirmDialog(`Deactivate ${name}?`,`${one?"It":"They"} will move to your deactivated cards and stop showing on Pay and in Updates. You can reactivate ${one?"it":"them"} any time.`,
+      "Deactivate",()=>setInactive(ids,true,true),"primary");
+    return;
+  }
+  closeSwipes();
+  ids.forEach(id=>{const w=walletById(id);if(!w)return;if(off)w.inactive=TODAY;else delete w.inactive});save();
+  const n=ids.length,name=n===1?dn(walletById(ids[0])):`${n} cards`;
+  if(off)showInactive=false;
+  selectMode=null;closeSheet();if(answerCtx)renderAnswer();
+  toast(`${name} ${off?"deactivated":"reactivated"}`,()=>{ids.forEach(id=>{const w=walletById(id);if(!w)return;if(off)delete w.inactive;else w.inactive=TODAY});save();render();if(answerCtx)renderAnswer()});
+}
+
+/* ─── Confirm pop-up ─── */
+let dialogFn=null;
+function confirmDialog(title,msg,okLabel,fn,kind="danger"){
+  dialogFn=fn;const d=$("dialog");
+  d.innerHTML=`<div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dlg-t"><h2 id="dlg-t">${esc(title)}</h2><p>${esc(msg)}</p>
+    <div class="dialog-btns"><button class="btn-outline" onclick="closeDialog()">Cancel</button><button class="btn ${kind==="danger"?"danger":""}" onclick="const f=dialogFn;closeDialog();f&&f()">${esc(okLabel)}</button></div></div>`;
+  d.hidden=false;d.onclick=e=>{if(e.target===d)closeDialog()};
+}
+function closeDialog(){$("dialog").hidden=true;$("dialog").innerHTML="";dialogFn=null}
+
+/* ─── Wallet menu (⋮) and select mode ─── */
+function openWalletMenu(){
+  const off=state.wallet.filter(w=>w.inactive).length;
+  const item=(icon,label,sub,fn)=>`<button class="row" onclick="${fn}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${label}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span></button>`;
+  openSheet(`<h2 class="sheet-title">Wallet</h2><div class="list" style="margin-top:12px">
+    ${item("plus","Add a card","","closeSheet();openAdd()")}
+    ${state.wallet.length?item("sort","Sort & view",`${SORTS[viewOpt().sort]} · grouped by ${GROUPS[viewOpt().group].toLowerCase()}`,"openViewSheet()"):""}
+    ${state.wallet.length?item("select","Select cards","Deactivate or remove several at once","closeSheet();startSelect()"):""}
+    ${off?item("archive",showInactive?"Hide deactivated cards":"Show deactivated cards",`${off} card${off>1?"s":""}`,"showInactive=!showInactive;closeSheet()"):""}
+    ${item("download","Back up or restore","Save your wallet to a file","openBackup()")}
+  </div>`);
+}
+function startSelect(){selectMode=new Set();render()}
+function endSelect(){selectMode=null;render()}
+function toggleSelect(id){selectMode.has(id)?selectMode.delete(id):selectMode.add(id);render()}
+function renderSelectBar(){
+  const bar=$("select-bar");if(!selectMode){bar.hidden=true;return}
+  const ids=[...selectMode],n=ids.length,allOff=n&&ids.every(id=>walletById(id)?.inactive);
+  bar.hidden=false;
+  bar.innerHTML=`<span class="sel-count">${n?`${n} selected`:"Tap cards to select"}</span>
+    <button class="btn-sm alt" ${n?"":"disabled"} onclick="setInactive([...selectMode],${!allOff})">${ic(allOff?"restore":"archive")}${allOff?"Reactivate":"Deactivate"}</button>
+    <button class="btn-sm danger" ${n?"":"disabled"} onclick="removeCards([...selectMode])">${ic("trash")}Remove</button>`;
 }
 
 /* ─── Add a card: bank → cards → details ─── */
@@ -1085,14 +1562,24 @@ function openAdd(){addQ="";addIss=null;draft=null;renderBanks(false)}
 function renderBanks(still=true){
   addIss=null;if(still)still=banksScroll||0.001;
   openSheet(`<h2 class="sheet-title">Add a card</h2><p class="sheet-sub">Choose the bank on your card</p>
-    <label class="search">${ic("search")}<input id="add-q" type="search" placeholder="Search banks or cards" value="${esc(addQ)}" autocomplete="off" oninput="addQ=this.value;renderAddBody()"></label>
-    <div id="add-body"></div><button class="btn-ghost" onclick="closeSheet()">Cancel</button>`,still);
+    ${searchRow("add-q","Search banks or cards",addQ,"addQ=this.value;renderAddBody()","clearAddSearch()")}
+    <div id="add-body"></div><button class="btn-outline" id="add-bottom" onclick="addQ.trim()?clearAddSearch():closeSheet()">Cancel</button>`,still);
   renderAddBody();
   if(typeof still==="number")$("sheet").querySelector(".sheet").scrollTop=still;
 }
 const bankRow=k=>{const n=productsOf(k).length;return `<button class="row" onclick="openBank('${k}')"><span class="row-main"><span class="row-title">${esc(B(k).name)}</span></span><span class="dim">${n} card${n>1?"s":""}</span>${ic("chevR","dim")}</button>`};
+/* Search box with an iOS-style Cancel that clears the search and brings the full list back */
+function searchRow(id,ph,val,oninput,oncancel){
+  return `<div class="search-row"><label class="search">${ic("search")}<input id="${id}" type="search" placeholder="${esc(ph)}" value="${esc(val)}" autocomplete="off"
+    oninput="${oninput};this.closest('.search-row').classList.toggle('active',!!this.value)"></label>
+    <button class="search-cancel" onclick="${oncancel}">Cancel</button></div>`.replace('class="search-row"',`class="search-row ${val?"active":""}"`);
+}
+function clearAddSearch(){addQ="";const i=$("add-q");if(i){i.value="";i.blur();i.closest(".search-row").classList.remove("active")}renderAddBody();
+  const sh=$("sheet").querySelector(".sheet");if(sh)sh.scrollTop=0}
+function clearBankSearch(){bankQ="";const i=$("bank-q");if(i){i.value="";i.blur();i.closest(".search-row").classList.remove("active")}renderBankList()}
 function renderAddBody(){
   const q=addQ.trim().toLowerCase();
+  sheetBack=q?{label:"All banks",fn:clearAddSearch}:null;
   const banks=Object.keys(CATALOG.brands).filter(k=>productsOf(k).length).sort((a,b)=>B(a).name.localeCompare(B(b).name));
   if(!q){$("add-body").innerHTML=`<h3 class="sec">Most popular</h3><div class="list">${POPULAR_BRANDS.filter(k=>banks.includes(k)).map(bankRow).join("")}</div>
     <h3 class="sec">All banks A–Z</h3><div class="list">${banks.map(bankRow).join("")}</div>`;return}
@@ -1104,7 +1591,9 @@ function renderAddBody(){
 }
 function cardCompact(id){const p=P(id),owned=ownedCount(id)&&SINGLE_CARD_PER_PRODUCT;
   return `<div class="row static ${owned?"muted":""}">${cardArt(id,56)}<span class="row-main"><span class="row-sub">${esc(B(p.brand).name)}</span><span class="row-title">${esc(p.name)}</span><span class="row-sub">${netLabel(p.network)}</span></span>
-    ${owned?`<button class="btn-sm alt" disabled>Already added</button>`:`<button class="btn-sm" onclick="startAdd('${id}')">Add</button>`}</div>`}
+    ${owned?(inactiveOf(id)?`<button class="btn-sm alt" onclick="reactivateFromAdd('${id}')">Reactivate</button>`:`<button class="btn-sm alt" disabled>Already added</button>`):`<button class="btn-sm" onclick="startAdd('${id}')">Add</button>`}</div>`}
+const inactiveOf=pid=>state.wallet.find(w=>w.product===pid&&w.inactive);
+function reactivateFromAdd(pid){const w=inactiveOf(pid);if(w)setInactive([w.id],false)}
 function openBank(k){banksScroll=curScroll();addIss=k;bankQ="";bankCardsScroll=0;renderBankCards()}
 function renderBankList(){
   const q=bankQ.trim().toLowerCase(),items=productsOf(addIss).filter(([,p])=>!q||(p.name+" "+p.short).toLowerCase().includes(q));
@@ -1113,15 +1602,15 @@ function renderBankList(){
 function renderBankCards(){
   const b=B(addIss),items=productsOf(addIss);
   openSheet(`<h2 class="sheet-title">${esc(b.name)}</h2><p class="sheet-sub">${b.note?esc(b.note):`${items.length} card${items.length>1?"s":""}`}</p>
-    ${items.length>3?`<label class="search">${ic("search")}<input type="search" id="bank-q" value="${esc(bankQ)}" placeholder="Search ${esc(b.short||b.name)} cards" autocomplete="off" oninput="bankQ=this.value;renderBankList()"></label>`:""}
-    <div id="bank-list" class="offers"></div><button class="btn-ghost" onclick="closeSheet()">Cancel</button>`,bankCardsScroll||0.001,{label:"All banks",fn:()=>renderBanks()});
+    ${items.length>3?searchRow("bank-q",`Search ${b.short||b.name} cards`,bankQ,"bankQ=this.value;renderBankList()","clearBankSearch()"):""}
+    <div id="bank-list" class="offers"></div><button class="btn-outline" onclick="bankQ.trim()?clearBankSearch():renderBanks()">${ic("chevL")}Back to all banks</button>`,bankCardsScroll||0.001,{label:"All banks",fn:()=>renderBanks()});
   renderBankList();$("sheet").querySelector(".sheet").scrollTop=bankCardsScroll||0;
 }
 function cardFull(id){const p=P(id),owned=ownedCount(id)&&SINGLE_CARD_PER_PRODUCT;
   return `<div class="offer ${owned?"muted":""}"><div class="offer-art">${cardArt(id)}</div>
     <div class="row-title">${esc(B(p.brand).name)} ${esc(p.name)}</div>
-    <div class="row-sub">${netLabel(p.network)}${p.business?" · Business":""}${p.status==="closed"?" · No longer offered":""}${owned?" · In your wallet":""}</div>
-    ${owned?`<button class="btn" disabled>Already added</button>`:`<button class="btn" onclick="startAdd('${id}')">Add</button>`}</div>`}
+    <div class="row-sub">${netLabel(p.network)}${p.business?" · Business":""}${p.status==="closed"?" · No longer offered":""}${owned?(inactiveOf(id)?" · Deactivated":" · In your wallet"):""}</div>
+    ${owned?(inactiveOf(id)?`<button class="btn" onclick="reactivateFromAdd('${id}')">Reactivate</button>`:`<button class="btn" disabled>Already added</button>`):`<button class="btn" onclick="startAdd('${id}')">Add</button>`}</div>`}
 function startAdd(pid){if(SINGLE_CARD_PER_PRODUCT&&ownedCount(pid))return;if(addIss)bankCardsScroll=curScroll();else banksScroll=curScroll();const p=P(pid);draft={product:pid,owner:state.people[0]?.id||"",nickname:"",last4:"",network:p.network};renderDraft(false)}
 function renderDraft(keep=true){
   const p=P(draft.product);
@@ -1165,14 +1654,62 @@ function obFinish(skip){
   if(!skip&&obSel.size)toast(`${obSel.size} card${obSel.size>1?"s":""} added${allTasks().length?". A few need a quick setup.":""}`);
 }
 
+/* ─── Backup: a file you can keep in iCloud Drive / Files and restore on any phone ─── */
+function exportWallet(){
+  const data=JSON.stringify({app:"card-maximizer",saved:new Date().toISOString(),state},null,1);
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));
+  a.download=`card-maximizer-backup-${TODAY}.json`;document.body.appendChild(a);a.click();a.remove();
+  state.backedUp=TODAY;save();render();toast("Backup saved to your downloads");
+}
+function importWallet(file){
+  if(!file)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result),s=d.state||d;if(!s||!Array.isArray(s.wallet))throw 0;
+      const before=JSON.stringify(state);
+      s.wallet.forEach(normalize);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,s);
+      state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];state.onboarded=true;
+      save();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
+    }catch{toast("That file isn't a Card Maximizer backup")}};
+  r.readAsText(file);
+}
+function openBackup(){
+  openSheet(`<h2 class="sheet-title">Back up your wallet</h2>
+    <p class="sheet-sub">Your cards are saved on this phone. Save a backup file to iCloud Drive or Google Drive so you can restore them if you delete the app or get a new phone.</p>
+    <button class="btn" onclick="exportWallet()">${ic("copy")} Save backup file</button>
+    <label class="btn-ghost" style="cursor:pointer;color:var(--accent)">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
+    <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`);
+}
+
+/* ─── One-finger navigation ─── */
+document.addEventListener("click",e=>{if(swipeOpen&&!e.target.closest(".swipe-wrap"))closeSwipes()},true);
+// The Pay answer slides up like the other pop-ups: swipe down (or sideways) to close it.
+sheetGestures($("ans-panel"),closeAnswer,()=>closeAnswer);
+$("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()});
+// Swipe left/right anywhere on a main tab to move between Pay, Wallet and Updates.
+(function(){const ORDER=["pay","wallet","updates"];let x0,y0,ok=false;
+  const main=document.querySelector("main");
+  main.addEventListener("touchstart",e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;
+    ok=e.touches.length===1&&x0>24&&x0<innerWidth-24&&!e.target.closest("input,textarea,.chips,.no-swipe,.swipe-wrap")},{passive:true});
+  main.addEventListener("touchend",e=>{if(!ok)return;ok=false;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+    if(Math.abs(dx)<80||Math.abs(dx)<Math.abs(dy)*2)return;
+    const i=ORDER.indexOf(tab)+(dx<0?1:-1);if(i>=0&&i<ORDER.length)go(ORDER[i]);},{passive:true});
+})();
+
+/* ─── Opening splash ─── */
+(function(){const sp=$("splash");if(!sp)return;
+  if(!SHOW.splash){sp.remove();return}
+  const done=()=>sp.remove();
+  sp.addEventListener("animationend",e=>{if(e.target===sp)done()});
+  sp.addEventListener("click",()=>sp.classList.add("skip"));
+  setTimeout(done,2600); // safety net
+})();
+
+/* Ask the browser to keep this app's storage (protects the wallet from automatic clean-up) */
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
+
 /* ─── Init ─── */
 go("pay");
 if(!state.wallet.length&&!state.onboarded)openOnboard();
 syncCatalog();
-if("serviceWorker"in navigator){
-  const sw=`const C='card-max-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});
-}
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 </script>
