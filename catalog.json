@@ -1,5 +1,5 @@
 {
- "version": "2026.09.30-v2",
+ "version": "2026.10.02-v1",
  "updated": "2026-09-29",
  "brands": {
   "amex": {
@@ -18,7 +18,8 @@
    "colors": [
     "#e11d48",
     "#1e3a8a"
-   ]
+   ],
+   "login": "https://www.bankofamerica.com/"
   },
   "capone": {
    "name": "Capital One",
@@ -36,7 +37,8 @@
    "colors": [
     "#1d4ed8",
     "#172554"
-   ]
+   ],
+   "login": "https://secure.chase.com/web/auth/dashboard"
   },
   "citi": {
    "name": "Citi",
@@ -45,7 +47,8 @@
    "colors": [
     "#0ea5e9",
     "#075985"
-   ]
+   ],
+   "login": "https://online.citi.com/"
   },
   "discover": {
    "name": "Discover",
@@ -55,7 +58,8 @@
     "#f97316",
     "#9a3412"
    ],
-   "note": "Owned by Capital One"
+   "note": "Owned by Capital One",
+   "login": "https://www.discover.com/login/"
   },
   "usbank": {
    "name": "U.S. Bank",
@@ -64,7 +68,8 @@
    "colors": [
     "#dc2626",
     "#1e3a8a"
-   ]
+   ],
+   "login": "https://www.usbank.com/"
   },
   "wells": {
    "name": "Wells Fargo",
@@ -111,7 +116,8 @@
     "#18181b",
     "#52525b"
    ],
-   "note": "Issued by Cardless since Feb 2026"
+   "note": "Issued by Cardless since Feb 2026",
+   "login": "https://www.biltrewards.com/"
   },
   "walmart": {
    "name": "Walmart (OnePay)",
