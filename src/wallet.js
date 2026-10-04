@@ -77,8 +77,9 @@ function walletRow(w,{drag=true}={}){
   const p=P(w.product),v=viewOpt(),has=!w.inactive&&tasksFor(w).length>0,sel=selectMode&&selectMode.has(w.id);
   const sub=w.inactive?`Deactivated ${shortDate(isoToDate(w.inactive))}${w.inactive.slice(0,4)!==TODAY.slice(0,4)?", "+w.inactive.slice(0,4):""}`
     :(w.nickname&&p)||!p?(p?`${B(p.brand).name} ${p.name}`:"Not in the catalog"):"";
-  const rate=v.showRate&&!w.inactive&&p?`<span class="w-rate">up to <b>${fmtRate(topRate(w))}%</b></span>`:"";
-  const right=(v.showLast4&&w.last4?`<span class="mono last4">•••• ${esc(w.last4)}</span>`:"")+rate;
+  const best=!w.inactive&&p?bestFor(w):"";
+  const rate=v.showRate&&!w.inactive&&p?`<span class="w-top"><span>up to</span><b>${fmtRate(topRate(w))}%</b></span>`:"";
+  const right=rate;
   return `<div class="swipe-wrap" data-id="${w.id}" data-drag="${drag&&!selectMode?1:0}">
     <div class="swipe-act left"><button class="sw-btn more" onclick="openCardMenu('${w.id}')" aria-label="More options for ${esc(dn(w))}">${ic("more","fill")}<span>More</span></button></div>
     <div class="swipe-act right">${w.inactive
@@ -86,18 +87,54 @@ function walletRow(w,{drag=true}={}){
       :`<button class="sw-btn archive" onclick="setInactive(['${w.id}'],true)">${ic("archive")}<span>Deactivate</span></button>`}
       <button class="sw-btn delete" onclick="removeCards(['${w.id}'])">${ic("trash")}<span>Delete</span></button></div>
     <button class="card-row ${w.inactive?"inactive":""} ${sel?"selected":""}" onclick="rowTap('${w.id}')" ${selectMode?`aria-pressed="${!!sel}"`:""}>
-      ${selectMode?`<span class="sel-box">${sel?ic("check"):""}</span>`:""}${cardArt(w.product,52)}
+      ${selectMode?`<span class="sel-box">${sel?ic("check"):""}</span>`:""}
       <span class="row-main"><span class="row-title">${w.pinned&&!w.inactive?`<span class="pin-ic" aria-label="Pinned">${ic("pin")}</span>`:""}${esc(dn(w))}${has?'<span class="dot" aria-label="needs an update"></span>':""}</span>
-      ${sub?`<span class="row-sub">${esc(sub)}</span>`:""}</span>
+      ${sub?`<span class="row-sub">${esc(sub)}</span>`:""}
+      ${best?`<span class="w-best-for">${best}</span>`:""}
+      <span class="w-meta">${p?`<span class="net-tag net-${esc(netOf(w))}">${esc(netLabel(netOf(w)))}</span>`:""}${v.showLast4&&w.last4?`<span class="mono">•••• ${esc(w.last4)}</span>`:""}</span></span>
       ${right?`<span class="row-end">${right}</span>`:""}</button></div>`;
 }
 
+/* Bank tile: the bank's colors and short name (real card pictures need licensing) */
+function bankTile(w){const p=P(w.product),b=p?B(p.brand):B("?");const[c1,c2]=(typeof ART!=="undefined"&&ART[w.product])||b.colors;
+  return `<span class="bank-tile" style="background:linear-gradient(135deg,${c1},${c2})" aria-hidden="true">${esc(b.mono||(b.short||b.name).slice(0,2))}</span>`}
+/* What a card is best for: its top two bonus categories, e.g. "6% grocery · 3% gas" */
+function bestFor(w){
+  const p=P(w.product);if(!p)return"";const mult=p.type==="cash"?1:(p.cpp||1);
+  const hits=visibleCats().filter(c=>c.id!=="other").map(c=>{const e=evalCard(w,c,null);return e?{c,r:e.rate-e.extras.reduce((t,x)=>t+x.extra,0)*mult}:null})
+    .filter(x=>x&&x.r>(p.base||0)*mult+0.001).sort((a,b)=>b.r-a.r||(a.c.parent?1:0)-(b.c.parent?1:0));
+  const seen=new Set(),top=[];for(const h of hits){if(top.length>=2)break;const k=h.r+"|"+(h.c.parent||h.c.id);if(seen.has(k))continue;seen.add(k);top.push(h)}
+  // a quarterly bonus that still needs activating
+  const q=p.rotating&&p.rotating.schedule[QK],pend=q&&!w.activated.includes(QK)?`<span class="bf-pill warn"><b>${fmtRate(p.rotating.rate)}%</b> ${esc(q.label.split(/,| &/)[0].toLowerCase())} · activate</span>`:"";
+  if(!top.length)return pend+`<span class="bf-pill">${fmtRate((p.base||0)*mult)}% everywhere</span>`;
+  return pend+top.slice(0,pend?1:2).map(h=>`<span class="bf-pill"><b>${fmtRate(Math.round(h.r*100)/100)}%</b> ${esc(h.c.label.toLowerCase())}</span>`).join("");
+}
+/* Wallet header: title, people, fanned top cards, then a summary strip like a finance app */
+function walletHero(){
+  const act=activeWallet(),nm=myName(),names=nm?[nm]:[];
+  const banks=new Set(act.map(w=>P(w.product)?.brand).filter(Boolean)).size;
+  let best=null;visibleCats().filter(c=>c.id!=="other").forEach(c=>{const r=rank(c,null)[0];if(r&&(!best||r.rate>best.r.rate))best={r,c}});
+  const every=rank(catById("other"),null)[0];
+  const fees=act.reduce((t,w)=>t+(P(w.product)?.fee||0),0);
+  const fan=[...act.filter(w=>w.pinned),...act.filter(w=>!w.pinned)].slice(0,3);
+  return `<div class="pay-hero w-hero">
+    <h2 class="hero-greet">Your wallet</h2>
+    <div class="hero-meta"><span>${act.length} card${act.length===1?"":"s"}</span><span>·</span><span>${banks} bank${banks===1?"":"s"}</span></div>
+    ${fan.length?`<div class="w-fan" aria-hidden="true">${fan.map((w,i)=>`<div class="w-fan-card f${fan.length-1-i}">${cardArt(w.product,0,true)}</div>`).reverse().join("")}</div>`:""}
+  </div>
+  ${act.length?`<div class="w-stats">
+    <div class="w-stat"><b class="good">${best?fmtRate(best.r.rate)+"%":"—"}</b><span>Top rate</span></div>
+    <div class="w-stat"><b>${every?fmtRate(every.rate)+"%":"—"}</b><span>Everywhere</span></div>
+  </div>
+  ${best?`<button class="w-best" onclick="openAnswer('${best.c.id}')">${ic("star")}<span>Your best rate: <b>${fmtRate(best.r.rate)}% at ${esc(best.c.label.toLowerCase())}</b> with ${esc(dn(best.r.w))}</span>${ic("chevR","dim")}</button>`:""}`:""}`;
+}
 function renderWallet(){
   const v=viewOpt(),all=state.wallet;
   const active=walletFiltered(activeWallet()),off=walletFiltered(all.filter(w=>w.inactive)).sort((a,b)=>b.inactive.localeCompare(a.inactive));
   let h="";
+  h+=walletHero();
   if(all.length)h+=walletToolbar();
-  if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and the Pay tab ranks them for every purchase.</p>
+  if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and Earn picks the best one for every purchase.</p>
     <button class="btn" onclick="openOnboard()">Pick your cards</button></div>`;
   else if(!active.length&&activeFilterCount())h+=`<div class="empty small"><p>No cards match these filters.</p><button class="btn-sm alt" onclick="clearFilter('*')">Clear filters</button></div>`;
   else if(!active.length)h+=`<p class="hint">All your cards are deactivated. Reactivate one below or tap + to add a card.</p>`;
@@ -114,7 +151,7 @@ function renderWallet(){
     const open=showInactive||!!selectMode;
     h+=`<button class="more" onclick="showInactive=!showInactive;renderWallet()" aria-expanded="${open}">
       <span>${ic("archive")} Deactivated cards (${off.length})</span>${ic(open?"chevD":"chevR","dim")}</button>
-      ${open?`<p class="hint">Cards you no longer use. They don't show up on Pay or in Updates.</p><div class="list inactive-list" data-list="off">${off.map(w=>walletRow(w,{drag:false})).join("")}</div>`:""}`;
+      ${open?`<p class="hint">Cards you no longer use. They don't show up on Earn or in notifications.</p><div class="list inactive-list" data-list="off">${off.map(w=>walletRow(w,{drag:false})).join("")}</div>`:""}`;
   }
   $("wallet-list").innerHTML=h;
   const d=CATALOG.updated?shortDate(isoToDate(CATALOG.updated)):"";
@@ -209,8 +246,8 @@ function openCardMenu(id){
   closeSwipes();const w=walletById(id);if(!w)return;const p=P(w.product);
   const item=(icon,label,fn,cls="")=>`<button class="row ${cls}" onclick="${fn}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${label}</span></span></button>`;
   openSheet(`<div class="drawer-head">${cardArt(w.product,64)}<div class="row-main"><h2 class="sheet-title">${esc(dn(w))}</h2>
-      <p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p></div></div>
-    <div class="list" style="margin-top:8px">
+      <p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}${w.last4?`<span class="mono sub-last4">•••• ${esc(w.last4)}</span>`:""}</p></div></div>
+    <div class="list">
       ${item("edit","Rename",`openRename('${id}')`)}
       ${item("info","Edit details & rewards",`closeSheet();openDrawer('${id}')`)}
       ${w.inactive?"":item("pin",w.pinned?"Unpin":"Pin to top",`togglePin('${id}')`)}

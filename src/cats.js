@@ -1,5 +1,5 @@
 /* v2 feature switches: hidden features stay in the code, turn back on here */
-const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */};
+const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */, multiPeople:false /* household mode: owner badges, Whose card, group by person */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
 
 /* ══════════════════════════════════════════════════════════
@@ -55,6 +55,10 @@ const ICONS={
   select:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12.5l3 3 5-6"/>',
   download:'<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
   more:'<circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/>',
+  earn:'<circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.1 1.7 2.8 2.1 2.9 1 2.9 2.2-1.2 2.1-2.9 2.1c-1.3 0-2.4-.6-2.9-1.5"/><path d="M12 6v1.8M12 16.2V18"/>',
+  bolt:'<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>',
+  refresh:'<path d="M20 11a8 8 0 0 0-14.3-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.5L20 16"/><path d="M20 20v-4h-4"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
   filter:'<path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
@@ -118,4 +122,6 @@ const CAT_GROUPS=[
   ["Travel & going out",["travel","transit","entertainment"]],
   ["Bills & everything else",["streaming","phone","utilities","fitness","other"]],
 ];
+/* Shown on Earn until someone stars their own favorites */
+const POPULAR_CATS=["grocery","dining","gas","fast_food"];
 const DEFAULT_TOP=["grocery","dining","gas","fast_food","amazon","costco"];

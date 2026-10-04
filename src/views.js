@@ -4,26 +4,29 @@
 let tab="pay",payQ="",moreOpen=false,answerCtx=null,showAllAlts=false,whyOpen=false;
 const stores=()=>CATALOG.stores||[];
 const storeById=id=>stores().find(s=>s.id===id);
-const TITLES={pay:"Pay",wallet:"Wallet",updates:"Updates"};
+const TITLES={pay:"Earn",wallet:"Wallet"};
 
 function go(t){
   tab=t;
-  ["pay","wallet","updates"].forEach(x=>{$("view-"+x).hidden=x!==t;const b=$("tab-"+x);b.classList.toggle("on",x===t);b.setAttribute("aria-current",x===t?"page":"false")});
-  $("title").textContent=TITLES[t];
+  if(t==="updates"){openNotifs();return}
+  ["pay","wallet"].forEach(x=>{$("view-"+x).hidden=x!==t;const b=$("tab-"+x);b.classList.toggle("on",x===t);b.setAttribute("aria-current",x===t?"page":"false")});
+  $("title").innerHTML=`<span class="brand">${BRAND_MARK}<span>lucro</span></span>`;
+  document.body.classList.add("hero-page");
   if(t!=="wallet")selectMode=null;
   render();window.scrollTo(0,0);
 }
 function renderAppbar(){
-  const a=$("appbar-action");
-  if(tab!=="wallet"){a.innerHTML="";$("fab").hidden=true;$("select-bar").hidden=true;return}
+  const a=$("appbar-action"),n=allTasks().length;
+  const bell=`<button class="bell-btn" onclick="openNotifs()" aria-label="Notifications${n?`, ${n} need attention`:""}">${ic("bell")}${n?`<span class="badge">${n}</span>`:""}</button>`;
+  if(tab!=="wallet"){a.innerHTML=`<div class="appbar-icons">${bell}</div>`;$("fab").hidden=true;$("select-bar").hidden=true;return}
   a.innerHTML=selectMode?`<button class="btn-pill quiet" onclick="endSelect()">Done</button>`
-    :`<button class="icon-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button>`;
+    :`<div class="appbar-icons">${bell}<button class="icon-btn" id="menu-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button></div>`;
   $("fab").hidden=!!selectMode;
   renderSelectBar();
 }
 function render(){
   renderPay();renderWallet();renderUpdates();renderAppbar();
-  const n=allTasks().length;$("tab-badge").textContent=n;$("tab-badge").hidden=!n;
+  refreshNotifs();
 }
 let toastTimer=null;
 function toast(msg,undoFn){
@@ -46,8 +49,25 @@ function clearPaySearch(){payQ="";$("q").value="";$("q-clear").hidden=true;rende
 const tile=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${ic(c.id)}<span>${esc(c.label)}</span></button>`;
 const placeRow=(catId,storeId,title,sub)=>`<button class="row" onclick="openAnswer('${catId}','${storeId||""}')">
   <span class="row-ic">${ic(catId)}</span><span class="row-main"><span class="row-title">${esc(title)}</span><span class="row-sub">${esc(sub)}</span></span>${ic("chevR","dim")}</button>`;
+/* Brand mark: a teal tile with two stacked cards and a gold "best pick" dot */
+/* Lucro mark: two rising chevrons (level up) with a gold dot on top */
+const BRAND_MARK=`<svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="23" fill="#0B1412"/><path d="M27 76 L50 53 L73 76" stroke="#14B8A6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M27 52 L50 29 L73 52" stroke="#A3E635" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="50" cy="15" r="5" fill="#FCD34D"/></svg>`;
+function greeting(){const h=new Date().getHours();return h<5?"Good evening":h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
+function renderPayHero(){
+  const nm=myName(),names=nm?[nm]:[];
+  const act=activeWallet(),setup=allTasks().length;
+  const top=act.find(w=>w.pinned)||act[0];
+  $("pay-hero").innerHTML=`
+    <h2 class="hero-greet">${greeting()}${names.length?",":""}</h2>
+    ${names.length?`<div class="hero-name">${esc(names.join(" & "))}</div>`:""}
+    <p class="hero-tag">Every purchase pays you back.</p>
+    <div class="hero-meta"><span>${act.length} card${act.length===1?"":"s"} ready</span>${setup?`<span>·</span><button onclick="openNotifs()">${setup} need${setup===1?"s":""} setup</button>`:""}</div>
+    ${top?`<div class="hero-peek" onclick="go('wallet')" aria-hidden="true">${cardArt(top.product,0,true)}</div>`:""}`;
+}
+addEventListener("scroll",()=>document.body.classList.toggle("scrolled",scrollY>12),{passive:true});
 function renderPay(){
   const empty=!activeWallet().length;
+  renderPayHero();
   $("pay-empty").hidden=!empty;$("pay-main").hidden=empty;
   if(empty)return;
   const res=$("pay-results"),home=$("pay-home");
@@ -63,7 +83,7 @@ function renderPay(){
   }
   home.hidden=false;res.hidden=true;
   const rec=state.recents.filter(x=>catById(x.c)&&(!x.s||storeById(x.s)));
-  $("recents").innerHTML=rec.length?`<div class="recent-wrap"><div class="recent-head"><h2 class="sec">Recent</h2><button class="link-btn" onclick="clearRecents()">Clear</button></div>
+  $("recents").innerHTML=rec.length?`<div class="recent-wrap"><div class="sec-head"><h2>Recent</h2><button class="link-btn" onclick="clearRecents()">Clear</button></div>
     <div class="recent-strip no-swipe">${rec.map(x=>{
     const s=x.s&&storeById(x.s);return `<button class="chip" onclick="openAnswer('${x.c}','${x.s||""}')">${ic(x.c)}${esc(s?s.name:catName(x.c))}</button>`}).join("")}</div></div>`:"";
   const vis=visibleCats(),vid=new Set(vis.map(c=>c.id));
@@ -71,18 +91,20 @@ function renderPay(){
   const favs=favItems();let top;
   if(favs.length){
     top=favs.filter(f=>!f.s).map(f=>f.c);
-    $("top-title").innerHTML=`${ic("star")}Favorites`;$("fav-edit").textContent="Edit";$("fav-hint").hidden=true;
+    $("top-title").innerHTML=`Favorites`;$("fav-edit").innerHTML=ic("edit");$("fav-hint").hidden=true;
     $("top").innerHTML=favs.map(favTile).join("");
   }else{
     top=[...new Set([...byUse,...DEFAULT_TOP.filter(id=>vid.has(id))])].slice(0,6);
-    $("top-title").innerHTML=`${ic("star")}Your top spots`;$("fav-edit").textContent="Pick favorites";
-    $("fav-hint").hidden=false;$("fav-hint").textContent="Star the places you pay most to keep them here.";
+    top=POPULAR_CATS.filter(id=>vid.has(id));
+    $("top-title").innerHTML=`Popular categories`;$("fav-edit").innerHTML=ic("star");$("fav-edit").setAttribute("aria-label","Pick your favorites");
+    $("fav-hint").hidden=false;$("fav-hint").textContent="Where most people shop. Tap the star to pick your own favorites.";
     $("top").innerHTML=top.map(id=>tile(catById(id))).join("");
   }
+  $("top").classList.toggle("two-up",!favs.length&&top.length===4);
   // All categories: grouped icon grid, always open (favorites are marked with a star)
   const favSet=new Set(state.favs),placed=new Set();
   const btn=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${favSet.has("c:"+c.id)?`<span class="fav-mark" aria-label="Favorite">${ic("star")}</span>`:""}${ic(c.id)}<span>${esc(c.label)}</span></button>`;
-  let h=`<div class="all-wrap"><h2 class="all-title">All categories</h2>`;
+  let h=`<div class="all-wrap"><div class="sec-head"><h2>All categories</h2></div>`;
   CAT_GROUPS.forEach(([name,ids],i)=>{
     const list=(i===CAT_GROUPS.length-1?vis.filter(c=>!placed.has(c.id)):vis.filter(c=>ids.includes(c.id)));
     list.forEach(c=>placed.add(c.id));
@@ -104,7 +126,7 @@ function openFavs(keep){
   const row=(key,icon,title,sub)=>{const on=state.favs.includes(key);
     return `<button class="row fav-row ${on?"on":""}" onclick="toggleFav('${key}',true)" aria-pressed="${on}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${esc(title)}</span>${sub?`<span class="row-sub">${esc(sub)}</span>`:""}</span>${ic("star","star")}</button>`};
   openSheet(`<h2 class="sheet-title">Favorites</h2>
-    <p class="sheet-sub">Star the places you pay most. They show first on Pay, in the order you star them.</p>
+    <p class="sheet-sub">Star the places you shop most. They show first on Earn, in the order you star them.</p>
     <p class="fav-count">${n?`${n} favorite${n>1?"s":""}`:"No favorites yet"}</p>
     ${favStores.length?`<h3 class="sec">Stores</h3><div class="list">${favStores.map(s=>row("s:"+s.id,s.cat,s.name,catName(s.cat))).join("")}</div>`:""}
     <h3 class="sec">Categories</h3><div class="list">${vis.map(c=>row("c:"+c.id,c.id,c.label)).join("")}</div>
@@ -162,7 +184,7 @@ function renderAnswer(){
   const b=r[0],hidden=networkHidden(cat),rest=r.slice(1).filter(x=>x.rate>0);
   const chips=[];
   if(b.label!=="Everything else")chips.push(`<span class="pill">${esc(b.label)}${b.note?` · ${esc(b.note)}`:""}</span>`);
-  if(b.flags.includes("confirm"))chips.push(`<span class="pill warn">Confirm ${qLabel(PICK_Q)} picks in Updates</span>`);
+  if(b.flags.includes("confirm"))chips.push(`<span class="pill warn">Confirm ${qLabel(PICK_Q)} picks (see 🔔)</span>`);
   if(b.flags.includes("activate"))chips.push(`<span class="pill warn">Not activated yet</span>`);
   b.extras.forEach(e=>chips.push(`<span class="pill">Includes ${esc(e.label.split(" (")[0])}</span>`));
   if(b.apr)chips.push(`<span class="pill">0% APR until ${shortDate(isoToDate(b.apr))}</span>`);
@@ -208,7 +230,7 @@ function undoCap(wid,key){const w=walletById(wid);delete w.capped[key];save();re
 const REASONS=["Another card earns more here","This card isn't accepted here","The store is in the wrong category","The rate shown is wrong"];
 function openReport(){
   openSheet(`<h2 class="sheet-title">What went wrong?</h2>
-    <p class="sheet-sub">Your feedback is saved in Updates so you can send it in.</p>
+    <p class="sheet-sub">Your feedback is saved in notifications (🔔) so you can send it in.</p>
     <div class="radio-list">${REASONS.map((r,i)=>`<label class="radio"><input type="radio" name="reason" id="reason-${i}" value="${i}" ${i===0?"checked":""}><span>${r}</span></label>`).join("")}</div>
     <label class="flabel" for="report-note">Details (optional)</label>
     <textarea id="report-note" class="field" rows="3" placeholder="For example: Costco charged this as gas, not warehouse"></textarea>
@@ -219,32 +241,42 @@ function saveReport(){
   const cat=catById(answerCtx.catId),store=answerCtx.storeId?storeById(answerCtx.storeId):null,b=rank(cat,store)[0];
   const i=+(document.querySelector('input[name="reason"]:checked')||{value:0}).value;
   state.reports.unshift({at:TODAY,where:store?store.name:cat.label,cat:cat.label,card:b?dn(b.w)+" "+fmtRate(b.rate)+"%":"none",reason:REASONS[i],note:$("report-note").value.trim()});
-  save();closeSheet();toast("Thanks! Feedback saved in Updates");
+  save();closeSheet();toast("Thanks! Feedback saved in notifications");
 }
 
 /* ─── Wallet ─── */
 function ownerBadge(w,size){return multiOwner()?badge(w.owner,size):""}
-function multiOwner(){return new Set(state.wallet.map(w=>w.owner)).size>1}
+function multiOwner(){return SHOW.multiPeople&&new Set(state.wallet.map(w=>w.owner)).size>1}
+/* The one name shown in greetings (MVP is single-user): saved choice, else Matt/first real name */
+function myName(){const ps=state.people||[];const me=ps.find(p=>p.id===state.me)||ps.find(p=>p.name==="Matt")||ps.find(p=>p.name&&p.name!=="Me");return me&&me.name!=="Me"?me.name:""}
 /* ─── Updates ─── */
-function renderUpdates(){
+/* ─── Notification center (bell, top right): activations, picks, caps, feedback ─── */
+function renderUpdates(){} // kept for older callers; the bell sheet replaces the Updates tab
+const notifOpen=()=>!$("sheet").hidden&&!!$("sheet").querySelector(".notif-sheet");
+function refreshNotifs(){if(notifOpen())openNotifs(true)}
+function notifsHTML(){
   const t=allTasks();
-  const caps=[];state.wallet.forEach(w=>Object.entries(w.capped||{}).forEach(([k,u])=>{if(u>=TODAY)caps.push({w,k,u})}));
+  const caps=[];activeWallet().forEach(w=>Object.entries(w.capped||{}).forEach(([k,u])=>{if(u>=TODAY)caps.push({w,k,u})}));
+  const KIND={activate:["activate","bolt"],confirm:["confirm","refresh"],pick:["pick","list"]};
+  const chip=w=>`<div class="n-card-chip">${cardArt(w.product,34)}<span>${esc(dn(w))}${w.last4?` <span class="mono dim">••${esc(w.last4)}</span>`:""}</span>${ownerBadge(w)}</div>`;
   let h="";
-  if(t.length)h+=`<h2 class="sec">Card updates</h2><div class="stack">${t.map(x=>`<div class="task">
-    <div class="task-main"><div class="task-head">${cardArt(x.w.product,36)}<span class="row-title">${esc(dn(x.w))}</span>${ownerBadge(x.w)}</div>
-    ${x.w.pending===x.key?`<p class="task-text">Did you activate it?</p><p class="task-sub">${esc(x.text.replace(/^Activate /,""))}</p>`:
-      `<p class="task-text">${esc(x.text)}</p>${x.sub?`<p class="task-sub">${esc(x.sub)}</p>`:""}`}</div>
-    <div class="task-btns">${taskButtons(x)}</div></div>`).join("")}</div>`;
-  if(caps.length)h+=`<h2 class="sec">Spending caps reached</h2><div class="list">${caps.map(c=>`<div class="row static">
-    <span class="row-ic">${ic("gauge")}</span><span class="row-main"><span class="row-title">${esc(dn(c.w))}</span>
-    <span class="row-sub">${esc(capLabel(c.w,c.k))} · back ${shortDate(new Date(isoToDate(c.u).getTime()+864e5))}</span></span>
-    <button class="btn-sm alt" onclick="undoCap('${c.w.id}','${c.k}')">Undo</button></div>`).join("")}</div>`;
-  if(state.reports.length)h+=`<h2 class="sec">Wrong-card reports</h2><div class="list">${state.reports.map(r=>`<div class="row static">
-    <span class="row-ic">${ic("flag")}</span><span class="row-main"><span class="row-title">${esc(r.where)} · ${esc(r.card)}</span>
-    <span class="row-sub">${esc(r.reason)}${r.note?` · ${esc(r.note)}`:""} · ${shortDate(isoToDate(r.at))}</span></span></div>`).join("")}</div>
-    <div class="btn-row"><button class="btn-sm" onclick="copyReports()">${ic("copy")}Copy all</button><button class="btn-sm alt" onclick="clearReports()">Clear</button></div>`;
-  if(!h)h=`<div class="empty"><div class="empty-ic">${ic("check")}</div><h2>You're all set</h2><p>Quarterly activations, category picks and reports will show up here.</p></div>`;
-  $("updates").innerHTML=h;
+  if(t.length)h+=`<h3 class="n-sec">Action needed <span class="n-count">${t.length}</span></h3>${t.map(x=>{const [cls,icon]=KIND[x.kind]||KIND.pick;
+    const pending=x.w.pending===x.key;
+    return `<div class="n-card"><span class="n-ic ${cls}">${ic(icon)}</span><div class="n-main">
+      <div class="n-title">${pending?"Did you activate it?":esc(x.text)}</div>
+      <div class="n-body">${pending?esc(x.text.replace(/^Activate /,"")):esc(x.sub||"")}</div>
+      ${chip(x.w)}<div class="n-actions">${taskButtons(x)}</div></div><span class="n-dot" aria-hidden="true"></span></div>`}).join("")}`;
+  if(caps.length)h+=`<h3 class="n-sec">Spending caps reached</h3>${caps.map(c=>`<div class="n-card"><span class="n-ic cap">${ic("gauge")}</span><div class="n-main">
+      <div class="n-title">${esc(capLabel(c.w,c.k))}</div><div class="n-body">Skipped until ${shortDate(new Date(isoToDate(c.u).getTime()+864e5))}, when the bonus resets.</div>
+      ${chip(c.w)}<div class="n-actions"><button class="btn-sm alt" onclick="undoCap('${c.w.id}','${c.k}')">Not capped yet</button></div></div></div>`).join("")}`;
+  if(state.reports.length)h+=`<h3 class="n-sec">Your feedback</h3>${state.reports.map(r=>`<div class="n-card"><span class="n-ic report">${ic("flag")}</span><div class="n-main">
+      <div class="n-title">${esc(r.where)} · ${esc(r.card)}</div><div class="n-body">${esc(r.reason)}${r.note?` · ${esc(r.note)}`:""} · ${shortDate(isoToDate(r.at))}</div></div></div>`).join("")}
+    <div class="n-actions"><button class="btn-sm" onclick="copyReports()">${ic("copy")}Copy all</button><button class="btn-sm alt" onclick="clearReports()">Clear</button></div>`;
+  if(!h)h=`<div class="n-empty"><div class="empty-ic">${ic("check")}</div><h3>You're all caught up</h3><p>Quarterly activations, category picks, spending caps and your feedback will show up here.</p></div>`;
+  return h;
+}
+function openNotifs(keep){
+  openSheet(`<div class="notif-sheet"><div class="set-head"><button class="round-btn" onclick="closeSheet()" aria-label="Close">${ic("x")}</button><h2>Notifications</h2><span class="round-btn ghost"></span></div>${notifsHTML()}</div>`,keep?true:false,null,{customTop:true});
 }
 /* Activate now / Change open the bank (its app if the phone has it, else the sign-in page) */
 function bankLink(w,label,cls,onclick){const u=B(P(w.product).brand).login;
@@ -326,10 +358,11 @@ function sheetGestures(sh,close,getBack){
 function closeSheet(){sheetBack=null;$("sheet").hidden=true;$("sheet").innerHTML="";if($("answer").hidden&&$("onboard").hidden)document.body.classList.remove("locked");render();if(answerCtx)renderAnswer()}
 
 /* ─── Card art (placeholder until licensed images) ─── */
-function cardArt(pid,miniWidth){
+function cardArt(pid,miniWidth,plain){
   const p=P(pid);const b=p?B(p.brand):B("?");const[c1,c2]=ART[pid]||b.colors;
   const bg=`background:linear-gradient(135deg,${c1},${c2})`,light=(pid==="apple_card"||pid==="amex_platinum")?";color:#111827":"";
   if(miniWidth||!p)return `<span class="art mini" style="${bg};width:${miniWidth||46}px"><span class="art-band"></span><span class="art-chip"></span></span>`;
+  if(plain)return `<span class="art" style="${bg}"><span class="art-band"></span><span class="art-chip"></span></span>`;
   return `<span class="art" style="${bg}${light}"><span class="art-band"></span><span class="art-iss">${esc(b.short||b.name)}</span><span class="art-chip"></span><span class="art-name">${esc(p.name)}</span><span class="art-net">${esc(netLabel(p.network))}</span></span>`;
 }
 
@@ -381,7 +414,7 @@ function openDrawer(id,keep){
     <input class="field mono" id="f-last4" inputmode="numeric" maxlength="4" value="${esc(w.last4)}" onchange="setField('${w.id}','last4',this.value.replace(/\\D/g,'').slice(0,4))">
     ${SHOW.accountDetails?`<label class="flabel" for="f-due">Due day</label><input class="field" id="f-due" inputmode="numeric" value="${w.dueDay||""}" onchange="setField('${w.id}','dueDay',parseInt(this.value)||null)">`:""}
     ${p.networkOptions?`<div class="flabel">Logo on your card</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${netOf(w)===n?"on":""}" onclick="setField('${w.id}','network','${n}')">${capWord(n)}</button>`).join("")}</div>`:""}
-    ${state.people.length>1?`<div class="flabel">Whose card</div><div class="chips">${ownerChips(w.owner,`setField('${w.id}','owner','$ID')`)}</div>`:""}
+    ${SHOW.multiPeople&&state.people.length>1?`<div class="flabel">Whose card</div><div class="chips">${ownerChips(w.owner,`setField('${w.id}','owner','$ID')`)}</div>`:""}
     <p class="source">${s.checked?`Terms checked ${isoToDate(s.checked).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}`:"Terms not yet checked"}${s.url?` · <a href="${esc(s.url)}" target="_blank" rel="noopener">View source</a>`:""}${s.note?`<br>${esc(s.note)}`:""}<br>Always confirm terms with your card issuer.</p>
     ${drawerButtons(w)}
   `,keep);
@@ -470,7 +503,7 @@ function drawerButtons(w){
     ${w.inactive?`<button class="btn-outline" onclick="setInactive(['${w.id}'],false)">${ic("restore")}Reactivate card</button>`
       :`<button class="btn-outline" onclick="setInactive(['${w.id}'],true)">${ic("archive")}Deactivate card</button>`}
     <button class="btn-outline danger" onclick="removeCard('${w.id}')">${ic("trash")}Remove from wallet</button></div>
-    ${w.inactive?"":`<p class="hint center">Deactivate keeps the card in your history but stops using it on Pay.</p>`}`;
+    ${w.inactive?"":`<p class="hint center">Deactivate keeps the card in your history but stops using it on Earn.</p>`}`;
 }
 function removeCard(id){removeCards([id])}
 function removeCards(ids){
@@ -487,7 +520,7 @@ function setInactive(ids,off,confirmed){
   if(off&&!confirmed){
     const ws=ids.map(walletById).filter(Boolean);if(!ws.length)return;
     const one=ws.length===1,name=one?dn(ws[0]):`${ws.length} cards`;
-    confirmDialog(`Deactivate ${name}?`,`${one?"It":"They"} will move to your deactivated cards and stop showing on Pay and in Updates. You can reactivate ${one?"it":"them"} any time.`,
+    confirmDialog(`Deactivate ${name}?`,`${one?"It":"They"} will move to your deactivated cards and stop showing on Earn and in notifications. You can reactivate ${one?"it":"them"} any time.`,
       "Deactivate",()=>setInactive(ids,true,true),"primary");
     return;
   }
@@ -514,7 +547,7 @@ function closeDialog(){$("dialog").hidden=true;$("dialog").innerHTML="";dialogFn
 function openWalletMenu(){
   const off=state.wallet.filter(w=>w.inactive).length,has=state.wallet.length;
   const item=(icon,label,fn)=>`<button class="pop-item" role="menuitem" onclick="closePopover();${fn}">${ic(icon)}<span>${label}</span></button>`;
-  openPopover($("appbar-action").querySelector(".icon-btn"),`
+  openPopover($("menu-btn"),`
     ${item("plus","Add a card","openAdd()")}
     ${has?item("select","Select cards","startSelect()"):""}
     ${has?item("sort","Sort","openDisplay('sort')")+item("filter","Filter","openDisplay('filter')"):""}
@@ -604,7 +637,7 @@ function renderDraft(keep=true){
   const p=P(draft.product);
   openSheet(`<div class="offer-art small">${cardArt(draft.product)}</div>
     <h2 class="sheet-title center">${esc(B(p.brand).name)} ${esc(p.name)}</h2>
-    ${state.people.length>1?`<div class="flabel">Whose card is this?</div><div class="chips">${ownerChips(draft.owner,"draft.owner='$ID';renderDraft()")}</div>`:""}
+    ${SHOW.multiPeople&&state.people.length>1?`<div class="flabel">Whose card is this?</div><div class="chips">${ownerChips(draft.owner,"draft.owner='$ID';renderDraft()")}</div>`:""}
     ${p.networkOptions?`<div class="flabel">Which logo is on your card?</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${draft.network===n?"on":""}" onclick="draft.network='${n}';renderDraft()">${capWord(n)}</button>`).join("")}</div>`:""}
     <label class="flabel" for="d-last4">Last 4 digits (optional)</label>
     <input class="field mono" id="d-last4" inputmode="numeric" maxlength="4" placeholder="1234" value="${esc(draft.last4)}" oninput="draft.last4=this.value.replace(/\\D/g,'').slice(0,4)">
@@ -638,7 +671,7 @@ function obSearch(v){obQ=v;renderOnboard()}
 function obFinish(skip){
   if(!skip)[...obSel].forEach(id=>state.wallet.push(normalize({id:"w"+Date.now()+Math.random().toString(36).slice(2,6),product:id,owner:state.people[0]?.id||"",nickname:"",last4:"",rewards:"",dueDay:null,limit:""})));
   state.onboarded=true;save();$("onboard").hidden=true;document.body.classList.remove("locked");
-  go(!skip&&allTasks().length?"updates":"pay");
+  go("pay");if(!skip&&allTasks().length)setTimeout(openNotifs,400);
   if(!skip&&obSel.size)toast(`${obSel.size} card${obSel.size>1?"s":""} added${allTasks().length?". A few need a quick setup.":""}`);
 }
 
@@ -646,7 +679,7 @@ function obFinish(skip){
 function exportWallet(){
   const data=JSON.stringify({app:"card-maximizer",saved:new Date().toISOString(),state},null,1);
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));
-  a.download=`card-maximizer-backup-${TODAY}.json`;document.body.appendChild(a);a.click();a.remove();
+  a.download=`lucro-backup-${TODAY}.json`;document.body.appendChild(a);a.click();a.remove();
   state.backedUp=TODAY;save();render();toast("Backup saved to your downloads");
 }
 function importWallet(file){
@@ -656,14 +689,14 @@ function importWallet(file){
       s.wallet.forEach(normalize);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,s);
       state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];state.onboarded=true;
       save();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
-    }catch{toast("That file isn't a Card Maximizer backup")}};
+    }catch{toast("That file isn't a Lucro backup")}};
   r.readAsText(file);
 }
 function openBackup(){
   openSheet(`<h2 class="sheet-title">Back up your wallet</h2>
     <p class="sheet-sub">Your cards are saved on this phone. Save a backup file to iCloud Drive or Google Drive so you can restore them if you delete the app or get a new phone.</p>
     <button class="btn" onclick="exportWallet()">${ic("copy")} Save backup file</button>
-    <label class="btn-ghost" style="cursor:pointer;color:var(--accent)">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
+    <label class="btn-outline restore-btn">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
     <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`);
 }
 
@@ -673,7 +706,7 @@ document.addEventListener("click",e=>{if(swipeOpen&&!e.target.closest(".swipe-wr
 sheetGestures($("ans-panel"),closeAnswer,()=>closeAnswer);
 $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()});
 // Swipe left/right anywhere on a main tab to move between Pay, Wallet and Updates.
-(function(){const ORDER=["pay","wallet","updates"];let x0,y0,ok=false;
+(function(){const ORDER=["pay","wallet"];let x0,y0,ok=false;
   const main=document.querySelector("main");
   main.addEventListener("touchstart",e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;
     ok=e.touches.length===1&&x0>24&&x0<innerWidth-24&&!e.target.closest("input,textarea,.chips,.no-swipe,.swipe-wrap")},{passive:true});
