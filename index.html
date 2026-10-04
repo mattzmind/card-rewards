@@ -530,13 +530,9 @@ button.w-best{width:100%;text-align:left}
 .bubble .ic{width:20px;height:20px}
 /* opening splash */
 #splash{position:fixed;inset:0;z-index:200;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;
-  background:linear-gradient(165deg,#0B1412 0%,#0E2622 50%,#0F5A52 100%);
+  background:#0B1412;
   animation:spOut .55s cubic-bezier(.75,0,.25,1) 1.45s forwards}
 #splash.skip{animation:spOut .35s cubic-bezier(.75,0,.25,1) forwards}
-.sp-glow{position:absolute;border-radius:50%;filter:blur(40px);opacity:.55}
-.sp-glow.g1{width:260px;height:260px;background:#A3E635;top:-60px;right:-80px;animation:drift 2s ease-in-out infinite alternate}
-.sp-glow.g2{width:300px;height:300px;background:#14B8A6;bottom:-90px;left:-110px;animation:drift 2.4s ease-in-out infinite alternate-reverse}
-.sp-glow.g3{width:180px;height:180px;background:#FCD34D;top:30%;left:-60px;opacity:.35}
 .sp-stack{position:relative;width:168px;height:106px;margin-bottom:26px}
 .sp-logo{width:116px;height:116px;margin-bottom:18px;border-radius:27px;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:popin .45s cubic-bezier(.2,1.3,.4,1) both}
 .sp-logo .sp-c1,.sp-logo .sp-c2,.sp-logo .sp-dot{opacity:0;animation:chev .45s cubic-bezier(.2,1.2,.4,1) forwards}
@@ -623,6 +619,62 @@ button.w-best{width:100%;text-align:left}
 /* toast */
 .toast{position:fixed;left:16px;right:16px;bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px) + 12px);z-index:60;max-width:480px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:14px;animation:fade .15s ease}
 .toast button{color:var(--bg);font-weight:700;text-decoration:underline}
+
+/* ═══ Spacing + press-state audit (Oct 2026) ═══ */
+/* name under the greeting: same font as "Good evening", same size as before */
+.hero-name{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:-.01em;text-transform:none;line-height:1.2;margin-top:4px}
+.hero-tag{max-width:68%;text-wrap:balance}
+.pay-hero{min-height:0}
+.hero-meta{margin-top:18px}
+/* splash: logo tile gets a soft outline so it reads on the solid background */
+.sp-logo{box-shadow:0 0 0 1px rgba(255,255,255,.10),0 20px 50px rgba(0,0,0,.45)}
+.sp-tag{color:rgba(255,255,255,.72)}
+/* one rhythm for section headings: 28px above, 12px below */
+.sec-head{margin:28px 2px 12px}
+#view-wallet .sec{margin:28px 4px 12px}
+.recent-head .sec{margin:0 2px 12px}
+.cat-group{margin-top:20px}
+.cat-group h3{margin:0 2px 12px}
+.all-title{margin:0 2px 12px}
+/* search: results never touch the search box */
+#pay-results{margin-top:12px}
+#pay-results .sec{margin-top:24px}
+/* wallet hero: no dead space between the count and the stats */
+.w-hero{min-height:132px;padding-bottom:0}
+.w-hero .hero-meta{margin-top:14px}
+.w-stats{margin:8px 0 0}
+.w-best{margin-top:12px}
+#view-wallet .w-toolbar{margin-top:20px}
+/* sheets use the same side margin as the pages */
+.sheet{padding-left:var(--gutter);padding-right:var(--gutter)}
+.ans-inner{padding-left:var(--gutter);padding-right:var(--gutter)}
+.sheet-top{margin:-4px -6px 4px}
+.sheet-top+.sheet-title,.sheet-top+.drawer-head,.sheet-top+h2{margin-top:2px}
+.drawer-head{margin-bottom:14px}
+.drawer-head .sheet-sub{margin:2px 0 0}
+.sub-last4{display:block;margin-top:2px}
+/* answer sheet: favorite star is a bubble, matching the close button */
+.ans-bar .star-btn{width:38px;height:38px;background:var(--surface);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.ans-bar .star-btn .ic{width:20px;height:20px}
+/* reward tiers: rate column left-aligned, no ragged gap */
+.tier-rate{min-width:40px;text-align:left}
+/* backup sheet: restore is a real button, not loose text */
+.restore-btn{cursor:pointer;margin-top:10px}
+
+/* press states: every tappable thing gives feedback (Apple-style) */
+.btn,.btn-sm,.btn-pill,.fab,.round-btn.ok,.dialog-btns .btn{transition:transform .08s ease,filter .08s ease}
+.btn:active:not(:disabled),.btn-sm:active:not(:disabled),.btn-pill:active,.round-btn.ok:active{transform:scale(.97);filter:brightness(.9)}
+.btn-outline:active,.reset-btn:active,.more:active,.why:active,.w-best:active,.round-btn:active,.bubble:active,.pill-btn:active,.chip:active,.btn-quiet:active,.bell-btn:active,.pencil:active{background:var(--surface-2)}
+.btn-ghost:active,.link-btn:active,.link:active,.search-cancel:active,.hero-meta button:active{opacity:.55}
+.tile,.fav-panel .tile{transition:transform .08s ease,background .1s}
+.tile:active{transform:scale(.97);background:var(--surface-2)}
+.fav-panel .tile:active{background:color-mix(in srgb,var(--hl) 34%,var(--surface))}
+#view-wallet .swipe-wrap .card-row:active{background:var(--surface-2)}
+.alt-row:active,.radio:active,.toggle-row:active,.ob-card:active,.offer:active{background:var(--surface-2)}
+.tabbar button:active .ic{transform:scale(.9)}
+.tabbar .ic{transition:transform .08s ease}
+.star-btn:active,.circle-btn:active{filter:brightness(.92)}
+.btn .ic{width:20px;height:20px;vertical-align:-4px;margin-right:6px}
 </style>
 </head>
 <body>
@@ -684,7 +736,6 @@ button.w-best{width:100%;text-align:left}
 
 <!-- Opening splash: plays once per launch, tap to skip. Turn off in cats.js (SHOW.splash). -->
 <div id="splash" aria-hidden="true">
-  <div class="sp-glow g1"></div><div class="sp-glow g2"></div><div class="sp-glow g3"></div>
   <svg class="sp-logo" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="23" fill="#0B1412"></rect><path class="sp-c1" d="M27 76 L50 53 L73 76" stroke="#14B8A6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path class="sp-c2" d="M27 52 L50 29 L73 52" stroke="#A3E635" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><circle class="sp-dot" cx="50" cy="15" r="5" fill="#FCD34D"></circle></svg>
   <div class="sp-word">lucro</div>
   <div class="sp-tag">Use the right card, every time.</div>
@@ -1319,8 +1370,8 @@ function openCardMenu(id){
   closeSwipes();const w=walletById(id);if(!w)return;const p=P(w.product);
   const item=(icon,label,fn,cls="")=>`<button class="row ${cls}" onclick="${fn}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${label}</span></span></button>`;
   openSheet(`<div class="drawer-head">${cardArt(w.product,64)}<div class="row-main"><h2 class="sheet-title">${esc(dn(w))}</h2>
-      <p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p></div></div>
-    <div class="list" style="margin-top:8px">
+      <p class="sheet-sub">${p?`${esc(B(p.brand).name)} ${esc(p.name)}`:""}${w.last4?`<span class="mono sub-last4">•••• ${esc(w.last4)}</span>`:""}</p></div></div>
+    <div class="list">
       ${item("edit","Rename",`openRename('${id}')`)}
       ${item("info","Edit details & rewards",`closeSheet();openDrawer('${id}')`)}
       ${w.inactive?"":item("pin",w.pinned?"Unpin":"Pin to top",`togglePin('${id}')`)}
@@ -2140,7 +2191,7 @@ function openBackup(){
   openSheet(`<h2 class="sheet-title">Back up your wallet</h2>
     <p class="sheet-sub">Your cards are saved on this phone. Save a backup file to iCloud Drive or Google Drive so you can restore them if you delete the app or get a new phone.</p>
     <button class="btn" onclick="exportWallet()">${ic("copy")} Save backup file</button>
-    <label class="btn-ghost" style="cursor:pointer;color:var(--accent)">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
+    <label class="btn-outline restore-btn">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
     <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`);
 }
 
