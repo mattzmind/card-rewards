@@ -3,6 +3,7 @@
   python3 build.py            -> index.html   (the public app GitHub Pages serves)
   python3 build.py preview    -> preview.html (for testing on your computer; loads
                                  seed.local.js if you have one, no offline worker)
+  No Python? node build.js [preview] is the same build in Node, with identical output.
 
 Source lives in src/:
   template.html  page layout + all styles
