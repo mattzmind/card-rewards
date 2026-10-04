@@ -260,7 +260,7 @@ function notifsHTML(){
   const chip=w=>`<div class="n-card-chip">${cardArt(w.product,34)}<span>${esc(dn(w))}${w.last4?` <span class="mono dim">••${esc(w.last4)}</span>`:""}</span>${ownerBadge(w)}</div>`;
   let h="";
   if(t.length)h+=`<h3 class="n-sec">Action needed <span class="n-count">${t.length}</span></h3>${t.map(x=>{const [cls,icon]=KIND[x.kind]||KIND.pick;
-    const pending=x.w.pending===x.key;
+    const pending=!!x.key&&x.w.pending===x.key;
     return `<div class="n-card"><span class="n-ic ${cls}">${ic(icon)}</span><div class="n-main">
       <div class="n-title">${pending?"Did you activate it?":esc(x.text)}</div>
       <div class="n-body">${pending?esc(x.text.replace(/^Activate /,"")):esc(x.sub||"")}</div>
@@ -283,7 +283,7 @@ function bankLink(w,label,cls,onclick){const u=B(P(w.product).brand).login;
           :`<button class="btn-sm ${cls}" onclick="${onclick}">${label}</button>`}
 function taskButtons(x){const id=x.w.id;
   if(x.kind==="activate"){
-    if(x.w.pending===x.key)return `<button class="btn-sm" onclick="finishAct('${id}','${x.q}',true)">Yes, done</button><button class="btn-sm alt" onclick="finishAct('${id}','${x.q}',false)">Not yet</button>`;
+    if(x.key&&x.w.pending===x.key)return `<button class="btn-sm" onclick="finishAct('${id}','${x.q}',true)">Yes, done</button><button class="btn-sm alt" onclick="finishAct('${id}','${x.q}',false)">Not yet</button>`;
     return bankLink(x.w,"Activate now","",`startAct('${id}','${x.key}')`)+`<button class="btn-sm alt" onclick="dismissTask('${id}','${x.key}')">Dismiss</button>`;
   }
   if(x.kind==="confirm")return `<button class="btn-sm" onclick="confirmSame('${id}')">Keep same</button>`+bankLink(x.w,"Change","alt",`changePicks('${id}')`);

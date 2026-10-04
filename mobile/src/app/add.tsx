@@ -48,7 +48,7 @@ export default function Add() {
     const b = brandOf(ctx, bank), t = q.trim().toLowerCase();
     const items = productsOf(bank).filter(([, p]) => !t || (p.name + ' ' + p.short).toLowerCase().includes(t));
     return (
-      <ScrollView contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled">
+      <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Back c={c} label="All banks" onPress={() => { setBank(null); setQ(''); }} />
         <Text style={[S.h, { color: c.ink }]}>{b.name}</Text>
         <Text style={[S.sub, { color: c.muted }]}>{b.note || `${productsOf(bank).length} card${productsOf(bank).length > 1 ? 's' : ''}`}</Text>
@@ -65,7 +65,7 @@ export default function Add() {
   const mb = t ? banks.filter(k => { const b = brandOf(ctx, k); return (b.name + ' ' + b.short + ' ' + (b.note || '')).toLowerCase().includes(t); }) : [];
   const mc = t ? Object.entries(ctx.catalog.products).filter(([, p]) => (brandOf(ctx, p.brand).name + ' ' + p.name + ' ' + p.short).toLowerCase().includes(t)).map(([id]) => id) : [];
   return (
-    <ScrollView contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       <Text style={[S.h, { color: c.ink }]}>Add a card</Text>
       <Text style={[S.sub, { color: c.muted }]}>Choose the bank on your card</Text>
       {search('Search banks or cards')}
@@ -97,7 +97,7 @@ function Draft({ pid, back }: { pid: string; back: () => void }) {
   };
   const S = styles;
   return (
-    <ScrollView contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       <Back c={c} label={brandOf(ctx, p.brand).short || 'Back'} onPress={back} />
       <View style={{ alignItems: 'center', marginTop: 4 }}><CardArt product={pid} width={220} /></View>
       <Text style={[S.h, { color: c.ink, textAlign: 'center', marginTop: 16 }]}>{brandOf(ctx, p.brand).name} {p.name}</Text>

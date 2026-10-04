@@ -40,7 +40,7 @@ export default function CardDetails() {
       {!w.inactive ? <Text style={[S.hint, { textAlign: 'center' }]}>Deactivate keeps the card in your history but stops using it on Earn.</Text> : null}
     </View>
   );
-  if (!p) return <ScrollView contentContainerStyle={S.wrap}><Text style={S.h}>{name}</Text><Text style={S.sub}>This card isn't in the catalog anymore.</Text>{footer}</ScrollView>;
+  if (!p) return <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap}><Text style={S.h}>{name}</Text><Text style={S.sub}>This card isn't in the catalog anymore.</Text>{footer}</ScrollView>;
 
   const unit = p.type !== 'cash' ? 'x' : '%', brand = brandOf(ctx, p.brand);
   const tiers: { rate: number; t: string; s: string }[] = [];
@@ -57,7 +57,7 @@ export default function CardDetails() {
   const saveName = () => { rename(w.id, nick); setNaming(false); };
 
   return (
-    <ScrollView contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       <View style={S.head}>
         <CardArt product={w.product} width={92} />
         <View style={{ flex: 1, minWidth: 0 }}>

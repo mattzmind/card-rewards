@@ -9,6 +9,13 @@ repo root stays live on GitHub Pages while this catches up.
 3. Scan the QR code with the iPhone camera. Phone and PC must be on the same Wi-Fi
    (if not, use `npx expo start --tunnel`).
 
+## Good to know
+- Deadline reminders (Profile → Deadline reminders) are local notifications and work in Expo Go.
+- Expo Go shows its own icon and splash; the Lucro icon/splash appear in real builds (EAS).
+- Deep links: `lucro://answer?c=dining`, `lucro://card/<id>`, `lucro://notifications`.
+- Screen previews without a phone: `npx expo export --platform web` renders the same screens in a browser
+  (storage falls back to localStorage via `src/store/kv.web.ts`). Handy for screenshots; not a product target.
+
 ## Commands
 - `npm test`: engine parity test + screen smoke tests
 - `npm run typecheck`: TypeScript
@@ -19,7 +26,7 @@ repo root stays live on GitHub Pages while this catches up.
   - `(tabs)/index.tsx` Earn, `(tabs)/wallet.tsx` Wallet (sort/filter, swipe actions, drag to reorder)
   - sheets: `answer`, `card/[id]` (details, picks, activation), `add`, `notifications`, `profile`, `display` (sort/filter), `report`
   - `onboarding.tsx` (first run)
-- `src/core/`: the card logic, plain TypeScript. `engine.ts` ports `../src/engine.js`, `wallet.ts` ports `../src/wallet.js`.
+- `src/core/`: the card logic, plain TypeScript. `reminders.ts` plans deadline notifications. `engine.ts` ports `../src/engine.js`, `wallet.ts` ports `../src/wallet.js`.
   The parity tests in `__tests__/` check they give identical answers to the web app.
 - `src/store/`: saved state (same shape as the web app, so backup files work both ways), actions, backup
 - `src/ui/`: theme colors, icons, card art, rows, tiles, toast, wallet row, header buttons

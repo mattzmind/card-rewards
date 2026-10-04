@@ -1,6 +1,6 @@
 /* App state: the wallet and settings, saved on the phone with the same shape as the
    web app's "cardmax-v3" storage, so a web backup file imports 1:1. */
-import Storage from 'expo-sqlite/kv-store';
+import Storage from './kv';
 import { useMemo } from 'react';
 import { create } from 'zustand';
 
@@ -13,6 +13,9 @@ const KEY = 'cardmax-v3', CAT_KEY = 'cardmax-catalog';
 const CATALOG_URL = 'https://mattzmind.github.io/card-rewards/catalog.json';
 const BUNDLED = catalogJson as unknown as Catalog;
 
+/* Deep copy (structuredClone where the JS engine has it) */
+const clone = <T,>(x: T): T => (typeof structuredClone === 'function' ? structuredClone(x) : JSON.parse(JSON.stringify(x)));
+
 export function fresh(): AppState {
   return { people: [{ id: 'me', name: 'Me' }], wallet: [], recents: [], usage: {}, reports: [], favs: [], profile: { name: '', theme: 'system' } };
 }
@@ -21,7 +24,7 @@ export function upgrade(s: Partial<AppState>): AppState {
   const st = { ...fresh(), ...s } as AppState;
   st.wallet = (st.wallet || []).map(w => normalize(w));
   st.recents = st.recents || []; st.usage = st.usage || {}; st.reports = st.reports || []; st.favs = st.favs || [];
-  const pr = { ...(st.profile || {}) } as AppState['profile'];
+  const pr = { ...(s.profile || {}) } as AppState['profile']; // the backup's own profile, not the empty default
   if (pr.name == null) { const p = (st.people || []).find(p => p.name && p.name !== 'Me'); pr.name = p ? p.name : ''; }
   pr.theme = pr.theme || 'system';
   st.profile = pr;
@@ -49,7 +52,7 @@ export const useApp = create<Store>((set, get) => ({
   state: loadState(),
   catalog: loadCatalog(),
   update: fn => {
-    const next = structuredClone(get().state);
+    const next = clone(get().state);
     fn(next);
     Storage.setItemSync(KEY, JSON.stringify(next));
     set({ state: next });

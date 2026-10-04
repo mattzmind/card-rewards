@@ -2,13 +2,14 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { isoToDate, shortDate } from '@/core/dates';
 import { activeWallet } from '@/core/engine';
 import type { Profile as P } from '@/core/types';
 import { fresh, useApp, useCtx } from '@/store/app';
 import { exportBackup, importBackup } from '@/store/backup';
+import { disableReminders, enableReminders } from '@/store/reminders';
 import { Avatar } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
 import { List, Row, tap } from '@/ui/parts';
@@ -32,6 +33,11 @@ export default function Profile() {
     toast(v ? `Hi, ${v.split(/\s+/)[0]}` : 'Name removed', () => update(s => { s.profile.name = old; if (s.people[0]) s.people[0].name = old || 'Me'; }));
   };
   const setTheme = (t: P['theme']) => { tap(); update(s => { s.profile.theme = t; }); };
+  const toggleReminders = async (on: boolean) => {
+    tap();
+    if (!on) { await disableReminders(); return; }
+    if (!(await enableReminders())) Alert.alert('Notifications are off', "Turn on notifications for Expo Go (or Lucro) in your phone's Settings to get reminders.");
+  };
   const restore = async () => {
     try { const n = await importBackup(); if (n != null) { router.back(); toast(`Restored ${n} card${n === 1 ? '' : 's'}`); } }
     catch (e) { Alert.alert('Could not restore', e instanceof Error ? e.message : String(e)); }
@@ -41,7 +47,7 @@ export default function Profile() {
   ]);
 
   return (
-    <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       <View style={styles.head}>
         <Avatar size={76} />
         {editing ? (
@@ -85,6 +91,8 @@ export default function Profile() {
             ))}
           </View>
         </View>
+        <Row icon="bell" title="Deadline reminders" sub="A heads-up before quarterly bonuses and picks are due"
+          right={<Switch value={!!pr.reminders} onValueChange={toggleReminders} trackColor={{ true: '#16a34a' }} accessibilityLabel="Deadline reminders" />} />
       </List>
 
       <Text style={[styles.sec, { color: c.ink }]}>Your data</Text>

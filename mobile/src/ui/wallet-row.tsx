@@ -91,7 +91,7 @@ export function WalletRow({ w, shown, showRate, showLast4, first }: { w: WalletC
             <View style={styles.pills}>
               {pills.map(b => (
                 <View key={b.label} style={[styles.pill, { backgroundColor: b.warn ? c.warnBg : c.surface2 }]}>
-                  <Text style={[styles.pillText, { color: b.warn ? c.warn : c.ink }]}><Text style={{ fontFamily: fonts.bold }}>{b.rate}</Text> {b.label}</Text>
+                  <Text style={[styles.pillText, { color: b.warn ? c.warn : c.ink }]} numberOfLines={1}><Text style={{ fontFamily: fonts.bold }}>{b.rate}</Text> {b.label.replace(/\s*\([^)]*\)/g, '')}</Text>
                 </View>
               ))}
             </View>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4 },
   sub: { fontFamily: fonts.body, fontSize: 13 },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
-  pill: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 },
+  pill: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3, maxWidth: '100%', flexShrink: 1 },
   pillText: { fontFamily: fonts.medium, fontSize: 12.5 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5 },
   net: { fontFamily: fonts.bold, fontSize: 10.5, letterSpacing: 0.6, borderWidth: StyleSheet.hairlineWidth, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 1, overflow: 'hidden' },

@@ -64,7 +64,7 @@ export default function Answer() {
 
   if (!r.length) {
     return (
-      <ScrollView contentContainerStyle={styles.wrap}>
+      <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
         {header}{context}
         <View style={styles.none}>
           <Text style={[styles.noneTitle, { color: c.ink }]}>None of your cards work here</Text>
@@ -99,7 +99,7 @@ export default function Answer() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.wrap}>
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
       {header}{context}
       <Pressable onPress={() => openCard(b.w.id)} style={styles.cardWrap} accessibilityLabel={`${dn(ctx, b.w)} details`}><CardArt product={b.w.product} width={240} /></Pressable>
       <Text style={[styles.ansName, { color: c.ink }]}>{dn(ctx, b.w)}{b.w.last4 ? `  •••• ${b.w.last4}` : ''}</Text>

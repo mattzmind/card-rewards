@@ -22,7 +22,7 @@ export default function Report() {
     router.back();
   };
   return (
-    <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       <Text style={[styles.h, { color: c.ink }]}>What went wrong?</Text>
       <Text style={[styles.sub, { color: c.muted }]}>Your feedback is saved in notifications so you can send it in.</Text>
       <View style={{ gap: 8 }}>

@@ -1,7 +1,7 @@
 /* v2 feature switches: hidden features stay in the code, turn back on here */
 const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */, multiPeople:false /* household mode: owner badges, Whose card, group by person */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
-const APP_VERSION="2.1.0"; // shown in Profile > About
+const APP_VERSION="2.1.1"; // shown in Profile > About
 const FEEDBACK_EMAIL=""; // Profile > Send feedback opens a mail to this address (row hidden while empty)
 
 /* ══════════════════════════════════════════════════════════

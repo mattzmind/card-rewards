@@ -1,8 +1,9 @@
 /* Bottom toast with optional Undo (same pattern as the web app). Call toast("Saved", undoFn) from anywhere. */
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FullWindowOverlay } from 'react-native-screens';
 import { create } from 'zustand';
 
 import { fonts, useColors } from './theme';
@@ -10,6 +11,9 @@ import { fonts, useColors } from './theme';
 interface T { id: number; msg: string; undo?: () => void }
 const useToast = create<{ t: T | null }>(() => ({ t: null }));
 let timer: ReturnType<typeof setTimeout> | undefined;
+/* iOS sheets are separate native windows; the overlay keeps the toast (and Undo) above them */
+const Passthrough = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const Wrap = Platform.OS === 'ios' ? FullWindowOverlay : Passthrough;
 
 export function toast(msg: string, undo?: () => void) {
   clearTimeout(timer);
@@ -23,6 +27,7 @@ export function ToastHost() {
   useEffect(() => () => clearTimeout(timer), []);
   if (!t) return null;
   return (
+    <Wrap>
     <Animated.View key={t.id} entering={FadeInDown.duration(160)} exiting={FadeOutDown.duration(160)}
       style={[styles.toast, { backgroundColor: c.ink, bottom: insets.bottom + 70 }]} accessibilityLiveRegion="polite">
       <Text style={[styles.msg, { color: c.bg }]} numberOfLines={2}>{t.msg}</Text>
@@ -32,6 +37,7 @@ export function ToastHost() {
         </Pressable>
       ) : null}
     </Animated.View>
+    </Wrap>
   );
 }
 

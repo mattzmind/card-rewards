@@ -98,7 +98,7 @@ export interface WalletCard {
   pending?: string | null;
 }
 
-export interface Profile { name: string; theme: 'system' | 'light' | 'dark'; splash?: boolean; since?: string }
+export interface Profile { name: string; theme: 'system' | 'light' | 'dark'; splash?: boolean; since?: string; reminders?: boolean }
 export interface AppState {
   people: { id: string; name: string }[];
   wallet: WalletCard[];

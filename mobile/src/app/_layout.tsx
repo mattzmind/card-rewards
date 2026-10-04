@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useApp } from '@/store/app';
+import { listenForReminderTaps, syncReminders } from '@/store/reminders';
 import { useColors, useScheme } from '@/ui/theme';
 import { ToastHost } from '@/ui/toast';
 
@@ -24,6 +25,10 @@ export default function RootLayout() {
 
   useEffect(() => { if (loaded) SplashScreen.hideAsync(); }, [loaded]);
   useEffect(() => { syncCatalog(); }, [syncCatalog]);
+  /* Keep deadline reminders in step with the wallet (only when turned on) */
+  const wallet = useApp(s => s.state.wallet), reminders = useApp(s => s.state.profile.reminders);
+  useEffect(() => { if (!reminders) return; const t = setTimeout(syncReminders, 800); return () => clearTimeout(t); }, [wallet, reminders]);
+  useEffect(() => listenForReminderTaps(), []);
   if (!loaded) return null;
 
   const sheet = { presentation: 'formSheet' as const, sheetGrabberVisible: true, sheetAllowedDetents: [0.92], sheetCornerRadius: 24, contentStyle: { backgroundColor: c.bg } };

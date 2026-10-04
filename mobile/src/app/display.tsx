@@ -53,7 +53,7 @@ export default function Display() {
       setPicking(null);
     };
     return (
-      <ScrollView contentContainerStyle={styles.wrap}>
+      <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
         {head(title, () => setPicking(null))}
         {hint ? <Text style={[styles.hint, { color: c.muted }]}>{hint}</Text> : null}
         <View style={[styles.group, { backgroundColor: c.surface }]}>
@@ -85,7 +85,7 @@ export default function Display() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.wrap}>
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
       {head(mode === 'sort' ? 'Sort' : 'Filter')}
       {mode === 'sort' ? (
         <>

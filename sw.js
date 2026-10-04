@@ -1,6 +1,6 @@
 // Card Maximizer service worker: works offline, but always tries the network
 // first so a new catalog.json or app version is picked up whenever you're online.
-const CACHE = "card-max-v20";
+const CACHE = "card-max-v21";
 const FILES = ["./", "index.html", "catalog.json", "manifest.json", "apple-touch-icon.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {

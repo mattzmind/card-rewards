@@ -26,6 +26,8 @@ GitHub Pages: one self-contained `index.html` built from the files in `src/`.
 - Card logic lives in `mobile/src/core/`. `engine.ts` must keep giving the same answers as `src/engine.js`:
   `cd mobile && npm test` runs the parity test. If you change ranking rules, change both and keep the test green.
 - After changing the catalog, run `npm run sync-catalog` in `mobile/` (the app also fetches the live `catalog.json` when newer).
+- To check layouts without a phone: `npx expo export --platform web`, serve the output, screenshot at 390×844 (light + dark).
+- Sheets must set their own background (`style={{ backgroundColor: c.bg }}`) so dark mode never shows a light sheet.
 - Stick to modules that ship in Expo Go (e.g. `expo-sqlite/kv-store`, not MMKV) until we move to development builds.
 
 ## Rules

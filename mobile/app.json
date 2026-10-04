@@ -8,7 +8,7 @@
     "scheme": "lucro",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.lucro.app",
       "supportsTablet": false
     },
@@ -33,11 +33,17 @@
         {
           "backgroundColor": "#0B1412",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 120
         }
       ],
       "expo-sqlite",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "color": "#0B1412"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -35,7 +35,7 @@ export default function Earn() {
   const res = q.trim() ? searchAll(ctx, q) : null;
 
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="never">
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentInsetAdjustmentBehavior="never">
       <LinearGradient colors={[c.heroA, c.heroB, c.bg]} locations={[0, 0.45, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.4, y: 1 }}
         style={[styles.hero, { paddingTop: insets.top + 12 }]}>
         <View style={styles.brandRow}>
