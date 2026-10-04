@@ -1,11 +1,11 @@
 {
-  "name": "Card Maximizer",
-  "short_name": "Card Max",
+  "name": "Lucro",
+  "short_name": "Lucro",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f766e",
-  "theme_color": "#0f766e",
+  "background_color": "#0B1412",
+  "theme_color": "#0B1412",
   "icons": [
     {
       "src": "icon-192.png",
@@ -19,5 +19,5 @@
     }
   ],
   "id": "./",
-  "description": "Pick the best credit card for every purchase."
+  "description": "Use the right card, every time."
 }

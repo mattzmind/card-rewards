@@ -1,6 +1,6 @@
-# Card Maximizer
+# Lucro
 
-Pick the best credit card for every purchase. A phone web app (PWA): open the
+Use the right card, every time. Lucro picks the best credit card for every purchase. A phone web app (PWA): open the
 link, tap Share → Add to Home Screen, and it runs like an app, offline too.
 
 ## Folder layout

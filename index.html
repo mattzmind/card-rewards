@@ -5,33 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Card Max">
+<meta name="apple-mobile-web-app-title" content="Lucro">
 <meta name="theme-color" content="#f4f6f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b100e" media="(prefers-color-scheme: dark)">
-<title>Card Maximizer</title>
+<title>Lucro</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="description" content="Use the right card, every time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: one-thumb phone app. Large title on top, content in the middle, tab bar pinned to the bottom. */
 :root{
-  --bg:#f4f6f5; --surface:#ffffff; --surface-2:#eef2f0; --ink:#0f1a16; --muted:#5c6b64; --line:#dfe6e2;
-  --accent:#0f766e; --on-accent:#ffffff; --rate:#047857; --warn:#8a5200; --star:#d97706; --warn-bg:#fdf1dc; --info:#1d4f91; --info-bg:#e7f0fb;
+  --bg:#f3f6f2; --surface:#ffffff; --surface-2:#ecf1ea; --ink:#0b1412; --muted:#56655f; --line:#dde5dc;
+  --accent:#0f766e; --on-accent:#ffffff; --rate:#047857;
+  --primary:#0b1412; --on-primary:#ffffff; --hl:#a3e635; --hl-ink:#0b1412; --badge:#fcd34d; --on-badge:#0b1412; --warn:#8a5200; --star:#d97706; --warn-bg:#fdf1dc; --info:#1d4f91; --info-bg:#e7f0fb;
   --danger:#b42318; --scrim:rgba(8,14,12,.45); --shadow:0 1px 2px rgba(15,26,22,.05),0 10px 30px rgba(15,26,22,.08);
   --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
   --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --tabbar:60px; --gutter:20px;
+  --hero-a:rgba(163,230,53,.30); --hero-b:rgba(20,184,166,.26); --hero-c:#eaf3e6; --hero-wave:rgba(255,255,255,.55);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0b100e; --surface:#141b18; --surface-2:#1c2521; --ink:#e8efec; --muted:#97a69f; --line:#26312d;
-  --accent:#2dd4bf; --on-accent:#032420; --rate:#4ade80; --warn:#fbbf24; --star:#fbbf24; --warn-bg:#2f250f; --info:#9cc7fb; --info-bg:#14243a;
-  --danger:#f87171; --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}}
+  --bg:#0b1412; --surface:#131d1a; --surface-2:#1b2723; --ink:#eef3ef; --muted:#9aaba3; --line:#24322d;
+  --accent:#2dd4bf; --on-accent:#032420; --rate:#a3e635;
+  --primary:#a3e635; --on-primary:#0b1412; --hl:#a3e635; --hl-ink:#0b1412; --badge:#fcd34d; --on-badge:#0b1412; --warn:#fbbf24; --star:#fbbf24; --warn-bg:#2f250f; --info:#9cc7fb; --info-bg:#14243a;
+  --danger:#f87171; --hero-a:rgba(163,230,53,.16); --hero-b:rgba(20,184,166,.18); --hero-c:#0e1c18; --hero-wave:rgba(255,255,255,.03); --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0b100e; --surface:#141b18; --surface-2:#1c2521; --ink:#e8efec; --muted:#97a69f; --line:#26312d;
-  --accent:#2dd4bf; --on-accent:#032420; --rate:#4ade80; --warn:#fbbf24; --star:#fbbf24; --warn-bg:#2f250f; --info:#9cc7fb; --info-bg:#14243a;
-  --danger:#f87171; --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
+  --bg:#0b1412; --surface:#131d1a; --surface-2:#1b2723; --ink:#eef3ef; --muted:#9aaba3; --line:#24322d;
+  --accent:#2dd4bf; --on-accent:#032420; --rate:#a3e635;
+  --primary:#a3e635; --on-primary:#0b1412; --hl:#a3e635; --hl-ink:#0b1412; --badge:#fcd34d; --on-badge:#0b1412; --warn:#fbbf24; --star:#fbbf24; --warn-bg:#2f250f; --info:#9cc7fb; --info-bg:#14243a;
+  --danger:#f87171; --hero-a:rgba(163,230,53,.16); --hero-b:rgba(20,184,166,.18); --hero-c:#0e1c18; --hero-wave:rgba(255,255,255,.03); --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--surface)}
@@ -54,7 +59,7 @@ input,textarea{font:inherit;color:inherit}
 /* app bar */
 .appbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);padding:calc(env(safe-area-inset-top,0px) + 10px) var(--gutter) 10px;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .appbar h1{font-family:var(--display);font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
-.btn-pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:14px;padding:8px 14px;border-radius:999px}
+.btn-pill{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:var(--on-primary);font-weight:600;font-size:14px;padding:8px 14px;border-radius:999px}
 .btn-pill .ic{width:18px;height:18px}
 .view{padding:4px var(--gutter) 0}
 
@@ -77,7 +82,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500}
 .chip .ic{width:16px;height:16px;color:var(--accent)}
-.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.chip.on{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
 .chip.on .ic{color:var(--on-accent)}
 .more{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;font-weight:600}
 .list{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -99,11 +104,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .stack{display:flex;flex-direction:column;gap:10px}
 
 /* buttons */
-.btn{display:block;width:100%;text-align:center;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:16px;padding:14px;border-radius:14px;margin-top:12px}
+.btn{display:block;width:100%;text-align:center;background:var(--primary);color:var(--on-primary);font-weight:600;font-size:16px;padding:14px;border-radius:14px;margin-top:12px}
 .btn:disabled{background:var(--surface-2);color:var(--muted);cursor:default}
 .btn-ghost{display:block;width:100%;text-align:center;color:var(--muted);font-weight:600;padding:14px;margin-top:6px}
 .btn-danger{display:block;width:100%;text-align:center;color:var(--danger);font-weight:600;padding:12px}
-.btn-sm{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--on-accent);font-size:13px;font-weight:600;padding:8px 12px;border-radius:10px;white-space:nowrap}
+.btn-sm{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:600;padding:8px 12px;border-radius:10px;white-space:nowrap}
 .btn-sm .ic{width:16px;height:16px}
 .btn-sm.alt{background:var(--surface-2);color:var(--ink)}
 .btn-sm:disabled{opacity:.7;cursor:default}
@@ -132,7 +137,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .ans-bar .bubble.close{justify-self:end}
 .ans-dollars b{color:var(--ink);font-weight:600}
 /* wallet: + button, menu, select mode, deactivated */
-.fab{position:fixed;right:18px;bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px) + 18px);z-index:35;width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;box-shadow:0 10px 24px rgba(15,118,110,.35),0 2px 6px rgba(0,0,0,.15);animation:popin .2s ease}
+.fab{position:fixed;right:18px;bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px) + 18px);z-index:35;width:60px;height:60px;border-radius:50%;background:var(--primary);color:var(--hl);display:grid;place-items:center;box-shadow:0 10px 24px rgba(11,20,18,.30),0 2px 6px rgba(0,0,0,.15);animation:popin .2s ease}
 .fab .ic{width:28px;height:28px}
 .fab:active{transform:scale(.94)}
 .icon-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);margin-right:-8px}
@@ -143,7 +148,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .card-row.inactive .art{filter:grayscale(1)}
 .card-row.selected{background:var(--surface-2)}
 .sel-box{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex-shrink:0;color:var(--on-accent)}
-.card-row.selected .sel-box{background:var(--accent);border-color:var(--accent)}
+.card-row.selected .sel-box{background:var(--primary);border-color:var(--primary)}
 .sel-box .ic{width:16px;height:16px}
 .more span{display:inline-flex;align-items:center;gap:8px}
 .inactive-list{margin-top:4px}
@@ -169,7 +174,7 @@ body.locked .toast{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 12px)}
 .swipe-act.right{right:0;width:176px}
 .sw-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;color:#fff;text-align:center}
 .sw-btn .ic{width:22px;height:22px}
-.sw-btn.more{background:var(--accent);color:var(--on-accent)}
+.sw-btn.more{background:var(--primary);color:var(--on-primary)}
 .sw-btn.archive{background:#64748b}
 .sw-btn.restore{background:var(--rate);color:var(--bg)}
 .sw-btn.delete{background:var(--danger);color:var(--bg)}
@@ -200,7 +205,7 @@ button.radio{width:100%;text-align:left}
 .list>.toggle-row:first-child{border-top:none}
 .switch{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;transition:background .15s;flex-shrink:0}
 .switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
-.switch.on{background:var(--accent)}
+.switch.on{background:#16a34a}
 .switch.on::after{transform:translateX(18px)}
 .danger-row .row-title,.danger-row .row-ic{color:var(--danger)}
 /* Pay home: favorites panel → recent strip → all categories grid */
@@ -236,7 +241,7 @@ button.radio{width:100%;text-align:left}
 .pencil:active{background:var(--line)}
 .rename-inline{display:flex;align-items:center;gap:6px}
 .rename-inline .field{flex:1;min-width:0;font-size:18px;font-weight:600;padding:9px 12px}
-.icon-btn.ok{background:var(--accent);color:var(--on-accent);width:40px;height:40px;margin:0}
+.icon-btn.ok{background:var(--primary);color:var(--on-primary);width:40px;height:40px;margin:0}
 /* chosen categories: dropdowns, saved summary */
 .pick-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 14px 14px;margin-top:4px}
 .pick-slot{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
@@ -274,7 +279,7 @@ button.radio{width:100%;text-align:left}
 .set-head h2{text-align:center;font-size:17px;font-weight:700}
 .round-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
 .round-btn .ic{width:20px;height:20px}
-.round-btn.ok{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.round-btn.ok{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
 .round-btn.ghost{visibility:hidden}
 .set-sec{font-size:15px;font-weight:600;color:var(--muted);margin:18px 4px 8px}
 .set-group{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -305,6 +310,145 @@ button.radio{width:100%;text-align:left}
 .cat-group .tiles{gap:10px}
 .tile .fav-mark{position:absolute;top:8px;right:8px;color:var(--star);display:grid}
 .tile .fav-mark .ic{width:15px;height:15px;fill:currentColor;color:var(--star)}
+/* ═══ Brand + Pay hero (soft gradient header, greeting, peeking card) ═══ */
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:21px;font-weight:700;letter-spacing:-.01em}
+.brand-mark{width:34px;height:34px;flex-shrink:0;border-radius:10px;box-shadow:0 4px 12px rgba(15,118,110,.28)}
+body.hero-page .appbar{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;transition:background .2s}
+body.hero-page.scrolled .appbar{background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 .5px 0 var(--line)}
+body.hero-page{position:relative;z-index:0}
+body.hero-page::before{content:"";position:absolute;left:0;right:0;top:0;height:420px;z-index:-1;pointer-events:none;
+  background:radial-gradient(120% 80% at 0% 0%,var(--hero-a) 0%,transparent 60%),radial-gradient(90% 70% at 100% 10%,var(--hero-b) 0%,transparent 65%),linear-gradient(180deg,var(--hero-c) 0%,var(--bg) 100%)}
+body.hero-page::after{content:"";position:absolute;left:-10%;right:-10%;top:250px;height:120px;z-index:-1;pointer-events:none;border-radius:50%;background:var(--hero-wave);filter:blur(2px)}
+.pay-hero{position:relative;margin:0 calc(-1*var(--gutter));padding:14px var(--gutter) 6px;min-height:150px;overflow:hidden}
+html,body{overflow-x:clip}
+.hero-greet{font-family:var(--display);font-size:34px;line-height:1.08;font-weight:700;letter-spacing:-.025em;max-width:68%}
+.hero-name{font-size:17px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;margin-top:6px;color:var(--ink)}
+.hero-tag{font-size:16px;color:var(--muted);margin-top:8px;max-width:62%}
+.hero-meta{margin-top:22px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.hero-meta button{color:var(--warn);font:inherit;letter-spacing:inherit;text-transform:inherit}
+.hero-peek{position:absolute;right:-46px;top:6px;width:170px;transform:rotate(-6deg);filter:drop-shadow(0 16px 24px rgba(0,0,0,.25));cursor:pointer}
+.hero-peek .art{box-shadow:none}
+.hero-search{margin-top:18px;box-shadow:0 6px 20px rgba(15,40,35,.08);border-color:transparent}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:30px 2px 12px}
+.sec-head h2{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.015em;display:flex;align-items:center;gap:8px}
+.sec-head h2 .ic{width:20px;height:20px;color:var(--star);fill:currentColor}
+.circle-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent);flex-shrink:0}
+.circle-btn .ic{width:22px;height:22px}
+.circle-btn:active{transform:scale(.94)}
+/* favorites: one white card, tinted tiles inside */
+.fav-panel{margin-top:0;padding:12px;border-radius:22px;background:var(--surface);border:none;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(15,40,35,.07)}
+.fav-panel .tile{background:color-mix(in srgb,var(--accent) 8%,var(--surface));border:none;box-shadow:none}
+.fav-hint{margin:2px 4px 10px}
+.recent-wrap{margin-top:0}
+.all-wrap{margin-top:0;padding-top:0;border-top:none}
+.cat-group:first-of-type{margin-top:0}
+/* ═══ Wallet: hero header, summary, premium list ═══ */
+.tabbar{justify-content:center;gap:24px}
+.tabbar button{max-width:150px}
+.appbar-icons{display:flex;align-items:center;gap:6px}
+.bell-btn{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);background:color-mix(in srgb,var(--surface) 70%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.bell-btn .ic{width:24px;height:24px}
+.bell-btn .badge{top:4px;left:auto;right:2px}
+.appbar .page-title{font-family:var(--display);font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.025em}
+.w-hero{padding:6px var(--gutter) 4px;min-height:170px}
+.w-hero .hero-name{margin-top:0}
+.w-sub{font-size:16px;color:var(--muted);margin-top:4px}
+.w-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0 6px;padding:16px 6px;border-radius:22px;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(15,40,35,.08)}
+.w-stat{text-align:center;padding:0 6px;border-left:1px solid var(--line)}
+.w-stat:first-child{border-left:none}
+.w-stat b{display:block;font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.w-stat b.good{color:var(--rate)}
+.w-stat b.warn{color:var(--warn)}
+.w-stat span{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+button.w-stat{font:inherit;color:inherit}
+.w-best{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:18px;background:color-mix(in srgb,var(--accent) 10%,var(--surface));font-size:15px}
+.w-best .ic{color:var(--accent);width:22px;height:22px}
+.w-best b{font-weight:700}
+#view-wallet .w-toolbar{margin-top:18px}
+.w-fan{position:absolute;right:-30px;top:4px;width:180px;height:130px}
+.w-fan-card{position:absolute;right:0;top:0;width:150px;filter:drop-shadow(0 12px 20px rgba(0,0,0,.22))}
+.w-fan-card .art{box-shadow:none}
+.w-fan-card.f2{transform:translate(-36px,22px) rotate(-16deg)}
+.w-fan-card.f1{transform:translate(-14px,10px) rotate(-8deg)}
+.w-fan-card.f0{transform:translate(8px,0) rotate(2deg)}
+.w-hero .hero-greet{max-width:60%}
+button.w-best{width:100%;text-align:left}
+.w-best span{flex:1}
+#view-wallet .list{border:none;border-radius:22px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(15,40,35,.07)}
+#view-wallet .sec{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin:26px 4px 10px}
+#view-wallet .sec .sec-n{font-family:var(--body);font-size:15px}
+#view-wallet .card-row{padding:14px 16px;gap:14px}
+#view-wallet .card-row .art.mini{width:64px!important;height:auto!important}
+#view-wallet .card-row .row-title{font-size:17px;font-weight:600}
+#view-wallet .more{border:none;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(15,40,35,.06);border-radius:18px}
+/* ═══ Notification center ═══ */
+.notif-sheet .set-head h2{font-size:20px;font-family:var(--display)}
+.n-sec{font-family:var(--display);font-size:18px;font-weight:700;margin:20px 4px 10px;display:flex;align-items:center;gap:8px}
+.n-sec .n-count{font-family:var(--body);font-size:13px;font-weight:700;min-width:22px;height:22px;padding:0 7px;border-radius:11px;display:grid;place-items:center;background:var(--warn-bg);color:var(--warn)}
+.n-card{display:flex;gap:12px;padding:14px;border-radius:20px;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 22px rgba(15,40,35,.07);margin-bottom:10px;position:relative}
+.n-ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex-shrink:0}
+.n-ic .ic{width:22px;height:22px}
+.n-ic.activate{background:#fef3c7;color:#b45309}
+.n-ic.confirm{background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--accent)}
+.n-ic.pick{background:#dbeafe;color:#1d4ed8}
+.n-ic.cap{background:#ede9fe;color:#6d28d9}
+.n-ic.report{background:var(--surface-2);color:var(--muted)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .n-ic.activate{background:#3a2a0a;color:#fbbf24}:root:not([data-theme="light"]) .n-ic.pick{background:#14243a;color:#93c5fd}:root:not([data-theme="light"]) .n-ic.cap{background:#251a3d;color:#c4b5fd}}
+.n-main{flex:1;min-width:0}
+.n-title{font-weight:700;font-size:16px;line-height:1.3}
+.n-body{font-size:14px;color:var(--muted);margin-top:3px}
+.n-card-chip{display:inline-flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;font-weight:600;color:var(--ink)}
+.n-actions{display:flex;gap:8px;margin-top:12px}
+.n-actions .btn-sm{flex:1;justify-content:center;padding:10px 8px;text-decoration:none}
+.n-dot{position:absolute;top:16px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--warn)}
+.n-empty{text-align:center;padding:60px 20px}
+.n-empty .empty-ic{margin:0 auto 14px}
+.n-empty h3{font-family:var(--display);font-size:22px;margin-bottom:6px}
+.n-empty p{color:var(--muted)}
+/* ═══ Lucro brand pass ═══ */
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fab{color:var(--on-primary)}}
+:root[data-theme="dark"] .fab{color:var(--on-primary)}
+.badge{background:var(--badge)!important;color:var(--on-badge)!important}
+.tabbar button.on{color:var(--ink)}
+.tabbar button.on .ic{color:var(--ink)}
+.tabbar button::before{content:"";position:absolute;top:0;left:50%;width:58px;height:30px;margin-left:-29px;border-radius:15px;background:transparent;transition:background .2s;z-index:-1}
+.tabbar button.on::before{background:color-mix(in srgb,var(--hl) 45%,transparent)}
+.tabbar button{isolation:isolate}
+.tile .ic{color:var(--accent)}
+.fav-panel .tile{background:color-mix(in srgb,var(--hl) 16%,var(--surface))}
+.circle-btn{background:color-mix(in srgb,var(--hl) 35%,var(--surface));color:var(--ink)}
+.w-best{background:color-mix(in srgb,var(--hl) 18%,var(--surface))}
+.w-best .ic{color:var(--ink)}
+.pill-btn.active{border-color:var(--ink);color:var(--ink);background:color-mix(in srgb,var(--hl) 30%,var(--surface))}
+.pill-btn.active .ic{color:var(--ink)}
+.chip.on-soft{border-color:var(--ink);color:var(--ink);background:color-mix(in srgb,var(--hl) 25%,var(--surface))}
+.link-btn{color:var(--accent)}
+.w-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* Wallet list: bank tile, what it's best for, top rate */
+.bank-tile{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.02em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 2px 6px rgba(0,0,0,.12);text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.card-row.inactive .bank-tile{filter:grayscale(1)}
+.w-best-for{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.bf-pill.warn{background:var(--warn-bg);color:var(--warn)}
+.bf-pill{font-size:12.5px;font-weight:500;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--hl) 22%,var(--surface-2));color:var(--ink);white-space:nowrap}
+.bf-pill b{font-weight:700}
+.w-last4{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.w-top{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+.w-top b{font-family:var(--display);font-size:24px;font-weight:700;color:var(--rate);letter-spacing:-.02em}
+.w-top span{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:1px}
+#view-wallet .card-row{align-items:center}
+.tiles.two-up{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tiles.two-up .tile{min-height:84px;flex-direction:row;gap:12px}
+.hero-name{font-family:var(--display);font-weight:700;letter-spacing:.01em}
+/* network tag on each wallet card (handy where only some networks work, like Costco = Visa) */
+.w-meta{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:12px;color:var(--muted)}
+.net-tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px;border:1px solid var(--line);color:var(--ink);background:var(--surface)}
+.net-tag.net-visa{color:#1a1f71;border-color:#c9cdea}
+.net-tag.net-mastercard{color:#c2410c;border-color:#f3d2bf}
+.net-tag.net-amex{color:#1d4ed8;border-color:#c7d6f5}
+.net-tag.net-discover{color:#b45309;border-color:#f1d9b8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .net-tag{color:var(--ink)!important;border-color:var(--line)!important}}
+:root[data-theme="dark"] .net-tag{color:var(--ink)!important;border-color:var(--line)!important}
+#view-wallet .card-row{padding-left:18px}
 /* clear, tappable action buttons */
 .action-stack{display:flex;flex-direction:column;gap:10px;margin-top:22px}
 .action-stack .btn{margin-top:0}
@@ -386,21 +530,25 @@ button.radio{width:100%;text-align:left}
 .bubble .ic{width:20px;height:20px}
 /* opening splash */
 #splash{position:fixed;inset:0;z-index:200;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;
-  background:linear-gradient(165deg,#064e46 0%,#0f766e 38%,#0d9488 62%,#f59e0b 135%);
+  background:linear-gradient(165deg,#0B1412 0%,#0E2622 50%,#0F5A52 100%);
   animation:spOut .55s cubic-bezier(.75,0,.25,1) 1.45s forwards}
 #splash.skip{animation:spOut .35s cubic-bezier(.75,0,.25,1) forwards}
 .sp-glow{position:absolute;border-radius:50%;filter:blur(40px);opacity:.55}
-.sp-glow.g1{width:260px;height:260px;background:#f472b6;top:-60px;right:-80px;animation:drift 2s ease-in-out infinite alternate}
-.sp-glow.g2{width:300px;height:300px;background:#fbbf24;bottom:-90px;left:-110px;animation:drift 2.4s ease-in-out infinite alternate-reverse}
-.sp-glow.g3{width:180px;height:180px;background:#38bdf8;top:30%;left:-60px;opacity:.35}
+.sp-glow.g1{width:260px;height:260px;background:#A3E635;top:-60px;right:-80px;animation:drift 2s ease-in-out infinite alternate}
+.sp-glow.g2{width:300px;height:300px;background:#14B8A6;bottom:-90px;left:-110px;animation:drift 2.4s ease-in-out infinite alternate-reverse}
+.sp-glow.g3{width:180px;height:180px;background:#FCD34D;top:30%;left:-60px;opacity:.35}
 .sp-stack{position:relative;width:168px;height:106px;margin-bottom:26px}
+.sp-logo{width:116px;height:116px;margin-bottom:18px;border-radius:27px;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:popin .45s cubic-bezier(.2,1.3,.4,1) both}
+.sp-logo .sp-c1,.sp-logo .sp-c2,.sp-logo .sp-dot{opacity:0;animation:chev .45s cubic-bezier(.2,1.2,.4,1) forwards}
+.sp-logo .sp-c1{animation-delay:.25s}.sp-logo .sp-c2{animation-delay:.45s}.sp-logo .sp-dot{animation-delay:.7s}
+@keyframes chev{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .sp-card{position:absolute;inset:0;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.2);opacity:0;transform:translateY(120px) scale(.8)}
 .sp-card i{position:absolute;left:14px;top:38px;width:26px;height:20px;border-radius:5px;background:linear-gradient(135deg,#fde68a,#d4a017 55%,#fcd34d)}
 .sp-card.c1{background:linear-gradient(135deg,#fb923c,#c2410c);animation:fanL .6s cubic-bezier(.2,1.3,.4,1) .1s forwards}
 .sp-card.c2{background:linear-gradient(135deg,#60a5fa,#1d4ed8);animation:fanR .6s cubic-bezier(.2,1.3,.4,1) .2s forwards}
 .sp-card.c3{background:linear-gradient(135deg,#111827,#374151);animation:fanC .6s cubic-bezier(.2,1.3,.4,1) .3s forwards}
 .sp-card b{position:absolute;right:-14px;top:-16px;background:#fff;color:#047857;font-family:var(--display);font-weight:700;font-size:20px;padding:6px 11px;border-radius:999px;box-shadow:0 8px 20px rgba(0,0,0,.25);transform:scale(0);animation:pop .4s cubic-bezier(.2,1.6,.4,1) .85s forwards}
-.sp-word{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.02em;opacity:0;transform:translateY(14px);animation:rise2 .5s ease .5s forwards}
+.sp-word{font-family:var(--display);font-weight:800;font-size:46px;letter-spacing:-.045em;opacity:0;transform:translateY(14px);animation:rise2 .5s ease .5s forwards}
 .sp-tag{font-size:17px;font-weight:500;opacity:0;transform:translateY(10px);animation:rise2 .5s ease .7s forwards;color:rgba(255,255,255,.9)}
 @keyframes fanL{to{opacity:1;transform:translate(-34px,6px) rotate(-14deg)}}
 @keyframes fanR{to{opacity:1;transform:translate(34px,6px) rotate(14deg)}}
@@ -464,7 +612,7 @@ button.radio{width:100%;text-align:left}
 .ob-card.on{border-color:var(--accent)}
 .ob-card:disabled{opacity:.5}
 .ob-name{font-size:13px;font-weight:600;line-height:1.25}
-.ob-check{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.ob-check{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:var(--primary);color:var(--on-primary);display:grid;place-items:center}
 .ob-check .ic{width:18px;height:18px}
 .ob-owned{font-size:12px;color:var(--muted)}
 .ob-bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
@@ -483,15 +631,16 @@ button.radio{width:100%;text-align:left}
 <main>
   <section id="view-pay" class="view">
     <div id="pay-empty" class="empty" hidden><h2>Add your cards to start</h2><p>Tell the app which cards you carry. It ranks them for every purchase.</p><button class="btn" onclick="openOnboard()">Pick your cards</button></div>
+    <div id="pay-hero" class="pay-hero"></div>
     <div id="pay-main">
-      <label class="search" for="q"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-        <input id="q" type="search" placeholder="Where are you paying?" autocomplete="off" oninput="onPaySearch(this.value)" aria-label="Search stores or categories">
+      <label class="search hero-search" for="q"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q" type="search" placeholder="Where are you shopping?" autocomplete="off" oninput="onPaySearch(this.value)" aria-label="Search stores or categories">
         <button id="q-clear" class="clear" hidden onclick="clearPaySearch()" aria-label="Clear search"><svg class="ic dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </label>
       <div id="pay-results" hidden></div>
       <div id="pay-home">
+        <div class="sec-head"><h2 id="top-title"></h2><button class="circle-btn" onclick="openFavs()" id="fav-edit" aria-label="Edit favorites"></button></div>
         <section class="fav-panel" aria-labelledby="top-title">
-          <div class="fav-head"><h2 id="top-title"></h2><button class="link-btn" onclick="openFavs()" id="fav-edit">Edit</button></div>
           <p class="fav-hint" id="fav-hint" hidden></p>
           <div id="top" class="tiles"></div>
         </section>
@@ -506,15 +655,13 @@ button.radio{width:100%;text-align:left}
     <p id="foot" class="foot"></p>
   </section>
 
-  <section id="view-updates" class="view" hidden>
-    <div id="updates"></div>
+  <section id="view-updates" class="view" hidden aria-hidden="true">
   </section>
 </main>
 
 <nav class="tabbar" aria-label="Main">
-  <button id="tab-pay" onclick="go('pay')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/></svg>Pay</button>
+  <button id="tab-pay" onclick="go('pay')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.1 1.7 2.8 2.1 2.9 1 2.9 2.2-1.2 2.1-2.9 2.1c-1.3 0-2.4-.6-2.9-1.5"/><path d="M12 6v1.8M12 16.2V18"/></svg>Earn</button>
   <button id="tab-wallet" onclick="go('wallet')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12v3"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h2"/></svg>Wallet</button>
-  <button id="tab-updates" onclick="go('updates')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg>Updates<span id="tab-badge" class="badge" hidden></span></button>
 </nav>
 
 <div id="answer" class="ans-bg" hidden><div id="ans-panel" class="ans-panel" role="dialog" aria-modal="true"><div class="handle"></div><div id="ans-body"></div></div></div>
@@ -538,18 +685,14 @@ button.radio{width:100%;text-align:left}
 <!-- Opening splash: plays once per launch, tap to skip. Turn off in cats.js (SHOW.splash). -->
 <div id="splash" aria-hidden="true">
   <div class="sp-glow g1"></div><div class="sp-glow g2"></div><div class="sp-glow g3"></div>
-  <div class="sp-stack">
-    <div class="sp-card c1"><i></i></div>
-    <div class="sp-card c2"><i></i></div>
-    <div class="sp-card c3"><i></i><b>5%</b></div>
-  </div>
-  <div class="sp-word">Card Max</div>
-  <div class="sp-tag">Right card. Every time.</div>
+  <svg class="sp-logo" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="23" fill="#0B1412"></rect><path class="sp-c1" d="M27 76 L50 53 L73 76" stroke="#14B8A6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path class="sp-c2" d="M27 52 L50 29 L73 52" stroke="#A3E635" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><circle class="sp-dot" cx="50" cy="15" r="5" fill="#FCD34D"></circle></svg>
+  <div class="sp-word">lucro</div>
+  <div class="sp-tag">Use the right card, every time.</div>
 </div>
 
 <script>
 /* v2 feature switches: hidden features stay in the code, turn back on here */
-const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */};
+const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */, multiPeople:false /* household mode: owner badges, Whose card, group by person */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
 
 /* ══════════════════════════════════════════════════════════
@@ -605,6 +748,10 @@ const ICONS={
   select:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12.5l3 3 5-6"/>',
   download:'<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
   more:'<circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/>',
+  earn:'<circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.1 1.7 2.8 2.1 2.9 1 2.9 2.2-1.2 2.1-2.9 2.1c-1.3 0-2.4-.6-2.9-1.5"/><path d="M12 6v1.8M12 16.2V18"/>',
+  bolt:'<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>',
+  refresh:'<path d="M20 11a8 8 0 0 0-14.3-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.5L20 16"/><path d="M20 20v-4h-4"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
   filter:'<path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
@@ -668,6 +815,8 @@ const CAT_GROUPS=[
   ["Travel & going out",["travel","transit","entertainment"]],
   ["Bills & everything else",["streaming","phone","utilities","fitness","other"]],
 ];
+/* Shown on Earn until someone stars their own favorites */
+const POPULAR_CATS=["grocery","dining","gas","fast_food"];
 const DEFAULT_TOP=["grocery","dining","gas","fast_food","amazon","costco"];
 
 /* ══════════════════════════════════════════════════════════
@@ -1001,8 +1150,9 @@ function walletRow(w,{drag=true}={}){
   const p=P(w.product),v=viewOpt(),has=!w.inactive&&tasksFor(w).length>0,sel=selectMode&&selectMode.has(w.id);
   const sub=w.inactive?`Deactivated ${shortDate(isoToDate(w.inactive))}${w.inactive.slice(0,4)!==TODAY.slice(0,4)?", "+w.inactive.slice(0,4):""}`
     :(w.nickname&&p)||!p?(p?`${B(p.brand).name} ${p.name}`:"Not in the catalog"):"";
-  const rate=v.showRate&&!w.inactive&&p?`<span class="w-rate">up to <b>${fmtRate(topRate(w))}%</b></span>`:"";
-  const right=(v.showLast4&&w.last4?`<span class="mono last4">•••• ${esc(w.last4)}</span>`:"")+rate;
+  const best=!w.inactive&&p?bestFor(w):"";
+  const rate=v.showRate&&!w.inactive&&p?`<span class="w-top"><span>up to</span><b>${fmtRate(topRate(w))}%</b></span>`:"";
+  const right=rate;
   return `<div class="swipe-wrap" data-id="${w.id}" data-drag="${drag&&!selectMode?1:0}">
     <div class="swipe-act left"><button class="sw-btn more" onclick="openCardMenu('${w.id}')" aria-label="More options for ${esc(dn(w))}">${ic("more","fill")}<span>More</span></button></div>
     <div class="swipe-act right">${w.inactive
@@ -1010,18 +1160,54 @@ function walletRow(w,{drag=true}={}){
       :`<button class="sw-btn archive" onclick="setInactive(['${w.id}'],true)">${ic("archive")}<span>Deactivate</span></button>`}
       <button class="sw-btn delete" onclick="removeCards(['${w.id}'])">${ic("trash")}<span>Delete</span></button></div>
     <button class="card-row ${w.inactive?"inactive":""} ${sel?"selected":""}" onclick="rowTap('${w.id}')" ${selectMode?`aria-pressed="${!!sel}"`:""}>
-      ${selectMode?`<span class="sel-box">${sel?ic("check"):""}</span>`:""}${cardArt(w.product,52)}
+      ${selectMode?`<span class="sel-box">${sel?ic("check"):""}</span>`:""}
       <span class="row-main"><span class="row-title">${w.pinned&&!w.inactive?`<span class="pin-ic" aria-label="Pinned">${ic("pin")}</span>`:""}${esc(dn(w))}${has?'<span class="dot" aria-label="needs an update"></span>':""}</span>
-      ${sub?`<span class="row-sub">${esc(sub)}</span>`:""}</span>
+      ${sub?`<span class="row-sub">${esc(sub)}</span>`:""}
+      ${best?`<span class="w-best-for">${best}</span>`:""}
+      <span class="w-meta">${p?`<span class="net-tag net-${esc(netOf(w))}">${esc(netLabel(netOf(w)))}</span>`:""}${v.showLast4&&w.last4?`<span class="mono">•••• ${esc(w.last4)}</span>`:""}</span></span>
       ${right?`<span class="row-end">${right}</span>`:""}</button></div>`;
 }
 
+/* Bank tile: the bank's colors and short name (real card pictures need licensing) */
+function bankTile(w){const p=P(w.product),b=p?B(p.brand):B("?");const[c1,c2]=(typeof ART!=="undefined"&&ART[w.product])||b.colors;
+  return `<span class="bank-tile" style="background:linear-gradient(135deg,${c1},${c2})" aria-hidden="true">${esc(b.mono||(b.short||b.name).slice(0,2))}</span>`}
+/* What a card is best for: its top two bonus categories, e.g. "6% grocery · 3% gas" */
+function bestFor(w){
+  const p=P(w.product);if(!p)return"";const mult=p.type==="cash"?1:(p.cpp||1);
+  const hits=visibleCats().filter(c=>c.id!=="other").map(c=>{const e=evalCard(w,c,null);return e?{c,r:e.rate-e.extras.reduce((t,x)=>t+x.extra,0)*mult}:null})
+    .filter(x=>x&&x.r>(p.base||0)*mult+0.001).sort((a,b)=>b.r-a.r||(a.c.parent?1:0)-(b.c.parent?1:0));
+  const seen=new Set(),top=[];for(const h of hits){if(top.length>=2)break;const k=h.r+"|"+(h.c.parent||h.c.id);if(seen.has(k))continue;seen.add(k);top.push(h)}
+  // a quarterly bonus that still needs activating
+  const q=p.rotating&&p.rotating.schedule[QK],pend=q&&!w.activated.includes(QK)?`<span class="bf-pill warn"><b>${fmtRate(p.rotating.rate)}%</b> ${esc(q.label.split(/,| &/)[0].toLowerCase())} · activate</span>`:"";
+  if(!top.length)return pend+`<span class="bf-pill">${fmtRate((p.base||0)*mult)}% everywhere</span>`;
+  return pend+top.slice(0,pend?1:2).map(h=>`<span class="bf-pill"><b>${fmtRate(Math.round(h.r*100)/100)}%</b> ${esc(h.c.label.toLowerCase())}</span>`).join("");
+}
+/* Wallet header: title, people, fanned top cards, then a summary strip like a finance app */
+function walletHero(){
+  const act=activeWallet(),nm=myName(),names=nm?[nm]:[];
+  const banks=new Set(act.map(w=>P(w.product)?.brand).filter(Boolean)).size;
+  let best=null;visibleCats().filter(c=>c.id!=="other").forEach(c=>{const r=rank(c,null)[0];if(r&&(!best||r.rate>best.r.rate))best={r,c}});
+  const every=rank(catById("other"),null)[0];
+  const fees=act.reduce((t,w)=>t+(P(w.product)?.fee||0),0);
+  const fan=[...act.filter(w=>w.pinned),...act.filter(w=>!w.pinned)].slice(0,3);
+  return `<div class="pay-hero w-hero">
+    <h2 class="hero-greet">Your wallet</h2>
+    <div class="hero-meta"><span>${act.length} card${act.length===1?"":"s"}</span><span>·</span><span>${banks} bank${banks===1?"":"s"}</span></div>
+    ${fan.length?`<div class="w-fan" aria-hidden="true">${fan.map((w,i)=>`<div class="w-fan-card f${fan.length-1-i}">${cardArt(w.product,0,true)}</div>`).reverse().join("")}</div>`:""}
+  </div>
+  ${act.length?`<div class="w-stats">
+    <div class="w-stat"><b class="good">${best?fmtRate(best.r.rate)+"%":"—"}</b><span>Top rate</span></div>
+    <div class="w-stat"><b>${every?fmtRate(every.rate)+"%":"—"}</b><span>Everywhere</span></div>
+  </div>
+  ${best?`<button class="w-best" onclick="openAnswer('${best.c.id}')">${ic("star")}<span>Your best rate: <b>${fmtRate(best.r.rate)}% at ${esc(best.c.label.toLowerCase())}</b> with ${esc(dn(best.r.w))}</span>${ic("chevR","dim")}</button>`:""}`:""}`;
+}
 function renderWallet(){
   const v=viewOpt(),all=state.wallet;
   const active=walletFiltered(activeWallet()),off=walletFiltered(all.filter(w=>w.inactive)).sort((a,b)=>b.inactive.localeCompare(a.inactive));
   let h="";
+  h+=walletHero();
   if(all.length)h+=walletToolbar();
-  if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and the Pay tab ranks them for every purchase.</p>
+  if(!all.length)h+=`<div class="empty"><h2>No cards yet</h2><p>Add the cards you carry and Earn picks the best one for every purchase.</p>
     <button class="btn" onclick="openOnboard()">Pick your cards</button></div>`;
   else if(!active.length&&activeFilterCount())h+=`<div class="empty small"><p>No cards match these filters.</p><button class="btn-sm alt" onclick="clearFilter('*')">Clear filters</button></div>`;
   else if(!active.length)h+=`<p class="hint">All your cards are deactivated. Reactivate one below or tap + to add a card.</p>`;
@@ -1038,7 +1224,7 @@ function renderWallet(){
     const open=showInactive||!!selectMode;
     h+=`<button class="more" onclick="showInactive=!showInactive;renderWallet()" aria-expanded="${open}">
       <span>${ic("archive")} Deactivated cards (${off.length})</span>${ic(open?"chevD":"chevR","dim")}</button>
-      ${open?`<p class="hint">Cards you no longer use. They don't show up on Pay or in Updates.</p><div class="list inactive-list" data-list="off">${off.map(w=>walletRow(w,{drag:false})).join("")}</div>`:""}`;
+      ${open?`<p class="hint">Cards you no longer use. They don't show up on Earn or in notifications.</p><div class="list inactive-list" data-list="off">${off.map(w=>walletRow(w,{drag:false})).join("")}</div>`:""}`;
   }
   $("wallet-list").innerHTML=h;
   const d=CATALOG.updated?shortDate(isoToDate(CATALOG.updated)):"";
@@ -1262,26 +1448,29 @@ const refreshAll=()=>render();
 let tab="pay",payQ="",moreOpen=false,answerCtx=null,showAllAlts=false,whyOpen=false;
 const stores=()=>CATALOG.stores||[];
 const storeById=id=>stores().find(s=>s.id===id);
-const TITLES={pay:"Pay",wallet:"Wallet",updates:"Updates"};
+const TITLES={pay:"Earn",wallet:"Wallet"};
 
 function go(t){
   tab=t;
-  ["pay","wallet","updates"].forEach(x=>{$("view-"+x).hidden=x!==t;const b=$("tab-"+x);b.classList.toggle("on",x===t);b.setAttribute("aria-current",x===t?"page":"false")});
-  $("title").textContent=TITLES[t];
+  if(t==="updates"){openNotifs();return}
+  ["pay","wallet"].forEach(x=>{$("view-"+x).hidden=x!==t;const b=$("tab-"+x);b.classList.toggle("on",x===t);b.setAttribute("aria-current",x===t?"page":"false")});
+  $("title").innerHTML=`<span class="brand">${BRAND_MARK}<span>lucro</span></span>`;
+  document.body.classList.add("hero-page");
   if(t!=="wallet")selectMode=null;
   render();window.scrollTo(0,0);
 }
 function renderAppbar(){
-  const a=$("appbar-action");
-  if(tab!=="wallet"){a.innerHTML="";$("fab").hidden=true;$("select-bar").hidden=true;return}
+  const a=$("appbar-action"),n=allTasks().length;
+  const bell=`<button class="bell-btn" onclick="openNotifs()" aria-label="Notifications${n?`, ${n} need attention`:""}">${ic("bell")}${n?`<span class="badge">${n}</span>`:""}</button>`;
+  if(tab!=="wallet"){a.innerHTML=`<div class="appbar-icons">${bell}</div>`;$("fab").hidden=true;$("select-bar").hidden=true;return}
   a.innerHTML=selectMode?`<button class="btn-pill quiet" onclick="endSelect()">Done</button>`
-    :`<button class="icon-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button>`;
+    :`<div class="appbar-icons">${bell}<button class="icon-btn" id="menu-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button></div>`;
   $("fab").hidden=!!selectMode;
   renderSelectBar();
 }
 function render(){
   renderPay();renderWallet();renderUpdates();renderAppbar();
-  const n=allTasks().length;$("tab-badge").textContent=n;$("tab-badge").hidden=!n;
+  refreshNotifs();
 }
 let toastTimer=null;
 function toast(msg,undoFn){
@@ -1304,8 +1493,25 @@ function clearPaySearch(){payQ="";$("q").value="";$("q-clear").hidden=true;rende
 const tile=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${ic(c.id)}<span>${esc(c.label)}</span></button>`;
 const placeRow=(catId,storeId,title,sub)=>`<button class="row" onclick="openAnswer('${catId}','${storeId||""}')">
   <span class="row-ic">${ic(catId)}</span><span class="row-main"><span class="row-title">${esc(title)}</span><span class="row-sub">${esc(sub)}</span></span>${ic("chevR","dim")}</button>`;
+/* Brand mark: a teal tile with two stacked cards and a gold "best pick" dot */
+/* Lucro mark: two rising chevrons (level up) with a gold dot on top */
+const BRAND_MARK=`<svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="23" fill="#0B1412"/><path d="M27 76 L50 53 L73 76" stroke="#14B8A6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M27 52 L50 29 L73 52" stroke="#A3E635" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="50" cy="15" r="5" fill="#FCD34D"/></svg>`;
+function greeting(){const h=new Date().getHours();return h<5?"Good evening":h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
+function renderPayHero(){
+  const nm=myName(),names=nm?[nm]:[];
+  const act=activeWallet(),setup=allTasks().length;
+  const top=act.find(w=>w.pinned)||act[0];
+  $("pay-hero").innerHTML=`
+    <h2 class="hero-greet">${greeting()}${names.length?",":""}</h2>
+    ${names.length?`<div class="hero-name">${esc(names.join(" & "))}</div>`:""}
+    <p class="hero-tag">Every purchase pays you back.</p>
+    <div class="hero-meta"><span>${act.length} card${act.length===1?"":"s"} ready</span>${setup?`<span>·</span><button onclick="openNotifs()">${setup} need${setup===1?"s":""} setup</button>`:""}</div>
+    ${top?`<div class="hero-peek" onclick="go('wallet')" aria-hidden="true">${cardArt(top.product,0,true)}</div>`:""}`;
+}
+addEventListener("scroll",()=>document.body.classList.toggle("scrolled",scrollY>12),{passive:true});
 function renderPay(){
   const empty=!activeWallet().length;
+  renderPayHero();
   $("pay-empty").hidden=!empty;$("pay-main").hidden=empty;
   if(empty)return;
   const res=$("pay-results"),home=$("pay-home");
@@ -1321,7 +1527,7 @@ function renderPay(){
   }
   home.hidden=false;res.hidden=true;
   const rec=state.recents.filter(x=>catById(x.c)&&(!x.s||storeById(x.s)));
-  $("recents").innerHTML=rec.length?`<div class="recent-wrap"><div class="recent-head"><h2 class="sec">Recent</h2><button class="link-btn" onclick="clearRecents()">Clear</button></div>
+  $("recents").innerHTML=rec.length?`<div class="recent-wrap"><div class="sec-head"><h2>Recent</h2><button class="link-btn" onclick="clearRecents()">Clear</button></div>
     <div class="recent-strip no-swipe">${rec.map(x=>{
     const s=x.s&&storeById(x.s);return `<button class="chip" onclick="openAnswer('${x.c}','${x.s||""}')">${ic(x.c)}${esc(s?s.name:catName(x.c))}</button>`}).join("")}</div></div>`:"";
   const vis=visibleCats(),vid=new Set(vis.map(c=>c.id));
@@ -1329,18 +1535,20 @@ function renderPay(){
   const favs=favItems();let top;
   if(favs.length){
     top=favs.filter(f=>!f.s).map(f=>f.c);
-    $("top-title").innerHTML=`${ic("star")}Favorites`;$("fav-edit").textContent="Edit";$("fav-hint").hidden=true;
+    $("top-title").innerHTML=`Favorites`;$("fav-edit").innerHTML=ic("edit");$("fav-hint").hidden=true;
     $("top").innerHTML=favs.map(favTile).join("");
   }else{
     top=[...new Set([...byUse,...DEFAULT_TOP.filter(id=>vid.has(id))])].slice(0,6);
-    $("top-title").innerHTML=`${ic("star")}Your top spots`;$("fav-edit").textContent="Pick favorites";
-    $("fav-hint").hidden=false;$("fav-hint").textContent="Star the places you pay most to keep them here.";
+    top=POPULAR_CATS.filter(id=>vid.has(id));
+    $("top-title").innerHTML=`Popular categories`;$("fav-edit").innerHTML=ic("star");$("fav-edit").setAttribute("aria-label","Pick your favorites");
+    $("fav-hint").hidden=false;$("fav-hint").textContent="Where most people shop. Tap the star to pick your own favorites.";
     $("top").innerHTML=top.map(id=>tile(catById(id))).join("");
   }
+  $("top").classList.toggle("two-up",!favs.length&&top.length===4);
   // All categories: grouped icon grid, always open (favorites are marked with a star)
   const favSet=new Set(state.favs),placed=new Set();
   const btn=c=>`<button class="tile" onclick="openAnswer('${c.id}')">${favSet.has("c:"+c.id)?`<span class="fav-mark" aria-label="Favorite">${ic("star")}</span>`:""}${ic(c.id)}<span>${esc(c.label)}</span></button>`;
-  let h=`<div class="all-wrap"><h2 class="all-title">All categories</h2>`;
+  let h=`<div class="all-wrap"><div class="sec-head"><h2>All categories</h2></div>`;
   CAT_GROUPS.forEach(([name,ids],i)=>{
     const list=(i===CAT_GROUPS.length-1?vis.filter(c=>!placed.has(c.id)):vis.filter(c=>ids.includes(c.id)));
     list.forEach(c=>placed.add(c.id));
@@ -1362,7 +1570,7 @@ function openFavs(keep){
   const row=(key,icon,title,sub)=>{const on=state.favs.includes(key);
     return `<button class="row fav-row ${on?"on":""}" onclick="toggleFav('${key}',true)" aria-pressed="${on}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${esc(title)}</span>${sub?`<span class="row-sub">${esc(sub)}</span>`:""}</span>${ic("star","star")}</button>`};
   openSheet(`<h2 class="sheet-title">Favorites</h2>
-    <p class="sheet-sub">Star the places you pay most. They show first on Pay, in the order you star them.</p>
+    <p class="sheet-sub">Star the places you shop most. They show first on Earn, in the order you star them.</p>
     <p class="fav-count">${n?`${n} favorite${n>1?"s":""}`:"No favorites yet"}</p>
     ${favStores.length?`<h3 class="sec">Stores</h3><div class="list">${favStores.map(s=>row("s:"+s.id,s.cat,s.name,catName(s.cat))).join("")}</div>`:""}
     <h3 class="sec">Categories</h3><div class="list">${vis.map(c=>row("c:"+c.id,c.id,c.label)).join("")}</div>
@@ -1420,7 +1628,7 @@ function renderAnswer(){
   const b=r[0],hidden=networkHidden(cat),rest=r.slice(1).filter(x=>x.rate>0);
   const chips=[];
   if(b.label!=="Everything else")chips.push(`<span class="pill">${esc(b.label)}${b.note?` · ${esc(b.note)}`:""}</span>`);
-  if(b.flags.includes("confirm"))chips.push(`<span class="pill warn">Confirm ${qLabel(PICK_Q)} picks in Updates</span>`);
+  if(b.flags.includes("confirm"))chips.push(`<span class="pill warn">Confirm ${qLabel(PICK_Q)} picks (see 🔔)</span>`);
   if(b.flags.includes("activate"))chips.push(`<span class="pill warn">Not activated yet</span>`);
   b.extras.forEach(e=>chips.push(`<span class="pill">Includes ${esc(e.label.split(" (")[0])}</span>`));
   if(b.apr)chips.push(`<span class="pill">0% APR until ${shortDate(isoToDate(b.apr))}</span>`);
@@ -1466,7 +1674,7 @@ function undoCap(wid,key){const w=walletById(wid);delete w.capped[key];save();re
 const REASONS=["Another card earns more here","This card isn't accepted here","The store is in the wrong category","The rate shown is wrong"];
 function openReport(){
   openSheet(`<h2 class="sheet-title">What went wrong?</h2>
-    <p class="sheet-sub">Your feedback is saved in Updates so you can send it in.</p>
+    <p class="sheet-sub">Your feedback is saved in notifications (🔔) so you can send it in.</p>
     <div class="radio-list">${REASONS.map((r,i)=>`<label class="radio"><input type="radio" name="reason" id="reason-${i}" value="${i}" ${i===0?"checked":""}><span>${r}</span></label>`).join("")}</div>
     <label class="flabel" for="report-note">Details (optional)</label>
     <textarea id="report-note" class="field" rows="3" placeholder="For example: Costco charged this as gas, not warehouse"></textarea>
@@ -1477,32 +1685,42 @@ function saveReport(){
   const cat=catById(answerCtx.catId),store=answerCtx.storeId?storeById(answerCtx.storeId):null,b=rank(cat,store)[0];
   const i=+(document.querySelector('input[name="reason"]:checked')||{value:0}).value;
   state.reports.unshift({at:TODAY,where:store?store.name:cat.label,cat:cat.label,card:b?dn(b.w)+" "+fmtRate(b.rate)+"%":"none",reason:REASONS[i],note:$("report-note").value.trim()});
-  save();closeSheet();toast("Thanks! Feedback saved in Updates");
+  save();closeSheet();toast("Thanks! Feedback saved in notifications");
 }
 
 /* ─── Wallet ─── */
 function ownerBadge(w,size){return multiOwner()?badge(w.owner,size):""}
-function multiOwner(){return new Set(state.wallet.map(w=>w.owner)).size>1}
+function multiOwner(){return SHOW.multiPeople&&new Set(state.wallet.map(w=>w.owner)).size>1}
+/* The one name shown in greetings (MVP is single-user): saved choice, else Matt/first real name */
+function myName(){const ps=state.people||[];const me=ps.find(p=>p.id===state.me)||ps.find(p=>p.name==="Matt")||ps.find(p=>p.name&&p.name!=="Me");return me&&me.name!=="Me"?me.name:""}
 /* ─── Updates ─── */
-function renderUpdates(){
+/* ─── Notification center (bell, top right): activations, picks, caps, feedback ─── */
+function renderUpdates(){} // kept for older callers; the bell sheet replaces the Updates tab
+const notifOpen=()=>!$("sheet").hidden&&!!$("sheet").querySelector(".notif-sheet");
+function refreshNotifs(){if(notifOpen())openNotifs(true)}
+function notifsHTML(){
   const t=allTasks();
-  const caps=[];state.wallet.forEach(w=>Object.entries(w.capped||{}).forEach(([k,u])=>{if(u>=TODAY)caps.push({w,k,u})}));
+  const caps=[];activeWallet().forEach(w=>Object.entries(w.capped||{}).forEach(([k,u])=>{if(u>=TODAY)caps.push({w,k,u})}));
+  const KIND={activate:["activate","bolt"],confirm:["confirm","refresh"],pick:["pick","list"]};
+  const chip=w=>`<div class="n-card-chip">${cardArt(w.product,34)}<span>${esc(dn(w))}${w.last4?` <span class="mono dim">••${esc(w.last4)}</span>`:""}</span>${ownerBadge(w)}</div>`;
   let h="";
-  if(t.length)h+=`<h2 class="sec">Card updates</h2><div class="stack">${t.map(x=>`<div class="task">
-    <div class="task-main"><div class="task-head">${cardArt(x.w.product,36)}<span class="row-title">${esc(dn(x.w))}</span>${ownerBadge(x.w)}</div>
-    ${x.w.pending===x.key?`<p class="task-text">Did you activate it?</p><p class="task-sub">${esc(x.text.replace(/^Activate /,""))}</p>`:
-      `<p class="task-text">${esc(x.text)}</p>${x.sub?`<p class="task-sub">${esc(x.sub)}</p>`:""}`}</div>
-    <div class="task-btns">${taskButtons(x)}</div></div>`).join("")}</div>`;
-  if(caps.length)h+=`<h2 class="sec">Spending caps reached</h2><div class="list">${caps.map(c=>`<div class="row static">
-    <span class="row-ic">${ic("gauge")}</span><span class="row-main"><span class="row-title">${esc(dn(c.w))}</span>
-    <span class="row-sub">${esc(capLabel(c.w,c.k))} · back ${shortDate(new Date(isoToDate(c.u).getTime()+864e5))}</span></span>
-    <button class="btn-sm alt" onclick="undoCap('${c.w.id}','${c.k}')">Undo</button></div>`).join("")}</div>`;
-  if(state.reports.length)h+=`<h2 class="sec">Wrong-card reports</h2><div class="list">${state.reports.map(r=>`<div class="row static">
-    <span class="row-ic">${ic("flag")}</span><span class="row-main"><span class="row-title">${esc(r.where)} · ${esc(r.card)}</span>
-    <span class="row-sub">${esc(r.reason)}${r.note?` · ${esc(r.note)}`:""} · ${shortDate(isoToDate(r.at))}</span></span></div>`).join("")}</div>
-    <div class="btn-row"><button class="btn-sm" onclick="copyReports()">${ic("copy")}Copy all</button><button class="btn-sm alt" onclick="clearReports()">Clear</button></div>`;
-  if(!h)h=`<div class="empty"><div class="empty-ic">${ic("check")}</div><h2>You're all set</h2><p>Quarterly activations, category picks and reports will show up here.</p></div>`;
-  $("updates").innerHTML=h;
+  if(t.length)h+=`<h3 class="n-sec">Action needed <span class="n-count">${t.length}</span></h3>${t.map(x=>{const [cls,icon]=KIND[x.kind]||KIND.pick;
+    const pending=x.w.pending===x.key;
+    return `<div class="n-card"><span class="n-ic ${cls}">${ic(icon)}</span><div class="n-main">
+      <div class="n-title">${pending?"Did you activate it?":esc(x.text)}</div>
+      <div class="n-body">${pending?esc(x.text.replace(/^Activate /,"")):esc(x.sub||"")}</div>
+      ${chip(x.w)}<div class="n-actions">${taskButtons(x)}</div></div><span class="n-dot" aria-hidden="true"></span></div>`}).join("")}`;
+  if(caps.length)h+=`<h3 class="n-sec">Spending caps reached</h3>${caps.map(c=>`<div class="n-card"><span class="n-ic cap">${ic("gauge")}</span><div class="n-main">
+      <div class="n-title">${esc(capLabel(c.w,c.k))}</div><div class="n-body">Skipped until ${shortDate(new Date(isoToDate(c.u).getTime()+864e5))}, when the bonus resets.</div>
+      ${chip(c.w)}<div class="n-actions"><button class="btn-sm alt" onclick="undoCap('${c.w.id}','${c.k}')">Not capped yet</button></div></div></div>`).join("")}`;
+  if(state.reports.length)h+=`<h3 class="n-sec">Your feedback</h3>${state.reports.map(r=>`<div class="n-card"><span class="n-ic report">${ic("flag")}</span><div class="n-main">
+      <div class="n-title">${esc(r.where)} · ${esc(r.card)}</div><div class="n-body">${esc(r.reason)}${r.note?` · ${esc(r.note)}`:""} · ${shortDate(isoToDate(r.at))}</div></div></div>`).join("")}
+    <div class="n-actions"><button class="btn-sm" onclick="copyReports()">${ic("copy")}Copy all</button><button class="btn-sm alt" onclick="clearReports()">Clear</button></div>`;
+  if(!h)h=`<div class="n-empty"><div class="empty-ic">${ic("check")}</div><h3>You're all caught up</h3><p>Quarterly activations, category picks, spending caps and your feedback will show up here.</p></div>`;
+  return h;
+}
+function openNotifs(keep){
+  openSheet(`<div class="notif-sheet"><div class="set-head"><button class="round-btn" onclick="closeSheet()" aria-label="Close">${ic("x")}</button><h2>Notifications</h2><span class="round-btn ghost"></span></div>${notifsHTML()}</div>`,keep?true:false,null,{customTop:true});
 }
 /* Activate now / Change open the bank (its app if the phone has it, else the sign-in page) */
 function bankLink(w,label,cls,onclick){const u=B(P(w.product).brand).login;
@@ -1584,10 +1802,11 @@ function sheetGestures(sh,close,getBack){
 function closeSheet(){sheetBack=null;$("sheet").hidden=true;$("sheet").innerHTML="";if($("answer").hidden&&$("onboard").hidden)document.body.classList.remove("locked");render();if(answerCtx)renderAnswer()}
 
 /* ─── Card art (placeholder until licensed images) ─── */
-function cardArt(pid,miniWidth){
+function cardArt(pid,miniWidth,plain){
   const p=P(pid);const b=p?B(p.brand):B("?");const[c1,c2]=ART[pid]||b.colors;
   const bg=`background:linear-gradient(135deg,${c1},${c2})`,light=(pid==="apple_card"||pid==="amex_platinum")?";color:#111827":"";
   if(miniWidth||!p)return `<span class="art mini" style="${bg};width:${miniWidth||46}px"><span class="art-band"></span><span class="art-chip"></span></span>`;
+  if(plain)return `<span class="art" style="${bg}"><span class="art-band"></span><span class="art-chip"></span></span>`;
   return `<span class="art" style="${bg}${light}"><span class="art-band"></span><span class="art-iss">${esc(b.short||b.name)}</span><span class="art-chip"></span><span class="art-name">${esc(p.name)}</span><span class="art-net">${esc(netLabel(p.network))}</span></span>`;
 }
 
@@ -1639,7 +1858,7 @@ function openDrawer(id,keep){
     <input class="field mono" id="f-last4" inputmode="numeric" maxlength="4" value="${esc(w.last4)}" onchange="setField('${w.id}','last4',this.value.replace(/\\D/g,'').slice(0,4))">
     ${SHOW.accountDetails?`<label class="flabel" for="f-due">Due day</label><input class="field" id="f-due" inputmode="numeric" value="${w.dueDay||""}" onchange="setField('${w.id}','dueDay',parseInt(this.value)||null)">`:""}
     ${p.networkOptions?`<div class="flabel">Logo on your card</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${netOf(w)===n?"on":""}" onclick="setField('${w.id}','network','${n}')">${capWord(n)}</button>`).join("")}</div>`:""}
-    ${state.people.length>1?`<div class="flabel">Whose card</div><div class="chips">${ownerChips(w.owner,`setField('${w.id}','owner','$ID')`)}</div>`:""}
+    ${SHOW.multiPeople&&state.people.length>1?`<div class="flabel">Whose card</div><div class="chips">${ownerChips(w.owner,`setField('${w.id}','owner','$ID')`)}</div>`:""}
     <p class="source">${s.checked?`Terms checked ${isoToDate(s.checked).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}`:"Terms not yet checked"}${s.url?` · <a href="${esc(s.url)}" target="_blank" rel="noopener">View source</a>`:""}${s.note?`<br>${esc(s.note)}`:""}<br>Always confirm terms with your card issuer.</p>
     ${drawerButtons(w)}
   `,keep);
@@ -1728,7 +1947,7 @@ function drawerButtons(w){
     ${w.inactive?`<button class="btn-outline" onclick="setInactive(['${w.id}'],false)">${ic("restore")}Reactivate card</button>`
       :`<button class="btn-outline" onclick="setInactive(['${w.id}'],true)">${ic("archive")}Deactivate card</button>`}
     <button class="btn-outline danger" onclick="removeCard('${w.id}')">${ic("trash")}Remove from wallet</button></div>
-    ${w.inactive?"":`<p class="hint center">Deactivate keeps the card in your history but stops using it on Pay.</p>`}`;
+    ${w.inactive?"":`<p class="hint center">Deactivate keeps the card in your history but stops using it on Earn.</p>`}`;
 }
 function removeCard(id){removeCards([id])}
 function removeCards(ids){
@@ -1745,7 +1964,7 @@ function setInactive(ids,off,confirmed){
   if(off&&!confirmed){
     const ws=ids.map(walletById).filter(Boolean);if(!ws.length)return;
     const one=ws.length===1,name=one?dn(ws[0]):`${ws.length} cards`;
-    confirmDialog(`Deactivate ${name}?`,`${one?"It":"They"} will move to your deactivated cards and stop showing on Pay and in Updates. You can reactivate ${one?"it":"them"} any time.`,
+    confirmDialog(`Deactivate ${name}?`,`${one?"It":"They"} will move to your deactivated cards and stop showing on Earn and in notifications. You can reactivate ${one?"it":"them"} any time.`,
       "Deactivate",()=>setInactive(ids,true,true),"primary");
     return;
   }
@@ -1772,7 +1991,7 @@ function closeDialog(){$("dialog").hidden=true;$("dialog").innerHTML="";dialogFn
 function openWalletMenu(){
   const off=state.wallet.filter(w=>w.inactive).length,has=state.wallet.length;
   const item=(icon,label,fn)=>`<button class="pop-item" role="menuitem" onclick="closePopover();${fn}">${ic(icon)}<span>${label}</span></button>`;
-  openPopover($("appbar-action").querySelector(".icon-btn"),`
+  openPopover($("menu-btn"),`
     ${item("plus","Add a card","openAdd()")}
     ${has?item("select","Select cards","startSelect()"):""}
     ${has?item("sort","Sort","openDisplay('sort')")+item("filter","Filter","openDisplay('filter')"):""}
@@ -1862,7 +2081,7 @@ function renderDraft(keep=true){
   const p=P(draft.product);
   openSheet(`<div class="offer-art small">${cardArt(draft.product)}</div>
     <h2 class="sheet-title center">${esc(B(p.brand).name)} ${esc(p.name)}</h2>
-    ${state.people.length>1?`<div class="flabel">Whose card is this?</div><div class="chips">${ownerChips(draft.owner,"draft.owner='$ID';renderDraft()")}</div>`:""}
+    ${SHOW.multiPeople&&state.people.length>1?`<div class="flabel">Whose card is this?</div><div class="chips">${ownerChips(draft.owner,"draft.owner='$ID';renderDraft()")}</div>`:""}
     ${p.networkOptions?`<div class="flabel">Which logo is on your card?</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${draft.network===n?"on":""}" onclick="draft.network='${n}';renderDraft()">${capWord(n)}</button>`).join("")}</div>`:""}
     <label class="flabel" for="d-last4">Last 4 digits (optional)</label>
     <input class="field mono" id="d-last4" inputmode="numeric" maxlength="4" placeholder="1234" value="${esc(draft.last4)}" oninput="draft.last4=this.value.replace(/\\D/g,'').slice(0,4)">
@@ -1896,7 +2115,7 @@ function obSearch(v){obQ=v;renderOnboard()}
 function obFinish(skip){
   if(!skip)[...obSel].forEach(id=>state.wallet.push(normalize({id:"w"+Date.now()+Math.random().toString(36).slice(2,6),product:id,owner:state.people[0]?.id||"",nickname:"",last4:"",rewards:"",dueDay:null,limit:""})));
   state.onboarded=true;save();$("onboard").hidden=true;document.body.classList.remove("locked");
-  go(!skip&&allTasks().length?"updates":"pay");
+  go("pay");if(!skip&&allTasks().length)setTimeout(openNotifs,400);
   if(!skip&&obSel.size)toast(`${obSel.size} card${obSel.size>1?"s":""} added${allTasks().length?". A few need a quick setup.":""}`);
 }
 
@@ -1904,7 +2123,7 @@ function obFinish(skip){
 function exportWallet(){
   const data=JSON.stringify({app:"card-maximizer",saved:new Date().toISOString(),state},null,1);
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));
-  a.download=`card-maximizer-backup-${TODAY}.json`;document.body.appendChild(a);a.click();a.remove();
+  a.download=`lucro-backup-${TODAY}.json`;document.body.appendChild(a);a.click();a.remove();
   state.backedUp=TODAY;save();render();toast("Backup saved to your downloads");
 }
 function importWallet(file){
@@ -1914,7 +2133,7 @@ function importWallet(file){
       s.wallet.forEach(normalize);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,s);
       state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];state.onboarded=true;
       save();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
-    }catch{toast("That file isn't a Card Maximizer backup")}};
+    }catch{toast("That file isn't a Lucro backup")}};
   r.readAsText(file);
 }
 function openBackup(){
@@ -1931,7 +2150,7 @@ document.addEventListener("click",e=>{if(swipeOpen&&!e.target.closest(".swipe-wr
 sheetGestures($("ans-panel"),closeAnswer,()=>closeAnswer);
 $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()});
 // Swipe left/right anywhere on a main tab to move between Pay, Wallet and Updates.
-(function(){const ORDER=["pay","wallet","updates"];let x0,y0,ok=false;
+(function(){const ORDER=["pay","wallet"];let x0,y0,ok=false;
   const main=document.querySelector("main");
   main.addEventListener("touchstart",e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;
     ok=e.touches.length===1&&x0>24&&x0<innerWidth-24&&!e.target.closest("input,textarea,.chips,.no-swipe,.swipe-wrap")},{passive:true});

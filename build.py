@@ -1,4 +1,4 @@
-"""Build Card Maximizer into one self-contained index.html.
+"""Build Lucro into one self-contained index.html.
 
   python3 build.py            -> index.html   (the public app GitHub Pages serves)
   python3 build.py preview    -> preview.html (for testing on your computer; loads
@@ -28,8 +28,8 @@ SW_MARK = 'if("serviceWorker"in navigator){'
 if mode == "site":
     js = js.replace('const CATALOG_URL = null;', 'const CATALOG_URL = "catalog.json";', 1)
     js = js[:js.index(SW_MARK)] + 'if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});\n'
-    tpl = tpl.replace("<title>Card Maximizer</title>",
-        '<title>Card Maximizer</title>\n<link rel="manifest" href="manifest.json">\n'
+    tpl = tpl.replace("<title>Lucro</title>",
+        '<title>Lucro</title>\n<link rel="manifest" href="manifest.json">\n'
         '<link rel="apple-touch-icon" href="apple-touch-icon.png">')
     out = ROOT / "index.html"
 elif mode == "preview":
