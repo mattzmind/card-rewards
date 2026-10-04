@@ -21,6 +21,13 @@ GitHub Pages: one self-contained `index.html` built from the files in `src/`.
 - `tools/build_catalog.py`: source of truth for card data; run it to regenerate `catalog.json`.
   Always raise `"version"` (phones only accept a newer version string).
 
+## Native app (`mobile/`)
+- Expo SDK 57 + TypeScript + Expo Router. See `mobile/README.md` and `mobile/AGENTS.md` (check versioned Expo docs; APIs change every SDK).
+- Card logic lives in `mobile/src/core/`. `engine.ts` must keep giving the same answers as `src/engine.js`:
+  `cd mobile && npm test` runs the parity test. If you change ranking rules, change both and keep the test green.
+- After changing the catalog, run `npm run sync-catalog` in `mobile/` (the app also fetches the live `catalog.json` when newer).
+- Stick to modules that ship in Expo Go (e.g. `expo-sqlite/kv-store`, not MMKV) until we move to development builds.
+
 ## Rules
 - Never edit `index.html` by hand: change `src/` and rebuild, or the next build wipes the edit.
 - Never commit personal data: no real names, last-4 digits or wallets. Personal test data goes in `seed.local.js` (git-ignored).
