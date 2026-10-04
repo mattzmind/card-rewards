@@ -42,6 +42,16 @@ export function WalletRow({ w, shown, showRate, showLast4, first }: { w: WalletC
   const sub = w.inactive ? deactivatedLabel(ctx, w) : (w.nickname && p) || !p ? (p ? `${brandOf(ctx, p.brand).name} ${p.name}` : 'Not in the catalog') : '';
   const pills = !w.inactive && p ? bestFor(ctx, w) : [];
   const close = () => ref.current?.close();
+  /* A swipe must never count as a tap: ignore presses that moved, that happen while the row is
+     being dragged, or while its actions are open (then a tap just closes them). */
+  const start = useRef({ x: 0, y: 0 }), swiping = useRef(false), open = useRef(false);
+  const settle = (isOpen: boolean) => { open.current = isOpen; setTimeout(() => { swiping.current = false; }, 250); };
+  const onRowPress = (e: { nativeEvent: { pageX: number; pageY: number } }) => {
+    const moved = Math.abs(e.nativeEvent.pageX - start.current.x) > 8 || Math.abs(e.nativeEvent.pageY - start.current.y) > 8;
+    if (moved || swiping.current) return;
+    if (open.current) { close(); return; }
+    tap(); router.push({ pathname: '/card/[id]', params: { id: w.id } });
+  };
 
   const act = (icon: string, label: string, bg: string, fg: string, fn: () => void) => (
     <Pressable key={label} onPress={() => { tap(); close(); fn(); }} style={[styles.act, { backgroundColor: bg }]} accessibilityLabel={`${label} ${name}`}>
@@ -51,6 +61,8 @@ export function WalletRow({ w, shown, showRate, showLast4, first }: { w: WalletC
 
   return (
     <Swipeable ref={ref} friction={1.6} overshootFriction={8} leftThreshold={50} rightThreshold={50}
+      onSwipeableOpenStartDrag={() => { swiping.current = true; }} onSwipeableCloseStartDrag={() => { swiping.current = true; }}
+      onSwipeableOpen={() => settle(true)} onSwipeableClose={() => settle(false)} onSwipeableWillClose={() => settle(false)}
       renderLeftActions={() => (
         <View style={styles.acts}>
           {act('more', 'More', c.primary, c.onPrimary, () => openCardMenu(w, name, shown))}
@@ -64,8 +76,7 @@ export function WalletRow({ w, shown, showRate, showLast4, first }: { w: WalletC
           {act('trash', 'Delete', '#b42318', '#fff', () => removeCards([w.id]))}
         </View>
       )}>
-      <Pressable onPress={() => { tap(); router.push({ pathname: '/card/[id]', params: { id: w.id } }); }}
-        onLongPress={undefined}
+      <Pressable onPressIn={e => { start.current = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY }; }} onPress={onRowPress}
         style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surface2 : c.surface, opacity: w.inactive ? 0.6 : 1 },
           !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }]}>
         <CardArt product={w.product} width={58} />
