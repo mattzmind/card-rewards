@@ -13,7 +13,7 @@ const KEY = 'cardmax-v3', CAT_KEY = 'cardmax-catalog';
 const CATALOG_URL = 'https://mattzmind.github.io/card-rewards/catalog.json';
 const BUNDLED = catalogJson as unknown as Catalog;
 
-function fresh(): AppState {
+export function fresh(): AppState {
   return { people: [{ id: 'me', name: 'Me' }], wallet: [], recents: [], usage: {}, reports: [], favs: [], profile: { name: '', theme: 'system' } };
 }
 /* Fill in anything an older save or a web backup might be missing */

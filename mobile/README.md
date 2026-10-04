@@ -15,8 +15,11 @@ repo root stays live on GitHub Pages while this catches up.
 - `npm run sync-catalog`: copy `../catalog.json` into `assets/` after rebuilding the catalog
 
 ## Layout
-- `src/app/`: screens (Expo Router). `(tabs)/index.tsx` Earn, `(tabs)/wallet.tsx`, `answer.tsx`, `onboarding.tsx`
-- `src/core/`: the card logic, plain TypeScript. `engine.ts` is a port of `../src/engine.js`;
-  `__tests__/parity.test.ts` checks it gives identical answers for every card, category and store.
-- `src/store/`: saved state (same shape as the web app, so backup files work both ways)
-- `src/ui/`: theme colors, icons, card art, rows and tiles
+- `src/app/`: screens (Expo Router)
+  - `(tabs)/index.tsx` Earn, `(tabs)/wallet.tsx` Wallet (sort/filter, swipe actions, drag to reorder)
+  - sheets: `answer`, `card/[id]` (details, picks, activation), `add`, `notifications`, `profile`, `display` (sort/filter), `report`
+  - `onboarding.tsx` (first run)
+- `src/core/`: the card logic, plain TypeScript. `engine.ts` ports `../src/engine.js`, `wallet.ts` ports `../src/wallet.js`.
+  The parity tests in `__tests__/` check they give identical answers to the web app.
+- `src/store/`: saved state (same shape as the web app, so backup files work both ways), actions, backup
+- `src/ui/`: theme colors, icons, card art, rows, tiles, toast, wallet row, header buttons

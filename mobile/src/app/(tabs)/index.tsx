@@ -9,8 +9,9 @@ import { CAT_GROUPS, POPULAR_CATS, catById, catName } from '@/core/cats';
 import { activeWallet, allTasks, searchAll, visibleCats } from '@/core/engine';
 import { myName, useApp, useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
+import { HeaderButtons } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
-import { List, Row, SectionTitle, Tile, tap } from '@/ui/parts';
+import { Button, List, Row, SectionTitle, Tile, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 
 const greeting = () => { const h = new Date().getHours(); return h < 5 ? 'Good evening' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
@@ -39,9 +40,7 @@ export default function Earn() {
         style={[styles.hero, { paddingTop: insets.top + 12 }]}>
         <View style={styles.brandRow}>
           <Text style={[styles.brand, { color: c.ink }]}>lucro</Text>
-          <View style={[styles.avatar, { backgroundColor: c.hl }]}>
-            {name ? <Text style={[styles.avatarText, { color: c.hlInk }]}>{name[0].toUpperCase()}</Text> : <Icon name="user" color={c.hlInk} size={18} />}
-          </View>
+          <HeaderButtons />
         </View>
         {top ? <View style={styles.peek} pointerEvents="none"><CardArt product={top.product} width={170} plain /></View> : null}
         <Text style={[styles.greet, { color: c.ink }]}>{greeting()}{name ? ',' : ''}</Text>
@@ -52,6 +51,13 @@ export default function Earn() {
         </Text>
       </LinearGradient>
 
+      {!act.length ? (
+        <View style={[styles.emptyBox, { paddingHorizontal: GUTTER }]}>
+          <Text style={[styles.emptyH, { color: c.ink }]}>Add your first card</Text>
+          <Text style={[styles.emptyP, { color: c.muted }]}>Lucro shows which card wins at every store. Add the cards you carry to get started.</Text>
+          <Button title="Add a card" onPress={() => router.push('/add')} />
+        </View>
+      ) : (
       <View style={{ paddingHorizontal: GUTTER }}>
         <View style={[styles.search, { backgroundColor: c.surface, borderColor: c.line }]}>
           <Icon name="search" color={c.muted} />
@@ -122,6 +128,7 @@ export default function Earn() {
           {Object.keys(ctx.catalog.products).length} cards and {stores.length} stores in the catalog.{'\n'}Your cards stay on this phone.
         </Text>
       </View>
+      )}
     </ScrollView>
   );
 }
@@ -130,8 +137,6 @@ const styles = StyleSheet.create({
   hero: { paddingHorizontal: GUTTER, paddingBottom: 22, overflow: 'hidden' },
   brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, marginBottom: 14 },
   brand: { fontFamily: fonts.displayHeavy, fontSize: 24, letterSpacing: -0.8 },
-  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontFamily: fonts.display, fontSize: 16 },
   peek: { position: 'absolute', right: -46, top: 90, transform: [{ rotate: '-6deg' }] },
   greet: { fontFamily: fonts.display, fontSize: 34, lineHeight: 38, letterSpacing: -0.8, maxWidth: '68%' },
   name: { fontFamily: fonts.display, fontSize: 18, marginTop: 4 },
@@ -146,5 +151,8 @@ const styles = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, minHeight: 44 },
   chipText: { fontFamily: fonts.semibold, fontSize: 14 },
   group: { fontFamily: fonts.bold, fontSize: 12, letterSpacing: 1, marginBottom: 10, marginHorizontal: 2 },
+  emptyBox: { paddingTop: 12, gap: 10 },
+  emptyH: { fontFamily: fonts.display, fontSize: 22, textAlign: 'center' },
+  emptyP: { fontFamily: fonts.body, fontSize: 15, textAlign: 'center', marginBottom: 8 },
   foot: { fontFamily: fonts.body, fontSize: 12, textAlign: 'center', marginTop: 16, lineHeight: 18 },
 });

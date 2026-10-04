@@ -23,15 +23,15 @@ export function List({ children, style }: { children: ReactNode; style?: ViewSty
   return <View style={[styles.list, { backgroundColor: c.surface, borderColor: c.line }, style]}>{children}</View>;
 }
 
-export function Row({ icon, title, sub, right, onPress, first, left }:
-  { icon?: string; title: string; sub?: string; right?: ReactNode; onPress?: () => void; first?: boolean; left?: ReactNode }) {
+export function Row({ icon, title, sub, right, onPress, first, left, danger }:
+  { icon?: string; title: string; sub?: string; right?: ReactNode; onPress?: () => void; first?: boolean; left?: ReactNode; danger?: boolean }) {
   const c = useColors();
   return (
     <Pressable onPress={onPress} disabled={!onPress}
       style={({ pressed }) => [styles.row, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }, pressed && { backgroundColor: c.surface2 }]}>
-      {left ?? (icon ? <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name={icon} color={c.accent} /></View> : null)}
+      {left ?? (icon ? <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name={icon} color={danger ? c.danger : c.accent} /></View> : null)}
       <View style={styles.rowMain}>
-        <Text style={[styles.rowTitle, { color: c.ink }]} numberOfLines={2}>{title}</Text>
+        <Text style={[styles.rowTitle, { color: danger ? c.danger : c.ink }]} numberOfLines={2}>{title}</Text>
         {sub ? <Text style={[styles.rowSub, { color: c.muted }]} numberOfLines={2}>{sub}</Text> : null}
       </View>
       {right ?? (onPress ? <Icon name="chevR" color={c.muted} size={18} /> : null)}

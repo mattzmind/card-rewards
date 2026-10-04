@@ -46,7 +46,7 @@ function busyWallet(qk: string, today: string): WalletCard[] {
     const p = catalog.products[id];
     const w = normalize({ id: 'w' + i, product: id } as WalletCard);
     (p.choice || []).forEach((s, j) => {
-      const n = s.count || 1;
+      const n = s.pick || 1;
       w.sel[s.id] = { opts: s.options.slice(j % 2, (j % 2) + n).map(o => o.id), quarter: i % 3 ? qk : '2020-Q1' };
     });
     if (i % 2) w.activated = [qk];

@@ -19,7 +19,7 @@ export interface ChoiceSlot {
   rate: number;
   note?: string;
   period?: 'quarter' | string;
-  count?: number;
+  pick: number;       // how many options to choose
   default?: string;
   options: ChoiceOption[];
 }
@@ -28,6 +28,7 @@ export interface Rotating {
   cap?: string;
   retroactive?: boolean;
   deadlineDay?: number;
+  activateHint?: string;
   schedule: Record<string, { cats: string[]; label: string; opens?: string }>;
 }
 export interface Product {
@@ -49,6 +50,9 @@ export interface Product {
   rotating?: Rotating;
   auto?: { rate: number; note?: string; options: string[] };
   perks?: string[];
+  networkOptions?: string[];
+  business?: boolean;
+  source?: { url?: string; checked?: string; note?: string };
   [k: string]: unknown;
 }
 export interface Brand { name: string; short: string; mono?: string; colors: [string, string]; login?: string; note?: string }
@@ -71,6 +75,7 @@ export interface Category {
 }
 
 export interface Promo { extra: number; until: string; label?: string }
+export interface Report { at: string; where: string; cat: string; card: string; reason: string; note: string }
 export interface WalletCard {
   id: string;
   product: string;
@@ -99,11 +104,22 @@ export interface AppState {
   wallet: WalletCard[];
   recents: { c: string; s?: string }[];
   usage: Record<string, number>;
-  reports: unknown[];
+  reports: Report[];
   favs: string[];
   profile: Profile;
   onboarded?: boolean;
   backedUp?: string;
-  view?: unknown;
+  view?: WalletView;
+  dragTipSeen?: boolean;
   [k: string]: unknown;
+}
+
+export interface WalletFilter { person: string; earns: string; type: string; bank: string; network: string; fee: string; status: string }
+export interface WalletView {
+  sort: 'custom' | 'rewards' | 'name' | 'bank' | 'added';
+  order: 'asc' | 'desc';
+  group: 'none' | 'person' | 'bank' | 'type';
+  f: WalletFilter;
+  showRate: boolean;
+  showLast4: boolean;
 }

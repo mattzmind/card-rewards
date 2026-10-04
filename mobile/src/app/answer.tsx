@@ -6,7 +6,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { catById } from '@/core/cats';
 import { isoToDate, qLabel, shortDate } from '@/core/dates';
-import { type Result, capWord, dn, fmtRate, networkHidden, periodEnd, rank } from '@/core/engine';
+import { type Result, capWord, dn, fmtRate, networkHidden, rank } from '@/core/engine';
+import { markCap } from '@/store/actions';
 import { useApp, useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
 import { Icon } from '@/ui/icon';
@@ -88,13 +89,9 @@ export default function Answer() {
   const [d1, d2, d3] = dollars(b);
   const src = (b.p.source || {}) as { checked?: string };
 
-  const markCap = () => {
-    if (!b.cap) return; const cap = b.cap, until = periodEnd(ctx, cap.per);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-    update(s => { const w = s.wallet.find(x => x.id === b.w.id); if (w) w.capped[cap.key] = until; });
-  };
+  const openCard = (id: string) => router.push({ pathname: '/card/[id]', params: { id } });
   const altRow = (x: Result, i: number, specialRow = false) => (
-    <Row key={x.w.id + (specialRow ? 's' : '')} first={i === 0}
+    <Row key={x.w.id + (specialRow ? 's' : '')} first={i === 0} onPress={() => openCard(x.w.id)}
       left={specialRow ? undefined : <CardArt product={x.w.product} width={44} />}
       title={dn(ctx, x.w) + (x.w.last4 ? ` ••${x.w.last4}` : '')}
       sub={specialRow ? x.special!.cond : x.label + (x.flags.length ? ' · needs update' : '')}
@@ -104,7 +101,7 @@ export default function Answer() {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       {header}{context}
-      <View style={styles.cardWrap}><CardArt product={b.w.product} width={240} /></View>
+      <Pressable onPress={() => openCard(b.w.id)} style={styles.cardWrap} accessibilityLabel={`${dn(ctx, b.w)} details`}><CardArt product={b.w.product} width={240} /></Pressable>
       <Text style={[styles.ansName, { color: c.ink }]}>{dn(ctx, b.w)}{b.w.last4 ? `  •••• ${b.w.last4}` : ''}</Text>
       <Text style={[styles.rate, { color: c.rate }]}>{fmtRate(b.rate)}%</Text>
       <Text style={[styles.dollars, { color: c.muted }]}>{d1}<Text style={[styles.b, { color: c.ink }]}>{d2}</Text>{d3}</Text>
@@ -117,11 +114,17 @@ export default function Answer() {
           ))}
         </View>
       ) : null}
+      <View style={styles.actions}>
       {b.cap ? (
-        <Pressable onPress={markCap} style={({ pressed }) => [styles.quiet, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+        <Pressable onPress={() => markCap(b.w.id, b.cap!.key, b.cap!.per)} style={({ pressed }) => [styles.quiet, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
           <Icon name="gauge" color={c.ink} size={18} /><Text style={[styles.quietText, { color: c.ink }]}>Hit the cap?</Text>
         </Pressable>
       ) : null}
+        <Pressable onPress={() => { tap(); router.push({ pathname: '/report', params: store ? { c: cat.id, s: store.id } : { c: cat.id } }); }}
+          style={({ pressed }) => [styles.quiet, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+          <Icon name="flag" color={c.ink} size={18} /><Text style={[styles.quietText, { color: c.ink }]}>Wrong card?</Text>
+        </Pressable>
+      </View>
 
       {rest.length ? (
         <>
@@ -175,7 +178,8 @@ const styles = StyleSheet.create({
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 14 },
   pill: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   pillText: { fontFamily: fonts.medium, fontSize: 13 },
-  quiet: { flexDirection: 'row', alignSelf: 'center', alignItems: 'center', gap: 8, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 16, minHeight: 44, marginTop: 14 },
+  actions: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginTop: 14 },
+  quiet: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 16, minHeight: 44 },
   quietText: { fontFamily: fonts.semibold, fontSize: 14 },
   sec: { fontFamily: fonts.display, fontSize: 20, marginTop: 28, marginBottom: 10 },
   altRate: { fontFamily: fonts.display, fontSize: 20 },

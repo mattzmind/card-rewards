@@ -9,6 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useApp } from '@/store/app';
 import { useColors, useScheme } from '@/ui/theme';
+import { ToastHost } from '@/ui/toast';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +26,7 @@ export default function RootLayout() {
   useEffect(() => { syncCatalog(); }, [syncCatalog]);
   if (!loaded) return null;
 
+  const sheet = { presentation: 'formSheet' as const, sheetGrabberVisible: true, sheetAllowedDetents: [0.92], sheetCornerRadius: 24, contentStyle: { backgroundColor: c.bg } };
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const theme = { ...base, colors: { ...base.colors, background: c.bg, card: c.surface, text: c.ink, border: c.line, primary: c.accent } };
   return (
@@ -34,15 +36,15 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
           <Stack.Protected guard={onboarded}>
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="answer" options={{
-              presentation: 'formSheet', sheetGrabberVisible: true, sheetAllowedDetents: [0.92], sheetCornerRadius: 24,
-              contentStyle: { backgroundColor: c.bg },
-            }} />
+            {['answer', 'card/[id]', 'add', 'notifications', 'profile', 'display', 'report'].map(name => (
+              <Stack.Screen key={name} name={name} options={sheet} />
+            ))}
           </Stack.Protected>
           <Stack.Protected guard={!onboarded}>
             <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
           </Stack.Protected>
         </Stack>
+        <ToastHost />
       </ThemeProvider>
     </GestureHandlerRootView>
   );
