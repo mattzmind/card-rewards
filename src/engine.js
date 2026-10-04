@@ -78,6 +78,20 @@ function load(){
 let state=load();
 state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];
 const save=()=>store.set(KEY,JSON.stringify(state));
+/* Profile: name (greeting + avatar), theme ("system"|"light"|"dark"), splash on/off, first-use date.
+   Older wallets kept the name on people[]; carry it over once. */
+function initProfile(){
+  const pr=state.profile=state.profile||{};
+  if(pr.name==null){const p=(state.people||[]).find(p=>p.name&&p.name!=="Me");pr.name=p?p.name:""}
+  pr.theme=pr.theme||"system";
+}
+initProfile();
+const myName=()=>(state.profile.name||"").trim().split(/\s+/)[0];
+function setMyName(v){
+  state.profile.name=(v||"").trim().slice(0,30);
+  if(state.people&&state.people[0])state.people[0].name=state.profile.name||"Me";
+  save();
+}
 
 async function syncCatalog(){
   if(!CATALOG_URL)return;

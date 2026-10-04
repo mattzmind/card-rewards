@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lucro">
-<meta name="theme-color" content="#f4f6f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0b100e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1412" media="(prefers-color-scheme: dark)">
 <title>Lucro</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -675,6 +675,86 @@ button.w-best{width:100%;text-align:left}
 .tabbar .ic{transition:transform .08s ease}
 .star-btn:active,.circle-btn:active{filter:brightness(.92)}
 .btn .ic{width:20px;height:20px;vertical-align:-4px;margin-right:6px}
+
+/* ═══ Onboarding: welcome → name → cards → first answer ═══ */
+.onboard{display:flex;flex-direction:column}
+.ob-inner{flex:1;width:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) var(--gutter) 150px}
+.ob-step.fwd{animation:obFwd .22s ease both}
+.ob-step.back{animation:obBack .22s ease both}
+@keyframes obFwd{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes obBack{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+.ob-top{display:flex;align-items:center;justify-content:space-between;min-height:44px;margin-bottom:18px}
+.ob-top-pad{width:44px}
+.ob-dots{display:flex;gap:6px}
+.ob-dots span{width:22px;height:5px;border-radius:3px;background:var(--line);transition:background .2s}
+.ob-dots span.on{background:var(--ink)}
+.ob-inner h1{font-size:32px;text-wrap:balance}
+.ob-inner>p,.ob-inner>.ob-step>p{color:var(--muted);margin:8px 0 18px;font-size:16px}
+.ob-name-field{font-size:22px;font-weight:600;padding:16px 18px;border-radius:16px;margin-top:8px}
+.ob-bar{border-top:none;background:linear-gradient(to top,var(--bg) 70%,transparent);padding-top:24px}
+.ob-bar-in{flex-direction:column;align-items:stretch;gap:4px}
+.ob-bar-row{display:flex;gap:10px;align-items:center}
+.ob-bar-row .btn{flex:1;margin:0}
+.ob-bar-row .btn-ghost{width:auto;margin:0;padding:14px 12px;min-width:84px}
+.ob-bar .btn:disabled{opacity:.45}
+/* welcome: dark brand screen that continues the splash */
+.onboard.ob-dark{background:#0B1412;color:#fff}
+.ob-dark .ob-inner{padding-top:calc(env(safe-area-inset-top,0px) + 22px)}
+.ob-dark .ob-bar{background:linear-gradient(to top,#0B1412 72%,rgba(11,20,18,0))}
+.ob-dark .btn{background:#A3E635;color:#0B1412}
+.ob-brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.03em}
+.ob-brand .brand-mark{width:36px;height:36px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.ob-fan{position:relative;height:150px;margin:26px auto 22px;max-width:300px}
+.ob-fan-card{position:absolute;left:50%;top:8px;width:190px;margin-left:-95px;filter:drop-shadow(0 14px 24px rgba(0,0,0,.45))}
+.ob-fan-card .art{box-shadow:none}
+.ob-fan-card.f0{transform:translate(-58px,18px) rotate(-12deg)}
+.ob-fan-card.f1{transform:translate(58px,18px) rotate(12deg)}
+.ob-fan-card.f2{transform:translateY(-4px)}
+.ob-dark h1{font-size:36px;line-height:1.05;letter-spacing:-.03em;max-width:12ch}
+.ob-vals{display:flex;flex-direction:column;gap:16px;margin-top:24px}
+.ob-val{display:flex;gap:14px;align-items:flex-start}
+.ob-val b{display:block;font-weight:600;font-size:16px}
+.ob-val>span:last-child>span{display:block;font-size:14px;color:rgba(255,255,255,.66);margin-top:2px}
+.ob-val-ic{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;background:rgba(163,230,53,.14);color:#A3E635}
+.ob-val-ic .ic{width:21px;height:21px}
+.ob-restore{display:block;text-align:center;padding:14px;min-height:44px;font-size:15px;color:rgba(255,255,255,.72);cursor:pointer}
+.ob-restore u{color:#fff;text-underline-offset:3px}
+/* last step: first answers from their own wallet */
+.ob-done-ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--hl);color:var(--hl-ink);margin:12px 0 18px;animation:popin .4s cubic-bezier(.2,1.3,.4,1) both}
+.ob-done-ic .ic{width:32px;height:32px;stroke-width:2.4}
+.ob-picks{border:none;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(15,40,35,.08)}
+.ob-picks .row-title{font-size:17px}
+.ob-rate{font-family:var(--display);font-size:24px;font-weight:700;color:var(--rate);letter-spacing:-.02em}
+/* Earn, no cards yet */
+.pay-empty{padding-top:8px}
+.pe-stack{position:relative;width:150px;height:110px;margin:0 auto 22px}
+.pe-card{position:absolute;left:50%;top:10px;width:120px;height:76px;margin-left:-60px;border-radius:12px}
+.pe-card.c1{background:linear-gradient(135deg,#14B8A6,#0F766E);transform:translate(-22px,10px) rotate(-10deg)}
+.pe-card.c2{background:linear-gradient(135deg,#FCD34D,#F59E0B);transform:translate(22px,10px) rotate(10deg)}
+.pe-card.c3{background:var(--surface);border:2px dashed color-mix(in srgb,var(--ink) 30%,transparent);display:grid;place-items:center;color:var(--ink);box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.pe-card.c3 .ic{width:28px;height:28px}
+
+/* ═══ Profile ═══ */
+.avatar-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--hl);color:var(--hl-ink);font-family:var(--display);font-weight:700;font-size:16px;line-height:1}
+.avatar .ic{width:18px;height:18px}
+.avatar.lg{width:76px;height:76px;font-size:34px;margin:0 auto 12px}
+.avatar.lg .ic{width:36px;height:36px}
+.avatar-btn:active .avatar{transform:scale(.92)}
+.prof-head{text-align:center;margin-bottom:6px}
+.prof-head .title-edit{justify-content:center}
+.prof-head .rename-inline{max-width:340px;margin:0 auto}
+.prof-head .sheet-sub{margin:4px 0 0}
+.prof-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0 0}
+.prof-sec{font-family:var(--display);font-size:18px;font-weight:700;margin:26px 4px 10px}
+.prof-pref{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 14px}
+.prof-pref .row-title{flex:1}
+.seg{display:flex;width:100%;padding:3px;border-radius:12px;background:var(--surface-2)}
+.seg button{flex:1;min-height:40px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);text-align:center}
+.seg button.on{background:var(--ink);color:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.prof-toggle-l{display:flex;align-items:center;gap:12px;font-weight:600}
+.toggle-row{min-height:56px;padding:9px 14px}
+.hero-add{display:inline-block;margin-top:6px;padding:6px 0;min-height:44px;font-size:15px;font-weight:600;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -682,8 +762,11 @@ button.w-best{width:100%;text-align:left}
 
 <main>
   <section id="view-pay" class="view">
-    <div id="pay-empty" class="empty" hidden><h2>Add your cards to start</h2><p>Tell the app which cards you carry. It ranks them for every purchase.</p><button class="btn" onclick="openOnboard()">Pick your cards</button></div>
     <div id="pay-hero" class="pay-hero"></div>
+    <div id="pay-empty" class="empty pay-empty" hidden>
+      <div class="pe-stack" aria-hidden="true"><span class="pe-card c1"></span><span class="pe-card c2"></span><span class="pe-card c3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></span></div>
+      <h2>Add your first card</h2><p>Lucro shows which card wins at every store. Pick the cards you carry to get started.</p>
+      <button class="btn" onclick="openOnboard(3)">Pick your cards</button></div>
     <div id="pay-main">
       <label class="search hero-search" for="q"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
         <input id="q" type="search" placeholder="Where are you shopping?" autocomplete="off" oninput="onPaySearch(this.value)" aria-label="Search stores or categories">
@@ -722,16 +805,8 @@ button.w-best{width:100%;text-align:left}
 <div id="dialog" class="dialog-bg" hidden></div>
 <div id="popover" class="pop-bg" hidden></div>
 <div id="sheet" class="sheet-bg" hidden></div>
-<div id="onboard" class="onboard" hidden>
-  <div class="ob-inner">
-    <h1>Which cards do you carry?</h1>
-    <p>Tap every card in your wallet. You can add more any time.</p>
-    <label class="search" for="ob-q"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="ob-q" type="search" placeholder="Search all cards" autocomplete="off" oninput="obSearch(this.value)"></label>
-    <div id="ob-grid" class="ob-grid"></div>
-  </div>
-  <div class="ob-bar"><div class="ob-bar-in"><button class="btn-ghost" onclick="obFinish(true)">Skip</button><button id="ob-add" class="btn" onclick="obFinish(false)" disabled>Tap the cards you carry</button></div></div>
-</div>
+<!-- First run (welcome → name → cards → first answer), drawn by renderOnboard() in views.js -->
+<div id="onboard" class="onboard" hidden></div>
 <div id="toast" class="toast" hidden role="status"></div>
 
 <!-- Opening splash: plays once per launch, tap to skip. Turn off in cats.js (SHOW.splash). -->
@@ -745,6 +820,8 @@ button.w-best{width:100%;text-align:left}
 /* v2 feature switches: hidden features stay in the code, turn back on here */
 const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */, multiPeople:false /* household mode: owner badges, Whose card, group by person */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
+const APP_VERSION="2.1.0"; // shown in Profile > About
+const FEEDBACK_EMAIL=""; // Profile > Send feedback opens a mail to this address (row hidden while empty)
 
 /* ══════════════════════════════════════════════════════════
    ICONS (one consistent line set, drawn for this app)
@@ -813,6 +890,10 @@ const ICONS={
   edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
   grip:'<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
   pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  share:'<path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M6 12v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
 };
 const ic=(n,cls)=>`<svg class="ic ${cls||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||ICONS.other}</svg>`;
 
@@ -950,6 +1031,20 @@ function load(){
 let state=load();
 state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];
 const save=()=>store.set(KEY,JSON.stringify(state));
+/* Profile: name (greeting + avatar), theme ("system"|"light"|"dark"), splash on/off, first-use date.
+   Older wallets kept the name on people[]; carry it over once. */
+function initProfile(){
+  const pr=state.profile=state.profile||{};
+  if(pr.name==null){const p=(state.people||[]).find(p=>p.name&&p.name!=="Me");pr.name=p?p.name:""}
+  pr.theme=pr.theme||"system";
+}
+initProfile();
+const myName=()=>(state.profile.name||"").trim().split(/\s+/)[0];
+function setMyName(v){
+  state.profile.name=(v||"").trim().slice(0,30);
+  if(state.people&&state.people[0])state.people[0].name=state.profile.name||"Me";
+  save();
+}
 
 async function syncCatalog(){
   if(!CATALOG_URL)return;
@@ -1513,9 +1608,10 @@ function go(t){
 function renderAppbar(){
   const a=$("appbar-action"),n=allTasks().length;
   const bell=`<button class="bell-btn" onclick="openNotifs()" aria-label="Notifications${n?`, ${n} need attention`:""}">${ic("bell")}${n?`<span class="badge">${n}</span>`:""}</button>`;
-  if(tab!=="wallet"){a.innerHTML=`<div class="appbar-icons">${bell}</div>`;$("fab").hidden=true;$("select-bar").hidden=true;return}
+  const me=`<button class="avatar-btn" onclick="openProfile()" aria-label="Profile">${avatar()}</button>`;
+  if(tab!=="wallet"){a.innerHTML=`<div class="appbar-icons">${bell}${me}</div>`;$("fab").hidden=true;$("select-bar").hidden=true;return}
   a.innerHTML=selectMode?`<button class="btn-pill quiet" onclick="endSelect()">Done</button>`
-    :`<div class="appbar-icons">${bell}<button class="icon-btn" id="menu-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button></div>`;
+    :`<div class="appbar-icons">${bell}<button class="icon-btn" id="menu-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button>${me}</div>`;
   $("fab").hidden=!!selectMode;
   renderSelectBar();
 }
@@ -1554,9 +1650,9 @@ function renderPayHero(){
   const top=act.find(w=>w.pinned)||act[0];
   $("pay-hero").innerHTML=`
     <h2 class="hero-greet">${greeting()}${names.length?",":""}</h2>
-    ${names.length?`<div class="hero-name">${esc(names.join(" & "))}</div>`:""}
+    ${names.length?`<div class="hero-name">${esc(names.join(" & "))}</div>`:`<button class="hero-add" onclick="editNameFromHero()">Add your name</button>`}
     <p class="hero-tag">Every purchase pays you back.</p>
-    <div class="hero-meta"><span>${act.length} card${act.length===1?"":"s"} ready</span>${setup?`<span>·</span><button onclick="openNotifs()">${setup} need${setup===1?"s":""} setup</button>`:""}</div>
+    <div class="hero-meta" ${act.length?"":"hidden"}><span>${act.length} card${act.length===1?"":"s"} ready</span>${setup?`<span>·</span><button onclick="openNotifs()">${setup} need${setup===1?"s":""} setup</button>`:""}</div>
     ${top?`<div class="hero-peek" onclick="go('wallet')" aria-hidden="true">${cardArt(top.product,0,true)}</div>`:""}`;
 }
 addEventListener("scroll",()=>document.body.classList.toggle("scrolled",scrollY>12),{passive:true});
@@ -1742,8 +1838,6 @@ function saveReport(){
 /* ─── Wallet ─── */
 function ownerBadge(w,size){return multiOwner()?badge(w.owner,size):""}
 function multiOwner(){return SHOW.multiPeople&&new Set(state.wallet.map(w=>w.owner)).size>1}
-/* The one name shown in greetings (MVP is single-user): saved choice, else Matt/first real name */
-function myName(){const ps=state.people||[];const me=ps.find(p=>p.id===state.me)||ps.find(p=>p.name==="Matt")||ps.find(p=>p.name&&p.name!=="Me");return me&&me.name!=="Me"?me.name:""}
 /* ─── Updates ─── */
 /* ─── Notification center (bell, top right): activations, picks, caps, feedback ─── */
 function renderUpdates(){} // kept for older callers; the bell sheet replaces the Updates tab
@@ -2149,10 +2243,57 @@ function addCard(){
   if(p.choice||p.rotating||p.auto)openDrawer(w.id);else{closeSheet();toast(`${dn(w)} added`)}
 }
 
-/* ─── First run: which cards do you carry? ─── */
-let obSel=new Set(),obQ="";
-function openOnboard(){obSel=new Set();obQ="";$("onboard").hidden=false;document.body.classList.add("locked");renderOnboard()}
+/* ─── First run: welcome → your name → your cards → a first answer ───
+   openOnboard(3) opens only the card step (from the empty Earn screen). */
+let obStep=1,obOnly=false,obSel=new Set(),obQ="",obAdded=0,obDir="";
+const OB_PREVIEW=["grocery","dining","gas"];
+function openOnboard(step=1){obStep=step;obOnly=step===3;obSel=new Set();obQ="";obAdded=0;obDir="";
+  $("onboard").hidden=false;document.body.classList.add("locked");renderOnboard()}
+function obGo(step){obDir=step<obStep?"back":"fwd";obStep=step;renderOnboard()}
 function renderOnboard(){
+  const o=$("onboard"),nm=myName(),dots=!obOnly&&obStep>1;
+  o.classList.toggle("ob-dark",obStep===1);
+  const top=obStep===1?"":`<div class="ob-top">${obStep>1&&!obOnly?`<button class="round-btn ob-back" onclick="obGo(${obStep-1})" aria-label="Back">${ic("chevL")}</button>`:obOnly?`<button class="round-btn ob-back" onclick="closeOnboard()" aria-label="Close">${ic("x")}</button>`:"<span></span>"}
+    ${dots?`<div class="ob-dots" aria-label="Step ${obStep-1} of 3">${[2,3,4].map(s=>`<span class="${s<=obStep?"on":""}"></span>`).join("")}</div>`:""}<span class="ob-top-pad"></span></div>`;
+  let body="",bar="";
+  if(obStep===1){
+    const fan=POPULAR_CARDS.filter(P).slice(0,3);
+    body=`<div class="ob-brand">${BRAND_MARK}<span>lucro</span></div>
+      <div class="ob-fan" aria-hidden="true">${fan.map((id,i)=>`<div class="ob-fan-card f${i}">${cardArt(id,0,true)}</div>`).join("")}</div>
+      <h1>Get paid back on every purchase.</h1>
+      <div class="ob-vals">
+        ${[["tag","The right card at every store","Search any store and see which card earns the most."],
+           ["bolt","Never miss a bonus","Reminders for quarterly activations and category picks."],
+           ["lock","Private by design","Your cards stay on this phone. No bank logins, ever."]]
+          .map(([i,t,s])=>`<div class="ob-val"><span class="ob-val-ic">${ic(i)}</span><span><b>${t}</b><span>${s}</span></span></div>`).join("")}
+      </div>`;
+    bar=`<button class="btn" onclick="obGo(2)">Get started</button>
+      <label class="ob-restore">Have a backup? <u>Restore it</u><input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>`;
+  }else if(obStep===2){
+    body=`<h1>What should we call you?</h1><p>Just your first name, so Lucro feels like yours.</p>
+      <input class="field ob-name-field" id="ob-name" value="${esc(state.profile.name||"")}" placeholder="First name" maxlength="30"
+        autocomplete="given-name" autocapitalize="words" enterkeyhint="next" oninput="$('ob-next').disabled=!this.value.trim()" onkeydown="if(event.key==='Enter'&&this.value.trim())obSaveName()">`;
+    bar=`<div class="ob-bar-row"><button class="btn-ghost" onclick="obGo(3)">Skip</button><button id="ob-next" class="btn" onclick="obSaveName()" ${nm?"":"disabled"}>Continue</button></div>`;
+  }else if(obStep===3){
+    body=`<h1>${nm?`Hi ${esc(nm)}, which cards do you carry?`:"Which cards do you carry?"}</h1><p>Tap every card in your wallet. You can add more any time.</p>
+      <label class="search" for="ob-q">${ic("search")}<input id="ob-q" type="search" placeholder="Search all cards" autocomplete="off" value="${esc(obQ)}" oninput="obSearch(this.value)"></label>
+      <div id="ob-grid" class="ob-grid"></div>`;
+    bar=`<div class="ob-bar-row"><button class="btn-ghost" onclick="obCards(true)">${obOnly?"Cancel":"Later"}</button><button id="ob-add" class="btn" onclick="obCards(false)" disabled>Tap the cards you carry</button></div>`;
+  }else{
+    const picks=OB_PREVIEW.map(id=>{const c=catById(id),b=c&&rank(c)[0];return b?{c,b}:null}).filter(Boolean);
+    body=`<div class="ob-done-ic">${ic("check")}</div><h1>${nm?`You're all set, ${esc(nm)}.`:"You're all set."}</h1>
+      ${picks.length?`<p>Here's what Lucro picks from your wallet:</p>
+        <div class="list ob-picks">${picks.map(({c,b})=>`<div class="row static"><span class="row-ic">${ic(c.id)}</span><span class="row-main"><span class="row-sub">${esc(c.label)}</span><span class="row-title">${esc(dn(b.w))}</span></span><span class="ob-rate">${fmtRate(b.rate)}%</span></div>`).join("")}</div>
+        <p class="hint">Search any store on Earn to get the best card for it.</p>`
+      :`<p>Add your cards any time from the Wallet tab, and Lucro will pick the best one for every purchase.</p>`}`;
+    bar=`<button class="btn" onclick="obDone()">${obAdded?"Start earning":"Explore Lucro"}</button>`;
+  }
+  o.innerHTML=`<div class="ob-inner ob-step ${obDir}">${top}${body}</div><div class="ob-bar"><div class="ob-bar-in">${bar}</div></div>`;
+  if(obStep===3)renderObGrid();
+  if(obStep===2)setTimeout(()=>{const i=$("ob-name");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250);
+  o.scrollTop=0;
+}
+function renderObGrid(){
   const q=obQ.trim().toLowerCase();
   const ids=q?Object.keys(CATALOG.products).filter(id=>{const p=P(id);return (B(p.brand).name+" "+p.name+" "+p.short).toLowerCase().includes(q)}).slice(0,30):POPULAR_CARDS.filter(P);
   $("ob-grid").innerHTML=ids.map(id=>{const p=P(id),on=obSel.has(id),own=ownedCount(id)>0;
@@ -2161,13 +2302,20 @@ function renderOnboard(){
   const n=obSel.size;
   $("ob-add").disabled=!n;$("ob-add").textContent=n?`Add ${n} card${n>1?"s":""}`:"Tap the cards you carry";
 }
-function obToggle(id){obSel.has(id)?obSel.delete(id):obSel.add(id);renderOnboard()}
-function obSearch(v){obQ=v;renderOnboard()}
-function obFinish(skip){
-  if(!skip)[...obSel].forEach(id=>state.wallet.push(normalize({id:"w"+Date.now()+Math.random().toString(36).slice(2,6),product:id,owner:state.people[0]?.id||"",nickname:"",last4:"",rewards:"",dueDay:null,limit:""})));
-  state.onboarded=true;save();$("onboard").hidden=true;document.body.classList.remove("locked");
-  go("pay");if(!skip&&allTasks().length)setTimeout(openNotifs,400);
-  if(!skip&&obSel.size)toast(`${obSel.size} card${obSel.size>1?"s":""} added${allTasks().length?". A few need a quick setup.":""}`);
+function obToggle(id){obSel.has(id)?obSel.delete(id):obSel.add(id);renderObGrid()}
+function obSearch(v){obQ=v;renderObGrid()}
+function obSaveName(){const v=$("ob-name").value.trim();if(!v)return;setMyName(v);obGo(3)}
+function obCards(skip){
+  if(!skip)[...obSel].filter(id=>!ownedCount(id)).forEach(id=>{obAdded++;state.wallet.push(normalize({id:"w"+Date.now()+Math.random().toString(36).slice(2,6),product:id,owner:state.people[0]?.id||"",nickname:"",last4:"",rewards:"",dueDay:null,limit:""}))});
+  obSel=new Set();save();
+  if(obOnly){if(skip)closeOnboard();else obDone();return}
+  obGo(4);
+}
+function closeOnboard(){$("onboard").hidden=true;$("onboard").innerHTML="";document.body.classList.remove("locked")}
+function obDone(){
+  state.onboarded=true;state.profile.since=state.profile.since||TODAY;save();closeOnboard();
+  go("pay");
+  if(obAdded){const t=allTasks().length;toast(`${obAdded} card${obAdded>1?"s":""} added${t?". A few need a quick setup.":""}`);if(t)setTimeout(openNotifs,600)}
 }
 
 /* ─── Backup: a file you can keep in iCloud Drive / Files and restore on any phone ─── */
@@ -2183,16 +2331,86 @@ function importWallet(file){
       const before=JSON.stringify(state);
       s.wallet.forEach(normalize);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,s);
       state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];state.onboarded=true;
-      save();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
+      initProfile();state.profile.since=state.profile.since||TODAY;applyTheme();
+      save();if(!$("onboard").hidden)closeOnboard();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
     }catch{toast("That file isn't a Lucro backup")}};
   r.readAsText(file);
 }
-function openBackup(){
+function openBackup(back){
   openSheet(`<h2 class="sheet-title">Back up your wallet</h2>
     <p class="sheet-sub">Your cards are saved on this phone. Save a backup file to iCloud Drive or Google Drive so you can restore them if you delete the app or get a new phone.</p>
     <button class="btn" onclick="exportWallet()">${ic("copy")} Save backup file</button>
     <label class="btn-outline restore-btn">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
-    <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`);
+    <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`,false,back);
+}
+
+/* ─── Profile (avatar, top right): name, preferences, your data, about ─── */
+const avatar=lg=>{const nm=myName();return `<span class="avatar ${lg?"lg":""}">${nm?esc(nm[0].toUpperCase()):ic("user")}</span>`};
+const PROFILE_BACK={label:"Profile",fn:()=>openProfile()};
+let profEditing=false;
+function openProfile(keep){
+  const pr=state.profile,nm=(pr.name||"").trim();
+  const looks=Object.values(state.usage).reduce((a,b)=>a+(+b||0),0);
+  const since=pr.since?isoToDate(pr.since).toLocaleDateString("en-US",{month:"long",year:"numeric"}):"";
+  const d=CATALOG.updated?shortDate(isoToDate(CATALOG.updated)):"";
+  const row=(icon,title,sub,fn,cls="")=>`<${fn?`button onclick="${fn}"`:"div"} class="row ${fn?"":"static"} ${cls}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${title}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span>${fn&&!cls?ic("chevR","dim"):""}</${fn?"button":"div"}>`;
+  const seg=["system","light","dark"].map(t=>`<button role="radio" aria-checked="${pr.theme===t}" class="${pr.theme===t?"on":""}" onclick="setTheme('${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join("");
+  const splashOn=pr.splash!==false;
+  openSheet(`<div class="prof-head">${avatar(true)}
+      ${profEditing?`<div class="rename-inline"><input class="field" id="prof-name" value="${esc(nm)}" placeholder="First name" maxlength="30" autocomplete="given-name" autocapitalize="words"
+          onkeydown="if(event.key==='Enter')saveProfName();if(event.key==='Escape')cancelProfName()">
+          <button class="icon-btn ok" onclick="saveProfName()" aria-label="Save name">${ic("check")}</button>
+          <button class="icon-btn" onclick="cancelProfName()" aria-label="Cancel">${ic("x")}</button></div>`
+        :`<h2 class="sheet-title title-edit"><span class="${nm?"":"dim"}">${nm?esc(nm):"Add your name"}</span><button class="pencil" onclick="startProfName()" aria-label="Edit name">${ic("edit")}</button></h2>`}
+      ${since?`<p class="sheet-sub">Using Lucro since ${since}</p>`:""}</div>
+    <div class="w-stats prof-stats">
+      <button class="w-stat" onclick="closeSheet();go('wallet')"><b>${activeWallet().length}</b><span>Cards</span></button>
+      <div class="w-stat"><b>${looks}</b><span>Lookups</span></div>
+      <button class="w-stat" onclick="closeSheet();go('pay')"><b>${state.favs.length}</b><span>Favorites</span></button>
+    </div>
+    <h3 class="prof-sec">Preferences</h3>
+    <div class="list">
+      <div class="prof-pref"><span class="row-ic">${ic("sun")}</span><span class="row-title">Appearance</span><div class="seg" role="radiogroup" aria-label="Appearance">${seg}</div></div>
+      <button class="toggle-row" role="switch" aria-checked="${splashOn}" onclick="toggleSplashPref()"><span class="prof-toggle-l"><span class="row-ic">${ic("bolt")}</span>Opening animation</span><span class="switch ${splashOn?"on":""}"></span></button>
+    </div>
+    <h3 class="prof-sec">Your data</h3>
+    <div class="list">
+      ${row("download","Back up or restore",state.backedUp?`Last backup ${shortDate(isoToDate(state.backedUp))}`:"No backup yet","openBackup(PROFILE_BACK)")}
+      ${row("lock","Private by design","Your cards stay on this phone. Lucro never asks for card numbers or bank logins.")}
+      ${row("trash","Erase all data","","eraseAll()","danger-row")}
+    </div>
+    <h3 class="prof-sec">About</h3>
+    <div class="list">
+      ${row("share","Share Lucro","Send it to a friend","shareApp()")}
+      ${FEEDBACK_EMAIL?row("mail","Send feedback","Ideas, bugs, a store in the wrong place","sendFeedback()"):""}
+      ${row("info",`Lucro ${APP_VERSION}`,`${Object.keys(CATALOG.products).length} cards and ${stores().length} stores${d?`, updated ${d}`:""}`)}
+    </div>`,keep);
+  if(profEditing)setTimeout(()=>{const i=$("prof-name");if(i){i.focus();i.select()}},50);
+}
+function startProfName(){profEditing=true;openProfile(true)}
+function cancelProfName(){profEditing=false;openProfile(true)}
+function saveProfName(){const old=state.profile.name,v=$("prof-name").value;profEditing=false;setMyName(v);openProfile(true);render();
+  const nm=myName();toast(nm?`Hi, ${nm}`:"Name removed",()=>{setMyName(old);render();if(!$("sheet").hidden)openProfile(true)})}
+function editNameFromHero(){profEditing=true;openProfile()}
+function setTheme(t){state.profile.theme=t;save();applyTheme();openProfile(true)}
+function applyTheme(){
+  const t=state.profile.theme,root=document.documentElement;
+  if(t==="light"||t==="dark")root.dataset.theme=t;else delete root.dataset.theme;
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{
+    const dark=t==="dark"||(t!=="light"&&m.media.includes("dark"));m.content=dark?"#0b1412":"#f3f6f2"});
+}
+function toggleSplashPref(){state.profile.splash=state.profile.splash===false;save();openProfile(true)}
+function shareApp(){
+  const url=location.origin+location.pathname.replace(/preview.html$/,""),data={title:"Lucro",text:"Lucro tells you which credit card to use for every purchase.",url};
+  if(navigator.share)navigator.share(data).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast("Link copied"),()=>toast(url));
+  else toast(url);
+}
+function sendFeedback(){location.href=`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(`Lucro ${APP_VERSION} feedback`)}`}
+function eraseAll(){
+  confirmDialog("Erase all data?","This deletes your cards, picks, favorites and settings from this phone. Save a backup first if you might want them back.","Erase",()=>{
+    try{localStorage.removeItem(KEY)}catch{}memStore={};location.reload();
+  });
 }
 
 /* ─── One-finger navigation ─── */
@@ -2212,7 +2430,7 @@ $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()
 
 /* ─── Opening splash ─── */
 (function(){const sp=$("splash");if(!sp)return;
-  if(!SHOW.splash){sp.remove();return}
+  if(!SHOW.splash||state.profile.splash===false){sp.remove();return}
   const done=()=>sp.remove();
   sp.addEventListener("animationend",e=>{if(e.target===sp)done()});
   sp.addEventListener("click",()=>sp.classList.add("skip"));
@@ -2223,6 +2441,8 @@ $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
 
 /* ─── Init ─── */
+applyTheme();
+if(!state.profile.since&&(state.onboarded||state.wallet.length)){state.profile.since=TODAY;save()}
 go("pay");
 if(!state.wallet.length&&!state.onboarded)openOnboard();
 syncCatalog();

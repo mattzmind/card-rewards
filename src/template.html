@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lucro">
-<meta name="theme-color" content="#f4f6f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0b100e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1412" media="(prefers-color-scheme: dark)">
 <title>Lucro</title>
 <meta name="description" content="Use the right card, every time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -673,6 +673,86 @@ button.w-best{width:100%;text-align:left}
 .tabbar .ic{transition:transform .08s ease}
 .star-btn:active,.circle-btn:active{filter:brightness(.92)}
 .btn .ic{width:20px;height:20px;vertical-align:-4px;margin-right:6px}
+
+/* ═══ Onboarding: welcome → name → cards → first answer ═══ */
+.onboard{display:flex;flex-direction:column}
+.ob-inner{flex:1;width:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) var(--gutter) 150px}
+.ob-step.fwd{animation:obFwd .22s ease both}
+.ob-step.back{animation:obBack .22s ease both}
+@keyframes obFwd{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes obBack{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+.ob-top{display:flex;align-items:center;justify-content:space-between;min-height:44px;margin-bottom:18px}
+.ob-top-pad{width:44px}
+.ob-dots{display:flex;gap:6px}
+.ob-dots span{width:22px;height:5px;border-radius:3px;background:var(--line);transition:background .2s}
+.ob-dots span.on{background:var(--ink)}
+.ob-inner h1{font-size:32px;text-wrap:balance}
+.ob-inner>p,.ob-inner>.ob-step>p{color:var(--muted);margin:8px 0 18px;font-size:16px}
+.ob-name-field{font-size:22px;font-weight:600;padding:16px 18px;border-radius:16px;margin-top:8px}
+.ob-bar{border-top:none;background:linear-gradient(to top,var(--bg) 70%,transparent);padding-top:24px}
+.ob-bar-in{flex-direction:column;align-items:stretch;gap:4px}
+.ob-bar-row{display:flex;gap:10px;align-items:center}
+.ob-bar-row .btn{flex:1;margin:0}
+.ob-bar-row .btn-ghost{width:auto;margin:0;padding:14px 12px;min-width:84px}
+.ob-bar .btn:disabled{opacity:.45}
+/* welcome: dark brand screen that continues the splash */
+.onboard.ob-dark{background:#0B1412;color:#fff}
+.ob-dark .ob-inner{padding-top:calc(env(safe-area-inset-top,0px) + 22px)}
+.ob-dark .ob-bar{background:linear-gradient(to top,#0B1412 72%,rgba(11,20,18,0))}
+.ob-dark .btn{background:#A3E635;color:#0B1412}
+.ob-brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.03em}
+.ob-brand .brand-mark{width:36px;height:36px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.ob-fan{position:relative;height:150px;margin:26px auto 22px;max-width:300px}
+.ob-fan-card{position:absolute;left:50%;top:8px;width:190px;margin-left:-95px;filter:drop-shadow(0 14px 24px rgba(0,0,0,.45))}
+.ob-fan-card .art{box-shadow:none}
+.ob-fan-card.f0{transform:translate(-58px,18px) rotate(-12deg)}
+.ob-fan-card.f1{transform:translate(58px,18px) rotate(12deg)}
+.ob-fan-card.f2{transform:translateY(-4px)}
+.ob-dark h1{font-size:36px;line-height:1.05;letter-spacing:-.03em;max-width:12ch}
+.ob-vals{display:flex;flex-direction:column;gap:16px;margin-top:24px}
+.ob-val{display:flex;gap:14px;align-items:flex-start}
+.ob-val b{display:block;font-weight:600;font-size:16px}
+.ob-val>span:last-child>span{display:block;font-size:14px;color:rgba(255,255,255,.66);margin-top:2px}
+.ob-val-ic{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;background:rgba(163,230,53,.14);color:#A3E635}
+.ob-val-ic .ic{width:21px;height:21px}
+.ob-restore{display:block;text-align:center;padding:14px;min-height:44px;font-size:15px;color:rgba(255,255,255,.72);cursor:pointer}
+.ob-restore u{color:#fff;text-underline-offset:3px}
+/* last step: first answers from their own wallet */
+.ob-done-ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--hl);color:var(--hl-ink);margin:12px 0 18px;animation:popin .4s cubic-bezier(.2,1.3,.4,1) both}
+.ob-done-ic .ic{width:32px;height:32px;stroke-width:2.4}
+.ob-picks{border:none;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(15,40,35,.08)}
+.ob-picks .row-title{font-size:17px}
+.ob-rate{font-family:var(--display);font-size:24px;font-weight:700;color:var(--rate);letter-spacing:-.02em}
+/* Earn, no cards yet */
+.pay-empty{padding-top:8px}
+.pe-stack{position:relative;width:150px;height:110px;margin:0 auto 22px}
+.pe-card{position:absolute;left:50%;top:10px;width:120px;height:76px;margin-left:-60px;border-radius:12px}
+.pe-card.c1{background:linear-gradient(135deg,#14B8A6,#0F766E);transform:translate(-22px,10px) rotate(-10deg)}
+.pe-card.c2{background:linear-gradient(135deg,#FCD34D,#F59E0B);transform:translate(22px,10px) rotate(10deg)}
+.pe-card.c3{background:var(--surface);border:2px dashed color-mix(in srgb,var(--ink) 30%,transparent);display:grid;place-items:center;color:var(--ink);box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.pe-card.c3 .ic{width:28px;height:28px}
+
+/* ═══ Profile ═══ */
+.avatar-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--hl);color:var(--hl-ink);font-family:var(--display);font-weight:700;font-size:16px;line-height:1}
+.avatar .ic{width:18px;height:18px}
+.avatar.lg{width:76px;height:76px;font-size:34px;margin:0 auto 12px}
+.avatar.lg .ic{width:36px;height:36px}
+.avatar-btn:active .avatar{transform:scale(.92)}
+.prof-head{text-align:center;margin-bottom:6px}
+.prof-head .title-edit{justify-content:center}
+.prof-head .rename-inline{max-width:340px;margin:0 auto}
+.prof-head .sheet-sub{margin:4px 0 0}
+.prof-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0 0}
+.prof-sec{font-family:var(--display);font-size:18px;font-weight:700;margin:26px 4px 10px}
+.prof-pref{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 14px}
+.prof-pref .row-title{flex:1}
+.seg{display:flex;width:100%;padding:3px;border-radius:12px;background:var(--surface-2)}
+.seg button{flex:1;min-height:40px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);text-align:center}
+.seg button.on{background:var(--ink);color:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.prof-toggle-l{display:flex;align-items:center;gap:12px;font-weight:600}
+.toggle-row{min-height:56px;padding:9px 14px}
+.hero-add{display:inline-block;margin-top:6px;padding:6px 0;min-height:44px;font-size:15px;font-weight:600;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -680,8 +760,11 @@ button.w-best{width:100%;text-align:left}
 
 <main>
   <section id="view-pay" class="view">
-    <div id="pay-empty" class="empty" hidden><h2>Add your cards to start</h2><p>Tell the app which cards you carry. It ranks them for every purchase.</p><button class="btn" onclick="openOnboard()">Pick your cards</button></div>
     <div id="pay-hero" class="pay-hero"></div>
+    <div id="pay-empty" class="empty pay-empty" hidden>
+      <div class="pe-stack" aria-hidden="true"><span class="pe-card c1"></span><span class="pe-card c2"></span><span class="pe-card c3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></span></div>
+      <h2>Add your first card</h2><p>Lucro shows which card wins at every store. Pick the cards you carry to get started.</p>
+      <button class="btn" onclick="openOnboard(3)">Pick your cards</button></div>
     <div id="pay-main">
       <label class="search hero-search" for="q"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
         <input id="q" type="search" placeholder="Where are you shopping?" autocomplete="off" oninput="onPaySearch(this.value)" aria-label="Search stores or categories">
@@ -720,16 +803,8 @@ button.w-best{width:100%;text-align:left}
 <div id="dialog" class="dialog-bg" hidden></div>
 <div id="popover" class="pop-bg" hidden></div>
 <div id="sheet" class="sheet-bg" hidden></div>
-<div id="onboard" class="onboard" hidden>
-  <div class="ob-inner">
-    <h1>Which cards do you carry?</h1>
-    <p>Tap every card in your wallet. You can add more any time.</p>
-    <label class="search" for="ob-q"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="ob-q" type="search" placeholder="Search all cards" autocomplete="off" oninput="obSearch(this.value)"></label>
-    <div id="ob-grid" class="ob-grid"></div>
-  </div>
-  <div class="ob-bar"><div class="ob-bar-in"><button class="btn-ghost" onclick="obFinish(true)">Skip</button><button id="ob-add" class="btn" onclick="obFinish(false)" disabled>Tap the cards you carry</button></div></div>
-</div>
+<!-- First run (welcome → name → cards → first answer), drawn by renderOnboard() in views.js -->
+<div id="onboard" class="onboard" hidden></div>
 <div id="toast" class="toast" hidden role="status"></div>
 
 <!-- Opening splash: plays once per launch, tap to skip. Turn off in cats.js (SHOW.splash). -->

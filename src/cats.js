@@ -1,6 +1,8 @@
 /* v2 feature switches: hidden features stay in the code, turn back on here */
 const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */, multiPeople:false /* household mode: owner badges, Whose card, group by person */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
+const APP_VERSION="2.1.0"; // shown in Profile > About
+const FEEDBACK_EMAIL=""; // Profile > Send feedback opens a mail to this address (row hidden while empty)
 
 /* ══════════════════════════════════════════════════════════
    ICONS (one consistent line set, drawn for this app)
@@ -69,6 +71,10 @@ const ICONS={
   edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
   grip:'<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
   pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  share:'<path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M6 12v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
 };
 const ic=(n,cls)=>`<svg class="ic ${cls||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||ICONS.other}</svg>`;
 

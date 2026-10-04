@@ -18,9 +18,10 @@ function go(t){
 function renderAppbar(){
   const a=$("appbar-action"),n=allTasks().length;
   const bell=`<button class="bell-btn" onclick="openNotifs()" aria-label="Notifications${n?`, ${n} need attention`:""}">${ic("bell")}${n?`<span class="badge">${n}</span>`:""}</button>`;
-  if(tab!=="wallet"){a.innerHTML=`<div class="appbar-icons">${bell}</div>`;$("fab").hidden=true;$("select-bar").hidden=true;return}
+  const me=`<button class="avatar-btn" onclick="openProfile()" aria-label="Profile">${avatar()}</button>`;
+  if(tab!=="wallet"){a.innerHTML=`<div class="appbar-icons">${bell}${me}</div>`;$("fab").hidden=true;$("select-bar").hidden=true;return}
   a.innerHTML=selectMode?`<button class="btn-pill quiet" onclick="endSelect()">Done</button>`
-    :`<div class="appbar-icons">${bell}<button class="icon-btn" id="menu-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button></div>`;
+    :`<div class="appbar-icons">${bell}<button class="icon-btn" id="menu-btn" onclick="openWalletMenu()" aria-label="Wallet options">${ic("more","fill")}</button>${me}</div>`;
   $("fab").hidden=!!selectMode;
   renderSelectBar();
 }
@@ -59,9 +60,9 @@ function renderPayHero(){
   const top=act.find(w=>w.pinned)||act[0];
   $("pay-hero").innerHTML=`
     <h2 class="hero-greet">${greeting()}${names.length?",":""}</h2>
-    ${names.length?`<div class="hero-name">${esc(names.join(" & "))}</div>`:""}
+    ${names.length?`<div class="hero-name">${esc(names.join(" & "))}</div>`:`<button class="hero-add" onclick="editNameFromHero()">Add your name</button>`}
     <p class="hero-tag">Every purchase pays you back.</p>
-    <div class="hero-meta"><span>${act.length} card${act.length===1?"":"s"} ready</span>${setup?`<span>·</span><button onclick="openNotifs()">${setup} need${setup===1?"s":""} setup</button>`:""}</div>
+    <div class="hero-meta" ${act.length?"":"hidden"}><span>${act.length} card${act.length===1?"":"s"} ready</span>${setup?`<span>·</span><button onclick="openNotifs()">${setup} need${setup===1?"s":""} setup</button>`:""}</div>
     ${top?`<div class="hero-peek" onclick="go('wallet')" aria-hidden="true">${cardArt(top.product,0,true)}</div>`:""}`;
 }
 addEventListener("scroll",()=>document.body.classList.toggle("scrolled",scrollY>12),{passive:true});
@@ -247,8 +248,6 @@ function saveReport(){
 /* ─── Wallet ─── */
 function ownerBadge(w,size){return multiOwner()?badge(w.owner,size):""}
 function multiOwner(){return SHOW.multiPeople&&new Set(state.wallet.map(w=>w.owner)).size>1}
-/* The one name shown in greetings (MVP is single-user): saved choice, else Matt/first real name */
-function myName(){const ps=state.people||[];const me=ps.find(p=>p.id===state.me)||ps.find(p=>p.name==="Matt")||ps.find(p=>p.name&&p.name!=="Me");return me&&me.name!=="Me"?me.name:""}
 /* ─── Updates ─── */
 /* ─── Notification center (bell, top right): activations, picks, caps, feedback ─── */
 function renderUpdates(){} // kept for older callers; the bell sheet replaces the Updates tab
@@ -654,10 +653,57 @@ function addCard(){
   if(p.choice||p.rotating||p.auto)openDrawer(w.id);else{closeSheet();toast(`${dn(w)} added`)}
 }
 
-/* ─── First run: which cards do you carry? ─── */
-let obSel=new Set(),obQ="";
-function openOnboard(){obSel=new Set();obQ="";$("onboard").hidden=false;document.body.classList.add("locked");renderOnboard()}
+/* ─── First run: welcome → your name → your cards → a first answer ───
+   openOnboard(3) opens only the card step (from the empty Earn screen). */
+let obStep=1,obOnly=false,obSel=new Set(),obQ="",obAdded=0,obDir="";
+const OB_PREVIEW=["grocery","dining","gas"];
+function openOnboard(step=1){obStep=step;obOnly=step===3;obSel=new Set();obQ="";obAdded=0;obDir="";
+  $("onboard").hidden=false;document.body.classList.add("locked");renderOnboard()}
+function obGo(step){obDir=step<obStep?"back":"fwd";obStep=step;renderOnboard()}
 function renderOnboard(){
+  const o=$("onboard"),nm=myName(),dots=!obOnly&&obStep>1;
+  o.classList.toggle("ob-dark",obStep===1);
+  const top=obStep===1?"":`<div class="ob-top">${obStep>1&&!obOnly?`<button class="round-btn ob-back" onclick="obGo(${obStep-1})" aria-label="Back">${ic("chevL")}</button>`:obOnly?`<button class="round-btn ob-back" onclick="closeOnboard()" aria-label="Close">${ic("x")}</button>`:"<span></span>"}
+    ${dots?`<div class="ob-dots" aria-label="Step ${obStep-1} of 3">${[2,3,4].map(s=>`<span class="${s<=obStep?"on":""}"></span>`).join("")}</div>`:""}<span class="ob-top-pad"></span></div>`;
+  let body="",bar="";
+  if(obStep===1){
+    const fan=POPULAR_CARDS.filter(P).slice(0,3);
+    body=`<div class="ob-brand">${BRAND_MARK}<span>lucro</span></div>
+      <div class="ob-fan" aria-hidden="true">${fan.map((id,i)=>`<div class="ob-fan-card f${i}">${cardArt(id,0,true)}</div>`).join("")}</div>
+      <h1>Get paid back on every purchase.</h1>
+      <div class="ob-vals">
+        ${[["tag","The right card at every store","Search any store and see which card earns the most."],
+           ["bolt","Never miss a bonus","Reminders for quarterly activations and category picks."],
+           ["lock","Private by design","Your cards stay on this phone. No bank logins, ever."]]
+          .map(([i,t,s])=>`<div class="ob-val"><span class="ob-val-ic">${ic(i)}</span><span><b>${t}</b><span>${s}</span></span></div>`).join("")}
+      </div>`;
+    bar=`<button class="btn" onclick="obGo(2)">Get started</button>
+      <label class="ob-restore">Have a backup? <u>Restore it</u><input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>`;
+  }else if(obStep===2){
+    body=`<h1>What should we call you?</h1><p>Just your first name, so Lucro feels like yours.</p>
+      <input class="field ob-name-field" id="ob-name" value="${esc(state.profile.name||"")}" placeholder="First name" maxlength="30"
+        autocomplete="given-name" autocapitalize="words" enterkeyhint="next" oninput="$('ob-next').disabled=!this.value.trim()" onkeydown="if(event.key==='Enter'&&this.value.trim())obSaveName()">`;
+    bar=`<div class="ob-bar-row"><button class="btn-ghost" onclick="obGo(3)">Skip</button><button id="ob-next" class="btn" onclick="obSaveName()" ${nm?"":"disabled"}>Continue</button></div>`;
+  }else if(obStep===3){
+    body=`<h1>${nm?`Hi ${esc(nm)}, which cards do you carry?`:"Which cards do you carry?"}</h1><p>Tap every card in your wallet. You can add more any time.</p>
+      <label class="search" for="ob-q">${ic("search")}<input id="ob-q" type="search" placeholder="Search all cards" autocomplete="off" value="${esc(obQ)}" oninput="obSearch(this.value)"></label>
+      <div id="ob-grid" class="ob-grid"></div>`;
+    bar=`<div class="ob-bar-row"><button class="btn-ghost" onclick="obCards(true)">${obOnly?"Cancel":"Later"}</button><button id="ob-add" class="btn" onclick="obCards(false)" disabled>Tap the cards you carry</button></div>`;
+  }else{
+    const picks=OB_PREVIEW.map(id=>{const c=catById(id),b=c&&rank(c)[0];return b?{c,b}:null}).filter(Boolean);
+    body=`<div class="ob-done-ic">${ic("check")}</div><h1>${nm?`You're all set, ${esc(nm)}.`:"You're all set."}</h1>
+      ${picks.length?`<p>Here's what Lucro picks from your wallet:</p>
+        <div class="list ob-picks">${picks.map(({c,b})=>`<div class="row static"><span class="row-ic">${ic(c.id)}</span><span class="row-main"><span class="row-sub">${esc(c.label)}</span><span class="row-title">${esc(dn(b.w))}</span></span><span class="ob-rate">${fmtRate(b.rate)}%</span></div>`).join("")}</div>
+        <p class="hint">Search any store on Earn to get the best card for it.</p>`
+      :`<p>Add your cards any time from the Wallet tab, and Lucro will pick the best one for every purchase.</p>`}`;
+    bar=`<button class="btn" onclick="obDone()">${obAdded?"Start earning":"Explore Lucro"}</button>`;
+  }
+  o.innerHTML=`<div class="ob-inner ob-step ${obDir}">${top}${body}</div><div class="ob-bar"><div class="ob-bar-in">${bar}</div></div>`;
+  if(obStep===3)renderObGrid();
+  if(obStep===2)setTimeout(()=>{const i=$("ob-name");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250);
+  o.scrollTop=0;
+}
+function renderObGrid(){
   const q=obQ.trim().toLowerCase();
   const ids=q?Object.keys(CATALOG.products).filter(id=>{const p=P(id);return (B(p.brand).name+" "+p.name+" "+p.short).toLowerCase().includes(q)}).slice(0,30):POPULAR_CARDS.filter(P);
   $("ob-grid").innerHTML=ids.map(id=>{const p=P(id),on=obSel.has(id),own=ownedCount(id)>0;
@@ -666,13 +712,20 @@ function renderOnboard(){
   const n=obSel.size;
   $("ob-add").disabled=!n;$("ob-add").textContent=n?`Add ${n} card${n>1?"s":""}`:"Tap the cards you carry";
 }
-function obToggle(id){obSel.has(id)?obSel.delete(id):obSel.add(id);renderOnboard()}
-function obSearch(v){obQ=v;renderOnboard()}
-function obFinish(skip){
-  if(!skip)[...obSel].forEach(id=>state.wallet.push(normalize({id:"w"+Date.now()+Math.random().toString(36).slice(2,6),product:id,owner:state.people[0]?.id||"",nickname:"",last4:"",rewards:"",dueDay:null,limit:""})));
-  state.onboarded=true;save();$("onboard").hidden=true;document.body.classList.remove("locked");
-  go("pay");if(!skip&&allTasks().length)setTimeout(openNotifs,400);
-  if(!skip&&obSel.size)toast(`${obSel.size} card${obSel.size>1?"s":""} added${allTasks().length?". A few need a quick setup.":""}`);
+function obToggle(id){obSel.has(id)?obSel.delete(id):obSel.add(id);renderObGrid()}
+function obSearch(v){obQ=v;renderObGrid()}
+function obSaveName(){const v=$("ob-name").value.trim();if(!v)return;setMyName(v);obGo(3)}
+function obCards(skip){
+  if(!skip)[...obSel].filter(id=>!ownedCount(id)).forEach(id=>{obAdded++;state.wallet.push(normalize({id:"w"+Date.now()+Math.random().toString(36).slice(2,6),product:id,owner:state.people[0]?.id||"",nickname:"",last4:"",rewards:"",dueDay:null,limit:""}))});
+  obSel=new Set();save();
+  if(obOnly){if(skip)closeOnboard();else obDone();return}
+  obGo(4);
+}
+function closeOnboard(){$("onboard").hidden=true;$("onboard").innerHTML="";document.body.classList.remove("locked")}
+function obDone(){
+  state.onboarded=true;state.profile.since=state.profile.since||TODAY;save();closeOnboard();
+  go("pay");
+  if(obAdded){const t=allTasks().length;toast(`${obAdded} card${obAdded>1?"s":""} added${t?". A few need a quick setup.":""}`);if(t)setTimeout(openNotifs,600)}
 }
 
 /* ─── Backup: a file you can keep in iCloud Drive / Files and restore on any phone ─── */
@@ -688,16 +741,86 @@ function importWallet(file){
       const before=JSON.stringify(state);
       s.wallet.forEach(normalize);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,s);
       state.recents=state.recents||[];state.usage=state.usage||{};state.reports=state.reports||[];state.favs=state.favs||[];state.onboarded=true;
-      save();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
+      initProfile();state.profile.since=state.profile.since||TODAY;applyTheme();
+      save();if(!$("onboard").hidden)closeOnboard();closeSheet();go("wallet");toast(`Restored ${s.wallet.length} card${s.wallet.length===1?"":"s"}`,()=>{const b=JSON.parse(before);Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,b);save();render()});
     }catch{toast("That file isn't a Lucro backup")}};
   r.readAsText(file);
 }
-function openBackup(){
+function openBackup(back){
   openSheet(`<h2 class="sheet-title">Back up your wallet</h2>
     <p class="sheet-sub">Your cards are saved on this phone. Save a backup file to iCloud Drive or Google Drive so you can restore them if you delete the app or get a new phone.</p>
     <button class="btn" onclick="exportWallet()">${ic("copy")} Save backup file</button>
     <label class="btn-outline restore-btn">Restore from a backup<input type="file" accept="application/json,.json" hidden onchange="importWallet(this.files[0])"></label>
-    <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`);
+    <p class="hint">${state.backedUp?`Last backup: ${shortDate(isoToDate(state.backedUp))}.`:"No backup yet."} Backups include your cards, picks, favorites and reports. Never card numbers.</p>`,false,back);
+}
+
+/* ─── Profile (avatar, top right): name, preferences, your data, about ─── */
+const avatar=lg=>{const nm=myName();return `<span class="avatar ${lg?"lg":""}">${nm?esc(nm[0].toUpperCase()):ic("user")}</span>`};
+const PROFILE_BACK={label:"Profile",fn:()=>openProfile()};
+let profEditing=false;
+function openProfile(keep){
+  const pr=state.profile,nm=(pr.name||"").trim();
+  const looks=Object.values(state.usage).reduce((a,b)=>a+(+b||0),0);
+  const since=pr.since?isoToDate(pr.since).toLocaleDateString("en-US",{month:"long",year:"numeric"}):"";
+  const d=CATALOG.updated?shortDate(isoToDate(CATALOG.updated)):"";
+  const row=(icon,title,sub,fn,cls="")=>`<${fn?`button onclick="${fn}"`:"div"} class="row ${fn?"":"static"} ${cls}"><span class="row-ic">${ic(icon)}</span><span class="row-main"><span class="row-title">${title}</span>${sub?`<span class="row-sub">${sub}</span>`:""}</span>${fn&&!cls?ic("chevR","dim"):""}</${fn?"button":"div"}>`;
+  const seg=["system","light","dark"].map(t=>`<button role="radio" aria-checked="${pr.theme===t}" class="${pr.theme===t?"on":""}" onclick="setTheme('${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join("");
+  const splashOn=pr.splash!==false;
+  openSheet(`<div class="prof-head">${avatar(true)}
+      ${profEditing?`<div class="rename-inline"><input class="field" id="prof-name" value="${esc(nm)}" placeholder="First name" maxlength="30" autocomplete="given-name" autocapitalize="words"
+          onkeydown="if(event.key==='Enter')saveProfName();if(event.key==='Escape')cancelProfName()">
+          <button class="icon-btn ok" onclick="saveProfName()" aria-label="Save name">${ic("check")}</button>
+          <button class="icon-btn" onclick="cancelProfName()" aria-label="Cancel">${ic("x")}</button></div>`
+        :`<h2 class="sheet-title title-edit"><span class="${nm?"":"dim"}">${nm?esc(nm):"Add your name"}</span><button class="pencil" onclick="startProfName()" aria-label="Edit name">${ic("edit")}</button></h2>`}
+      ${since?`<p class="sheet-sub">Using Lucro since ${since}</p>`:""}</div>
+    <div class="w-stats prof-stats">
+      <button class="w-stat" onclick="closeSheet();go('wallet')"><b>${activeWallet().length}</b><span>Cards</span></button>
+      <div class="w-stat"><b>${looks}</b><span>Lookups</span></div>
+      <button class="w-stat" onclick="closeSheet();go('pay')"><b>${state.favs.length}</b><span>Favorites</span></button>
+    </div>
+    <h3 class="prof-sec">Preferences</h3>
+    <div class="list">
+      <div class="prof-pref"><span class="row-ic">${ic("sun")}</span><span class="row-title">Appearance</span><div class="seg" role="radiogroup" aria-label="Appearance">${seg}</div></div>
+      <button class="toggle-row" role="switch" aria-checked="${splashOn}" onclick="toggleSplashPref()"><span class="prof-toggle-l"><span class="row-ic">${ic("bolt")}</span>Opening animation</span><span class="switch ${splashOn?"on":""}"></span></button>
+    </div>
+    <h3 class="prof-sec">Your data</h3>
+    <div class="list">
+      ${row("download","Back up or restore",state.backedUp?`Last backup ${shortDate(isoToDate(state.backedUp))}`:"No backup yet","openBackup(PROFILE_BACK)")}
+      ${row("lock","Private by design","Your cards stay on this phone. Lucro never asks for card numbers or bank logins.")}
+      ${row("trash","Erase all data","","eraseAll()","danger-row")}
+    </div>
+    <h3 class="prof-sec">About</h3>
+    <div class="list">
+      ${row("share","Share Lucro","Send it to a friend","shareApp()")}
+      ${FEEDBACK_EMAIL?row("mail","Send feedback","Ideas, bugs, a store in the wrong place","sendFeedback()"):""}
+      ${row("info",`Lucro ${APP_VERSION}`,`${Object.keys(CATALOG.products).length} cards and ${stores().length} stores${d?`, updated ${d}`:""}`)}
+    </div>`,keep);
+  if(profEditing)setTimeout(()=>{const i=$("prof-name");if(i){i.focus();i.select()}},50);
+}
+function startProfName(){profEditing=true;openProfile(true)}
+function cancelProfName(){profEditing=false;openProfile(true)}
+function saveProfName(){const old=state.profile.name,v=$("prof-name").value;profEditing=false;setMyName(v);openProfile(true);render();
+  const nm=myName();toast(nm?`Hi, ${nm}`:"Name removed",()=>{setMyName(old);render();if(!$("sheet").hidden)openProfile(true)})}
+function editNameFromHero(){profEditing=true;openProfile()}
+function setTheme(t){state.profile.theme=t;save();applyTheme();openProfile(true)}
+function applyTheme(){
+  const t=state.profile.theme,root=document.documentElement;
+  if(t==="light"||t==="dark")root.dataset.theme=t;else delete root.dataset.theme;
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{
+    const dark=t==="dark"||(t!=="light"&&m.media.includes("dark"));m.content=dark?"#0b1412":"#f3f6f2"});
+}
+function toggleSplashPref(){state.profile.splash=state.profile.splash===false;save();openProfile(true)}
+function shareApp(){
+  const url=location.origin+location.pathname.replace(/preview.html$/,""),data={title:"Lucro",text:"Lucro tells you which credit card to use for every purchase.",url};
+  if(navigator.share)navigator.share(data).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast("Link copied"),()=>toast(url));
+  else toast(url);
+}
+function sendFeedback(){location.href=`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(`Lucro ${APP_VERSION} feedback`)}`}
+function eraseAll(){
+  confirmDialog("Erase all data?","This deletes your cards, picks, favorites and settings from this phone. Save a backup first if you might want them back.","Erase",()=>{
+    try{localStorage.removeItem(KEY)}catch{}memStore={};location.reload();
+  });
 }
 
 /* ─── One-finger navigation ─── */
@@ -717,7 +840,7 @@ $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()
 
 /* ─── Opening splash ─── */
 (function(){const sp=$("splash");if(!sp)return;
-  if(!SHOW.splash){sp.remove();return}
+  if(!SHOW.splash||state.profile.splash===false){sp.remove();return}
   const done=()=>sp.remove();
   sp.addEventListener("animationend",e=>{if(e.target===sp)done()});
   sp.addEventListener("click",()=>sp.classList.add("skip"));
@@ -728,6 +851,8 @@ $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
 
 /* ─── Init ─── */
+applyTheme();
+if(!state.profile.since&&(state.onboarded||state.wallet.length)){state.profile.since=TODAY;save()}
 go("pay");
 if(!state.wallet.length&&!state.onboarded)openOnboard();
 syncCatalog();
