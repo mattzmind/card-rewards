@@ -18,6 +18,8 @@ GitHub Pages: one self-contained `index.html` built from the files in `src/`.
 - `src/engine.js`: catalog loading, wallet storage (`localStorage` key `cardmax-v3`), ranking (`evalCard`, `rank`), tasks.
 - `src/wallet.js`: Wallet tab (sort/filter sheets, swipe actions, drag to reorder, list rows).
 - `src/views.js`: Earn tab, answer sheet, notifications, card details, add-card flow, onboarding, profile, splash, backup.
+- `site/`: public website (Home, About, Support, Privacy, Terms). Static HTML/CSS, self-hosted fonts, no trackers.
+  Placeholders (domain, email, legal name, App Store link) are listed in `site/README.md`. Header/footer are identical on every page.
 - `tools/build_catalog.py`: source of truth for card data; run it to regenerate `catalog.json`.
   Always raise `"version"` (phones only accept a newer version string).
 
