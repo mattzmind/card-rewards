@@ -42,7 +42,7 @@ p { margin: 0; }
 .strip a { color: var(--ink); font-weight: 600; }
 
 /* ─── Nav (Quicken-style: white, logo left, plain links, one pill CTA) ─── */
-.nav { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: saturate(180%) blur(14px); backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: saturate(180%) blur(14px); backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid transparent; transition: border-color .2s; }
 .nav.scrolled { border-bottom-color: var(--line); }
 .nav-in { display: flex; align-items: center; gap: 28px; height: 76px; }
 .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: var(--display); font-weight: 800; font-size: 25px; letter-spacing: -.04em; }
@@ -249,12 +249,12 @@ p { margin: 0; }
 .footer a:hover { color: #fff; text-decoration: underline; }
 .footer-legal { margin-top: 56px; padding-top: 28px; border-top: 1px solid rgba(255, 255, 255, .12); display: grid; gap: 10px; font-size: 13.5px; line-height: 1.6; }
 
-/* ─── Scroll reveal ─── */
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.in { opacity: 1; transform: none; }
+/* ─── Scroll reveal: content is always visible; it just rises slightly as it scrolls in ─── */
+.reveal.in { animation: rise .6s ease both; }
+@keyframes rise { from { transform: translateY(14px); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal.in { animation: none; }
   .btn, .faq summary::after { transition: none; }
 }
 
