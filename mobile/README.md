@@ -16,6 +16,15 @@ repo root stays live on GitHub Pages while this catches up.
 - Screen previews without a phone: `npx expo export --platform web` renders the same screens in a browser
   (storage falls back to localStorage via `src/store/kv.web.ts`). Handy for screenshots; not a product target.
 
+## Build and ship (EAS, no Mac needed)
+Builds run in Expo's cloud and are signed with the Apple Developer account. Run `eas` as `npx eas-cli@latest`.
+- One-time setup: `eas login`, then `eas init` (links the project and adds `extra.eas.projectId` to `app.json`).
+- Your iPhone: `eas device:create` (register it), then `eas build --profile development --platform ios`.
+  Install it, turn on Developer Mode (Settings → Privacy & Security), then `npx expo start`.
+- App Store: `eas build --profile production --platform ios`, then `eas submit --platform ios --latest`.
+  The build lands in TestFlight; build numbers go up automatically (`eas.json`).
+- `bundleIdentifier` in `app.json` is permanent once the App Store Connect record exists. Pick it before the first build.
+
 ## Commands
 - `npm test`: engine parity test + screen smoke tests
 - `npm run typecheck`: TypeScript

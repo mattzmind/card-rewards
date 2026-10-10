@@ -2,15 +2,18 @@
   "expo": {
     "name": "Lucro",
     "slug": "lucro",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lucro",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.lucro.app",
-      "supportsTablet": false
+      "bundleIdentifier": "com.lucrorewards.app",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +23,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.lucro.app"
+      "package": "com.lucrorewards.app"
     },
     "web": {
       "output": "static",
@@ -48,6 +51,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6c1379fe-1678-4cac-aecb-5917c0d4fe3c"
+      }
+    },
+    "owner": "mahrens0"
   }
 }
