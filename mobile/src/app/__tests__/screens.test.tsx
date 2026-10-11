@@ -79,6 +79,14 @@ test('Earn offers to request a store that is not listed', async () => {
   expect(router.push).toHaveBeenCalledWith({ pathname: '/report', params: { missing: 'Rosas Taqueria' } });
 });
 
+test('Earn hides the store request for one letter or a store that is already listed', async () => {
+  await render(<Earn />);
+  await fireEvent.changeText(screen.getByPlaceholderText('Where are you shopping?'), 'c');
+  expect(screen.queryByText(/^Request “/)).toBeNull();
+  await fireEvent.changeText(screen.getByPlaceholderText('Where are you shopping?'), 'Costco');
+  expect(screen.queryByText(/^Request “/)).toBeNull();
+});
+
 test('Earn with no cards asks for one', async () => {
   useApp.getState().update(s => { s.wallet = []; });
   await render(<Earn />);
@@ -97,7 +105,7 @@ test('Answer picks the best card and logs the lookup', async () => {
 test('Answer at Costco only ranks Visa cards', async () => {
   params.c = 'costco'; params.s = 'costco';
   await render(<Answer />);
-  expect(screen.getByText(/aren't shown/)).toBeTruthy();
+  expect(screen.getByText(/aren’t shown/)).toBeTruthy();
 });
 
 test('Wallet shows the summary, toolbar and cards', async () => {

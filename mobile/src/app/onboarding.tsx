@@ -141,7 +141,7 @@ function CardsAndDone({ back }: { back: () => void }) {
           <Text style={[styles.h1, { color: c.ink }]}>{name ? `You're all set, ${name}.` : "You're all set."}</Text>
           {picks.length ? (
             <>
-              <Text style={[styles.p, { color: c.muted }]}>Here's what Lucro picks from your wallet:</Text>
+              <Text style={[styles.p, { color: c.muted }]}>Here’s what Lucro picks from your wallet:</Text>
               <List>{picks.map(({ cat, b }, i) => (
                 <Row key={cat.id} first={i === 0} icon={cat.id} title={dn(previewCtx, b.w)} sub={cat.label}
                   right={<Text style={[styles.rate, { color: c.rate }]}>{fmtRate(b.rate)}%</Text>} />

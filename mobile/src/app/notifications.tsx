@@ -102,7 +102,7 @@ export default function Notifications() {
       {empty ? (
         <View style={styles.empty}>
           <View style={[styles.emptyIc, { backgroundColor: c.hl }]}><Icon name="check" color={c.hlInk} size={30} strokeWidth={2.4} /></View>
-          <Text style={[styles.emptyH, { color: c.ink }]}>You're all caught up</Text>
+          <Text style={[styles.emptyH, { color: c.ink }]}>You’re all caught up</Text>
           <Text style={[styles.emptyP, { color: c.muted }]}>Quarterly activations, category picks, spending caps and your feedback will show up here.</Text>
         </View>
       ) : null}

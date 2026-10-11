@@ -143,7 +143,7 @@ export default function Answer() {
           <List>{special.map((x, i) => altRow(x, i, true))}</List>
         </>
       ) : null}
-      {hidden ? <Text style={[styles.hint, { color: c.muted }]}>Costco only takes Visa, so {hidden} of your cards aren't shown.</Text> : null}
+      {hidden ? <Text style={[styles.hint, { color: c.muted }]}>Costco only takes Visa, so {hidden} of your cards aren’t shown.</Text> : null}
 
       <Pressable onPress={() => { tap(); setWhy(!why); }} style={[styles.why, { borderColor: c.line, backgroundColor: c.surface }]}>
         <Icon name="info" color={c.accent} size={20} />

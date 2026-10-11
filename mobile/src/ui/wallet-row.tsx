@@ -17,7 +17,7 @@ import { fonts, useColors } from './theme';
 
 const openCard = (w: WalletCard) => router.push({ pathname: '/card/[id]', params: { id: w.id } });
 
-export function WalletRow({ w, shown, showRate, showLast4, first }: { w: WalletCard; shown: string[]; showRate: boolean; showLast4: boolean; first?: boolean }) {
+export function WalletRow({ w, showRate, showLast4, first }: { w: WalletCard; showRate: boolean; showLast4: boolean; first?: boolean }) {
   const c = useColors(), ctx = useCtx(), ref = useRef<SwipeableMethods>(null);
   const p = productOf(ctx, w.product), name = dn(ctx, w);
   const needs = !w.inactive && tasksFor(ctx, w).length > 0;

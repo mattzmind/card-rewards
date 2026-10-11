@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDime
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CAT_GROUPS, POPULAR_CATS, catById, catName } from '@/core/cats';
-import { activeWallet, allTasks, searchAll, visibleCats } from '@/core/engine';
+import { activeWallet, allTasks, norm, searchAll, visibleCats } from '@/core/engine';
 import { myName, useApp, useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
 import { HeaderButtons, ScreenTitle } from '@/ui/header-buttons';
@@ -39,6 +39,8 @@ export default function Earn() {
   }).filter((x): x is { c: string; s: string; label: string } => !!x);
   const recents = state.recents.filter(x => catById(x.c) && (!x.s || stores.some(s => s.id === x.s)));
   const res = q.trim() ? searchAll(ctx, q) : null;
+  /* Offer "Request a store" once the search looks like a name (2+ letters) that isn't already listed */
+  const canRequest = !!res && norm(q).length >= 2 && !res.st.some(s => norm(s.name) === norm(q));
 
   return (
     <ScrollView ref={scrollRef} style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentInsetAdjustmentBehavior="never">
@@ -81,10 +83,10 @@ export default function Earn() {
                 {res.ct.map((x, i) => <Row key={x.id} first={!res.st.length && i === 0} icon={x.id} title={x.label} sub="Category" onPress={() => openAnswer(x.id)} />)}
               </List>
             ) : <Text style={[styles.hint, { color: c.muted }]}>No store called “{q.trim()}” in the list.</Text>}
-            <List style={{ marginTop: 12 }}>
+            {canRequest ? <List style={{ marginTop: 12 }}>
               <Row first icon="plus" title={`Request “${q.trim()}”`} sub="Small shop or local restaurant missing? Ask us to add it"
                 onPress={() => { tap(); router.push({ pathname: '/report', params: { missing: q.trim() } }); }} />
-            </List>
+            </List> : null}
             <SectionTitle>Local or not listed? Pick what it is</SectionTitle>
             <View style={styles.tiles}>{vis.map(x => <Tile key={x.id} icon={x.id} label={x.label} onPress={() => openAnswer(x.id)} />)}</View>
           </>

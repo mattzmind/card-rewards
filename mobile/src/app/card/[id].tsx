@@ -31,9 +31,11 @@ export default function CardDetails() {
   const [naming, setNaming] = useState(false), [nick, setNick] = useState('');
   const [last4, setLast4] = useState(w?.last4 || ''), [net, setNet] = useState(w?.network);
   const navigation = useNavigation(), [leaving, setLeaving] = useState(false);
-  const dirty = !!w && (last4 !== (w.last4 || '') || (net || null) !== (w.network || null));
+  /* Compare the network shown on screen (the card's choice, else the product default), not the raw saved value */
+  const netChanged = !!w && netOf(ctx, { ...w, network: net }) !== netOf(ctx, w);
+  const dirty = !!w && (last4 !== (w.last4 || '') || netChanged);
   const canSave = dirty && last4Ok(last4);
-  const commit = () => { if (!w) return; setField(w.id, 'last4', last4); setField(w.id, 'network', net); toast('Changes saved'); };
+  const commit = () => { if (!w) return; setField(w.id, 'last4', last4); if (netChanged) setField(w.id, 'network', net); toast('Changes saved'); };
   /* Close after the guard has switched off (next render), so Save / Remove don't trigger the prompt */
   useEffect(() => { if (leaving) router.back(); }, [leaving]);
 

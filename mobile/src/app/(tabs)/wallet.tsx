@@ -40,7 +40,7 @@ export default function Wallet() {
   const clearFilter = (k: keyof WalletFilter | '*') => { tap(); update(s => { const cur = viewOf({ ...ctx, state: s }); s.view = { ...cur, f: k === '*' ? { ...FILTER_DEFAULT } : { ...cur.f, [k]: FILTER_DEFAULT[k] } }; }); };
 
   const list = (items: WalletCard[], key: string) => {
-    const row = (w: WalletCard, i: number) => <WalletRow w={w} shown={shown} showRate={v.showRate} showLast4={v.showLast4} first={i === 0} />;
+    const row = (w: WalletCard, i: number) => <WalletRow w={w} showRate={v.showRate} showLast4={v.showLast4} first={i === 0} />;
     return (
       <View key={key} style={[styles.list, { backgroundColor: c.surface }]}>
         {canDrag && items.length > 1 ? (
@@ -138,9 +138,9 @@ export default function Wallet() {
               </Pressable>
               {showOff ? (
                 <>
-                  <Text style={[styles.hint, { color: c.muted }]}>Cards you no longer use. They don't show up on Earn or in notifications.</Text>
+                  <Text style={[styles.hint, { color: c.muted }]}>Cards you no longer use. They don’t show up on Earn or in notifications.</Text>
                   <View style={[styles.list, { backgroundColor: c.surface }]}>
-                    {off.map((w, i) => <WalletRow key={w.id} w={w} shown={shown} showRate={false} showLast4={v.showLast4} first={i === 0} />)}
+                    {off.map((w, i) => <WalletRow key={w.id} w={w} showRate={false} showLast4={v.showLast4} first={i === 0} />)}
                   </View>
                 </>
               ) : null}
