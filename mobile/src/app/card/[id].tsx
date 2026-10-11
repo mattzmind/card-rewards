@@ -1,7 +1,12 @@
 /* Card details: setup (quarterly bonus, chosen categories, top category), caps, reward tiers,
-   perks, last 4 / network, and Deactivate / Remove. */
-import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+   perks, last 4 / network, and Deactivate / Remove.
+   Last 4 and network are a draft: Save changes commits them. Closing with unsaved edits (X or a swipe
+   down) asks Save / Discard / Keep editing. This uses usePreventRemove, which makes the native sheet
+   cancel the swipe itself. Don't toggle the sheet's options (e.g. gestureEnabled) from here: changing a
+   formSheet's options while it's open re-applies its native setup, and the X bar was lost that way. */
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { usePreventRemove } from 'expo-router/react-navigation';
+import { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { catName } from '@/core/cats';
@@ -13,8 +18,9 @@ import { confirmSame, removeCards, rename, savePicks, setField, setInactive, tog
 import { useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
 import { Icon } from '@/ui/icon';
-import { Button, tap } from '@/ui/parts';
+import { Button, Last4Input, SheetBar, last4Ok, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
+import { toast } from '@/ui/toast';
 
 const isDefaultSel = (w: WalletCard, s: ChoiceSlot) => !(w.sel[s.id]?.opts?.length) && !!s.default;
 
@@ -23,6 +29,22 @@ export default function CardDetails() {
   const c = useColors(), ctx = useCtx();
   const w = ctx.state.wallet.find(x => x.id === id);
   const [naming, setNaming] = useState(false), [nick, setNick] = useState('');
+  const [last4, setLast4] = useState(w?.last4 || ''), [net, setNet] = useState(w?.network);
+  const navigation = useNavigation(), [leaving, setLeaving] = useState(false);
+  const dirty = !!w && (last4 !== (w.last4 || '') || (net || null) !== (w.network || null));
+  const canSave = dirty && last4Ok(last4);
+  const commit = () => { if (!w) return; setField(w.id, 'last4', last4); setField(w.id, 'network', net); toast('Changes saved'); };
+  /* Close after the guard has switched off (next render), so Save / Remove don't trigger the prompt */
+  useEffect(() => { if (leaving) router.back(); }, [leaving]);
+
+  usePreventRemove(dirty && !leaving, ({ data }) => {
+    const go = () => navigation.dispatch(data.action);
+    Alert.alert('Save your changes?', "You edited this card but haven't saved it yet.", [
+      { text: 'Keep editing', style: 'cancel' },
+      { text: 'Discard', style: 'destructive', onPress: go },
+      ...(last4Ok(last4) ? [{ text: 'Save', onPress: () => { commit(); go(); } }] : []),
+    ]);
+  });
   if (!w) return null;
   const p = productOf(ctx, w.product), name = dn(ctx, w);
   const { QK, NQK, TODAY } = ctx.clock;
@@ -30,17 +52,22 @@ export default function CardDetails() {
 
   const footer = (
     <View style={{ gap: 10, marginTop: 28 }}>
-      <Button title="Done" onPress={() => router.back()} />
+      <Button title="Save changes" disabled={!canSave} onPress={() => { commit(); setLeaving(true); }} />
       <Pressable onPress={() => { tap(); setInactive([w.id], !w.inactive); }} style={S.outline}>
         <Icon name={w.inactive ? 'restore' : 'archive'} color={c.ink} size={20} /><Text style={S.outlineText}>{w.inactive ? 'Reactivate card' : 'Deactivate card'}</Text>
       </Pressable>
-      <Pressable onPress={() => { tap(); removeCards([w.id], () => router.back()); }} style={[S.outline, { borderColor: c.danger + '73' }]}>
+      <Pressable onPress={() => { tap(); removeCards([w.id], () => setLeaving(true)); }} style={[S.outline, { borderColor: c.danger + '73' }]}>
         <Icon name="trash" color={c.danger} size={20} /><Text style={[S.outlineText, { color: c.danger }]}>Remove from wallet</Text>
       </Pressable>
       {!w.inactive ? <Text style={[S.hint, { textAlign: 'center' }]}>Deactivate keeps the card in your history but stops using it on Earn.</Text> : null}
     </View>
   );
-  if (!p) return <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap}><Text style={S.h}>{name}</Text><Text style={S.sub}>This card isn't in the catalog anymore.</Text>{footer}</ScrollView>;
+  const bar = <SheetBar onClose={() => router.back()} />;
+  if (!p) return (
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} stickyHeaderIndices={[0]}>
+      {bar}<Text style={S.h}>{name}</Text><Text style={S.sub}>{"This card isn't in the catalog anymore."}</Text>{footer}
+    </ScrollView>
+  );
 
   const unit = p.type !== 'cash' ? 'x' : '%', brand = brandOf(ctx, p.brand);
   const tiers: { rate: number; t: string; s: string }[] = [];
@@ -57,7 +84,8 @@ export default function CardDetails() {
   const saveName = () => { rename(w.id, nick); setNaming(false); };
 
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      {bar}
       <View style={S.head}>
         <CardArt product={w.product} width={92} />
         <View style={{ flex: 1, minWidth: 0 }}>
@@ -74,7 +102,7 @@ export default function CardDetails() {
               <View style={[S.pencil, { backgroundColor: c.surface2 }]}><Icon name="edit" color={c.muted} size={16} /></View>
             </Pressable>
           )}
-          <Text style={S.sub}>{brand.name} {p.name} · {netLabel(netOf(ctx, w))}{w.last4 ? ` · •••• ${w.last4}` : ''}</Text>
+          <Text style={S.sub}>{brand.name} {p.name} · {netLabel(netOf(ctx, w))}{w.last4 ? ` · •••• ${w.last4}` : ''}</Text>
           {p.status === 'closed' ? <Pill c={c} text="No longer offered to new applicants" warn /> : null}
           {w.inactive ? <Pill c={c} text={`Deactivated ${shortDate(isoToDate(w.inactive))}`} /> : null}
         </View>
@@ -99,7 +127,7 @@ export default function CardDetails() {
       <Text style={S.sec}>Rewards</Text>
       <View style={{ gap: 6 }}>
         {tiers.map((t, i) => (
-          <View key={i} style={[S.tier, i === 0 && { borderColor: c.accent }]}>
+          <View key={i} style={S.tier}>
             <Text style={S.tierRate}>{fmtRate(t.rate)}{unit}</Text>
             <View style={{ flex: 1 }}><Text style={S.rowTitle}>{t.t}</Text>{t.s ? <Text style={S.rowSub}>{t.s}</Text> : null}</View>
           </View>
@@ -115,14 +143,14 @@ export default function CardDetails() {
       ) : null}
 
       <Text style={S.sec}>Card details</Text>
-      <Text style={S.label}>Last 4 digits</Text>
-      <TextInput defaultValue={w.last4} keyboardType="number-pad" maxLength={4} placeholder="1234" placeholderTextColor={c.muted}
-        onEndEditing={e => setField(w.id, 'last4', e.nativeEvent.text.replace(/\D/g, '').slice(0, 4))} style={S.field} />
+      <Text style={S.label}>Last 4 digits (optional)</Text>
+      <Last4Input value={last4} onChangeText={setLast4} style={S.field} />
+      {!last4Ok(last4) ? <Text style={[S.hint, { color: c.warn }]}>Enter all 4 digits, or leave it empty.</Text> : null}
       <Text style={S.hint}>Never enter your full card number. The last 4 only help you spot the card at checkout.</Text>
       {p.networkOptions ? (
         <>
           <Text style={S.label}>Logo on your card</Text>
-          <View style={S.chips}>{p.networkOptions.map(n => <Chip key={n} c={c} label={capWord(n)} on={netOf(ctx, w) === n} onPress={() => setField(w.id, 'network', n)} />)}</View>
+          <View style={S.chips}>{p.networkOptions.map(n => <Chip key={n} c={c} label={capWord(n)} on={(net || netOf(ctx, w)) === n} onPress={() => setNet(n)} />)}</View>
         </>
       ) : null}
 
@@ -274,7 +302,7 @@ const chipS = StyleSheet.create({
 });
 
 const makeStyles = (c: C) => StyleSheet.create({
-  wrap: { paddingHorizontal: GUTTER, paddingTop: 24, paddingBottom: 48 },
+  wrap: { paddingHorizontal: GUTTER, paddingBottom: 48 },
   head: { flexDirection: 'row', gap: 14, alignItems: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
   h: { fontFamily: fonts.display, fontSize: 24, color: c.ink, flexShrink: 1 },
@@ -289,7 +317,7 @@ const makeStyles = (c: C) => StyleSheet.create({
   divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line },
   rowTitle: { fontFamily: fonts.semibold, fontSize: 15, color: c.ink },
   rowSub: { fontFamily: fonts.body, fontSize: 13, color: c.muted, marginTop: 2 },
-  tier: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', padding: 12, borderRadius: 12, backgroundColor: c.surface, borderWidth: 1, borderColor: 'transparent' },
+  tier: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', padding: 12, borderRadius: 12, backgroundColor: c.surface },
   tierRate: { minWidth: 44, fontFamily: fonts.display, fontSize: 17, color: c.rate },
   pickRate: { fontFamily: fonts.display, fontSize: 22, color: c.rate, minWidth: 44 },
   pickFoot: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth },

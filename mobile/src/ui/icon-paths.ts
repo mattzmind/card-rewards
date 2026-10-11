@@ -51,6 +51,7 @@ export const ICONS: Record<string, string> = {
  "select": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"4\"/><path d=\"M8 12.5l3 3 5-6\"/>",
  "download": "<path d=\"M12 4v11\"/><path d=\"M7 10l5 5 5-5\"/><path d=\"M5 20h14\"/>",
  "more": "<circle cx=\"12\" cy=\"5.5\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"18.5\" r=\"1.6\"/>",
+ "trophy": "<path d=\"M8 21h8\"/><path d=\"M12 17v4\"/><path d=\"M7 4h10v5a5 5 0 0 1-10 0z\"/><path d=\"M17 5h3v2a3 3 0 0 1-3 3\"/><path d=\"M7 5H4v2a3 3 0 0 0 3 3\"/>",
  "earn": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.1 1.7 2.8 2.1 2.9 1 2.9 2.2-1.2 2.1-2.9 2.1c-1.3 0-2.4-.6-2.9-1.5\"/><path d=\"M12 6v1.8M12 16.2V18\"/>",
  "bolt": "<path d=\"M13 3L5 13.5h6L10 21l8-10.5h-6z\"/>",
  "refresh": "<path d=\"M20 11a8 8 0 0 0-14.3-4.5L4 8\"/><path d=\"M4 4v4h4\"/><path d=\"M4 13a8 8 0 0 0 14.3 4.5L20 16\"/><path d=\"M20 20v-4h-4\"/>",

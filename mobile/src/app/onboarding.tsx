@@ -98,7 +98,7 @@ function NameStep({ back, next }: { back: () => void; next: () => void }) {
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ flex: 1, paddingTop: insets.top + 12, paddingHorizontal: GUTTER }}>
         <Top back={back} step={2} />
-        <Text style={[styles.h1, { color: c.ink }]}>What should we call you?</Text>
+        <Text style={[styles.h1, { color: c.ink }]}>What is your name?</Text>
         <Text style={[styles.p, { color: c.muted }]}>Just your first name, so Lucro feels like yours.</Text>
         <TextInput value={name} onChangeText={setName} placeholder="First name" placeholderTextColor={c.muted} autoFocus maxLength={30}
           autoComplete="given-name" textContentType="givenName" autoCapitalize="words" returnKeyType="next" onSubmitEditing={save}

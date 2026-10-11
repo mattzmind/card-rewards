@@ -1,26 +1,32 @@
-/* Earn: greeting, store/category search, favorites or popular categories, all categories. */
+/* Earn: greeting, store/category search, favorites, popular categories, recents, all categories. */
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { router, useScrollToTop } from 'expo-router';
+import { useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CAT_GROUPS, POPULAR_CATS, catById, catName } from '@/core/cats';
 import { activeWallet, allTasks, searchAll, visibleCats } from '@/core/engine';
 import { myName, useApp, useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
-import { HeaderButtons } from '@/ui/header-buttons';
+import { HeaderButtons, ScreenTitle } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
 import { Button, List, Row, SectionTitle, Tile, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
+
+/* Switched off for now (kept so they can come back): the card peeking in the hero, and "N CARDS READY" */
+const SHOW = { cardPeek: false, cardCount: false };
 
 const greeting = () => { const h = new Date().getHours(); return h < 5 ? 'Good evening' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 const openAnswer = (c: string, s?: string) => router.push({ pathname: '/answer', params: s ? { c, s } : { c } });
 
 export default function Earn() {
-  const c = useColors(), insets = useSafeAreaInsets();
+  const c = useColors(), insets = useSafeAreaInsets(), { width } = useWindowDimensions();
+  const third = Math.floor((width - GUTTER * 2 - 20) / 3); // tile width when three share a row (gap 10)
   const ctx = useCtx(), state = useApp(s => s.state), update = useApp(s => s.update);
   const [q, setQ] = useState('');
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const act = activeWallet(ctx), tasks = allTasks(ctx).length, name = myName(state);
   const top = act.find(w => w.pinned) || act[0];
   const vis = visibleCats(ctx), vid = new Set(vis.map(x => x.id));
@@ -35,20 +41,21 @@ export default function Earn() {
   const res = q.trim() ? searchAll(ctx, q) : null;
 
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentInsetAdjustmentBehavior="never">
+    <ScrollView ref={scrollRef} style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentInsetAdjustmentBehavior="never">
       <LinearGradient colors={[c.heroA, c.heroB, c.bg]} locations={[0, 0.45, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.4, y: 1 }}
-        style={[styles.hero, { paddingTop: insets.top + 12 }]}>
+        style={[styles.hero, { paddingTop: insets.top + 4 }]}>
         <View style={styles.brandRow}>
-          <Text style={[styles.brand, { color: c.ink }]}>lucro</Text>
+          <ScreenTitle>Earn</ScreenTitle>
           <HeaderButtons />
         </View>
-        {top ? <View style={styles.peek} pointerEvents="none"><CardArt product={top.product} width={170} plain /></View> : null}
-        <Text style={[styles.greet, { color: c.ink }]}>{greeting()}{name ? ',' : ''}</Text>
-        {name ? <Text style={[styles.name, { color: c.ink }]}>{name}</Text> : null}
+        {SHOW.cardPeek && top ? <View style={[styles.peek, { top: insets.top + 58 }]} pointerEvents="none"><CardArt product={top.product} width={120} plain /></View> : null}
+        <Text style={[styles.greet, { color: c.ink }]} numberOfLines={2}>{greeting()}{name ? `, ${name}` : ''}</Text>
         <Text style={[styles.tag, { color: c.muted }]}>Every purchase pays you back.</Text>
-        <Text style={[styles.meta, { color: c.ink }]}>
-          {act.length} CARD{act.length === 1 ? '' : 'S'} READY{tasks ? <Text style={{ color: c.warn }}>{`  ·  ${tasks} NEED${tasks === 1 ? 'S' : ''} SETUP`}</Text> : null}
-        </Text>
+        {SHOW.cardCount ? (
+          <Text style={[styles.meta, { color: c.ink }]}>
+            {act.length} CARD{act.length === 1 ? '' : 'S'} READY{tasks ? <Text style={{ color: c.warn }}>{`  ·  ${tasks} NEED${tasks === 1 ? 'S' : ''} SETUP`}</Text> : null}
+          </Text>
+        ) : null}
       </LinearGradient>
 
       {!act.length ? (
@@ -73,19 +80,30 @@ export default function Earn() {
                   sub={catName(s.cat) + (s.id === 'costco' || s.id === 'costco_gas' ? ' · Visa only' : '')} onPress={() => openAnswer(s.cat, s.id)} />)}
                 {res.ct.map((x, i) => <Row key={x.id} first={!res.st.length && i === 0} icon={x.id} title={x.label} sub="Category" onPress={() => openAnswer(x.id)} />)}
               </List>
-            ) : <Text style={[styles.hint, { color: c.muted }]}>No store called “{q}” in the list.</Text>}
+            ) : <Text style={[styles.hint, { color: c.muted }]}>No store called “{q.trim()}” in the list.</Text>}
+            <List style={{ marginTop: 12 }}>
+              <Row first icon="plus" title={`Request “${q.trim()}”`} sub="Small shop or local restaurant missing? Ask us to add it"
+                onPress={() => { tap(); router.push({ pathname: '/report', params: { missing: q.trim() } }); }} />
+            </List>
             <SectionTitle>Local or not listed? Pick what it is</SectionTitle>
             <View style={styles.tiles}>{vis.map(x => <Tile key={x.id} icon={x.id} label={x.label} onPress={() => openAnswer(x.id)} />)}</View>
           </>
         ) : (
           <>
-            <SectionTitle>{favs.length ? 'Favorites' : 'Popular categories'}</SectionTitle>
+            {favs.length ? (
+              <>
+                <SectionTitle>Favorites</SectionTitle>
+                <View style={styles.tiles}>
+                  {favs.map(f => <Tile key={f.c + f.s} width={third} icon={f.c} label={f.label} onPress={() => openAnswer(f.c, f.s || undefined)} />)}
+                </View>
+              </>
+            ) : null}
+
+            <SectionTitle>Popular categories</SectionTitle>
             <View style={[styles.panel, { backgroundColor: c.surface }]}>
               {!favs.length ? <Text style={[styles.hint, { color: c.muted, marginTop: 0, marginBottom: 10 }]}>Where most people shop. Star any answer to pin your own favorites.</Text> : null}
               <View style={styles.tiles}>
-                {favs.length
-                  ? favs.map(f => <Tile key={f.c + f.s} icon={f.c} label={f.label} onPress={() => openAnswer(f.c, f.s || undefined)} />)
-                  : POPULAR_CATS.filter(id => vid.has(id)).map(id => <Tile key={id} wide icon={id} label={catName(id)} onPress={() => openAnswer(id)} />)}
+                {POPULAR_CATS.filter(id => vid.has(id)).map(id => <Tile key={id} wide icon={id} label={catName(id)} onPress={() => openAnswer(id)} />)}
               </View>
             </View>
 
@@ -134,14 +152,12 @@ export default function Earn() {
 }
 
 const styles = StyleSheet.create({
-  hero: { paddingHorizontal: GUTTER, paddingBottom: 22, overflow: 'hidden' },
-  brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, marginBottom: 14 },
-  brand: { fontFamily: fonts.displayHeavy, fontSize: 24, letterSpacing: -0.8 },
-  peek: { position: 'absolute', right: -46, top: 90, transform: [{ rotate: '-6deg' }] },
-  greet: { fontFamily: fonts.display, fontSize: 34, lineHeight: 38, letterSpacing: -0.8, maxWidth: '68%' },
-  name: { fontFamily: fonts.display, fontSize: 18, marginTop: 4 },
-  tag: { fontFamily: fonts.body, fontSize: 16, marginTop: 8, maxWidth: '62%' },
-  meta: { fontFamily: fonts.bold, fontSize: 13, letterSpacing: 1, marginTop: 18 },
+  hero: { paddingHorizontal: GUTTER, paddingBottom: 18, overflow: 'hidden' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, marginBottom: 8, zIndex: 2 },
+  peek: { position: 'absolute', right: -34, transform: [{ rotate: '-6deg' }] },
+  greet: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, letterSpacing: -0.4, maxWidth: '72%' },
+  tag: { fontFamily: fonts.body, fontSize: 15, marginTop: 2, maxWidth: '68%' },
+  meta: { fontFamily: fonts.bold, fontSize: 13, letterSpacing: 1, marginTop: 12 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, minHeight: 52 },
   searchInput: { flex: 1, fontFamily: fonts.body, fontSize: 17, paddingVertical: 12 },
   hint: { fontFamily: fonts.body, fontSize: 14, marginTop: 12, marginHorizontal: 2 },

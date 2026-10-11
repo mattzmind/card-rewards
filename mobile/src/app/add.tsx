@@ -8,7 +8,7 @@ import { addCard, setInactive } from '@/store/actions';
 import { useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
 import { Icon } from '@/ui/icon';
-import { Button, List, Row, tap } from '@/ui/parts';
+import { Button, Last4Input, List, Row, SheetBar, last4Ok, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 import { toast } from '@/ui/toast';
 
@@ -48,8 +48,8 @@ export default function Add() {
     const b = brandOf(ctx, bank), t = q.trim().toLowerCase();
     const items = productsOf(bank).filter(([, p]) => !t || (p.name + ' ' + p.short).toLowerCase().includes(t));
     return (
-      <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-        <Back c={c} label="All banks" onPress={() => { setBank(null); setQ(''); }} />
+      <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar onClose={() => router.back()} left={<Back c={c} label="All banks" onPress={() => { setBank(null); setQ(''); }} />} />
         <Text style={[S.h, { color: c.ink }]}>{b.name}</Text>
         <Text style={[S.sub, { color: c.muted }]}>{b.note || `${productsOf(bank).length} card${productsOf(bank).length > 1 ? 's' : ''}`}</Text>
         {productsOf(bank).length > 3 ? search(`Search ${b.short || b.name} cards`) : null}
@@ -65,8 +65,8 @@ export default function Add() {
   const mb = t ? banks.filter(k => { const b = brandOf(ctx, k); return (b.name + ' ' + b.short + ' ' + (b.note || '')).toLowerCase().includes(t); }) : [];
   const mc = t ? Object.entries(ctx.catalog.products).filter(([, p]) => (brandOf(ctx, p.brand).name + ' ' + p.name + ' ' + p.short).toLowerCase().includes(t)).map(([id]) => id) : [];
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-      <Text style={[S.h, { color: c.ink }]}>Add a card</Text>
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar onClose={() => router.back()} left={<Text style={[S.h, { color: c.ink }]}>Add a card</Text>} />
       <Text style={[S.sub, { color: c.muted }]}>Choose the bank on your card</Text>
       {search('Search banks or cards')}
       {t ? (
@@ -97,8 +97,8 @@ function Draft({ pid, back }: { pid: string; back: () => void }) {
   };
   const S = styles;
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-      <Back c={c} label={brandOf(ctx, p.brand).short || 'Back'} onPress={back} />
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={S.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar onClose={() => router.back()} left={<Back c={c} label={brandOf(ctx, p.brand).short || 'Back'} onPress={back} />} />
       <View style={{ alignItems: 'center', marginTop: 4 }}><CardArt product={pid} width={220} /></View>
       <Text style={[S.h, { color: c.ink, textAlign: 'center', marginTop: 16 }]}>{brandOf(ctx, p.brand).name} {p.name}</Text>
       {p.networkOptions ? (
@@ -114,13 +114,13 @@ function Draft({ pid, back }: { pid: string; back: () => void }) {
         </>
       ) : null}
       <Text style={[S.label, { color: c.muted }]}>Last 4 digits (optional)</Text>
-      <TextInput value={last4} onChangeText={v => setLast4(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" maxLength={4} placeholder="1234" placeholderTextColor={c.muted}
-        style={[S.field, { color: c.ink, backgroundColor: c.surface, borderColor: c.line, letterSpacing: 2 }]} />
+      <Last4Input value={last4} onChangeText={setLast4} style={[S.field, { color: c.ink, backgroundColor: c.surface, borderColor: c.line, letterSpacing: 2 }]} />
+      {!last4Ok(last4) ? <Text style={[S.hint, { color: c.warn }]}>Enter all 4 digits, or leave it empty.</Text> : null}
       <Text style={[S.label, { color: c.muted }]}>Nickname (optional)</Text>
       <TextInput value={nick} onChangeText={setNick} placeholder={p.short} placeholderTextColor={c.muted} maxLength={40}
         style={[S.field, { color: c.ink, backgroundColor: c.surface, borderColor: c.line }]} />
       <Text style={[S.hint, { color: c.muted }]}>Never enter your full card number. The last 4 only help you spot the card at checkout.</Text>
-      <View style={{ marginTop: 18 }}><Button title="Add to wallet" onPress={add} /></View>
+      <View style={{ marginTop: 18 }}><Button title="Add to wallet" onPress={add} disabled={!last4Ok(last4)} /></View>
     </ScrollView>
   );
 }
@@ -134,7 +134,7 @@ function Back({ c, label, onPress }: { c: ReturnType<typeof useColors>; label: s
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: GUTTER, paddingTop: 22, paddingBottom: 48 },
+  wrap: { paddingHorizontal: GUTTER, paddingBottom: 48 },
   h: { fontFamily: fonts.display, fontSize: 26, letterSpacing: -0.4 },
   sub: { fontFamily: fonts.body, fontSize: 15, marginTop: 4, marginBottom: 14 },
   sec: { fontFamily: fonts.display, fontSize: 19, marginTop: 24, marginBottom: 10 },
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontFamily: fonts.body, fontSize: 16, paddingVertical: 12 },
   addBtn: { borderRadius: 10, paddingHorizontal: 12, minHeight: 34, justifyContent: 'center' },
   addText: { fontFamily: fonts.semibold, fontSize: 13 },
-  back: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 44, alignSelf: 'flex-start', marginBottom: 6 },
+  back: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 44, alignSelf: 'flex-start' },
   label: { fontFamily: fonts.semibold, fontSize: 13, marginTop: 18, marginBottom: 8 },
   field: { fontFamily: fonts.semibold, fontSize: 17, borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

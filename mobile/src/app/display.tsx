@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import type { WalletFilter, WalletView } from '@/core/types';
-import { FILTER_DEFAULT, GROUPS, SORTS, SORT_NATURAL, VIEW_DEFAULT, filterDefs, viewOf, walletFiltered } from '@/core/wallet';
+import { FILTER_DEFAULT, GROUPS, SORTS, SORT_CHOICES, SORT_NATURAL, VIEW_DEFAULT, filterDefs, viewOf, walletFiltered } from '@/core/wallet';
 import { useApp, useCtx } from '@/store/app';
 import { Icon } from '@/ui/icon';
 import { tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
+
+/* Hidden for now: the rate and last 4 always show on wallet cards (see viewOf). Flip to bring the toggles back. */
+const SHOW_CARD_TOGGLES = false;
 
 type Key = 'group' | 'sort' | 'order' | `f.${keyof WalletFilter}`;
 
@@ -38,7 +41,7 @@ export default function Display() {
   if (picking) {
     let title = '', opts: [string, string][] = [], cur = '', hint = '';
     if (picking === 'group') { title = 'Grouping'; cur = v.group === 'person' ? 'none' : v.group; opts = [['none', 'None'], ['bank', 'Bank'], ['type', 'Reward type']]; }
-    else if (picking === 'sort') { title = 'Sorting'; cur = v.sort; opts = Object.entries(SORTS); }
+    else if (picking === 'sort') { title = 'Sorting'; cur = v.sort; opts = SORT_CHOICES.map(k => [k, SORTS[k]]); }
     else if (picking === 'order') {
       title = 'Ordering'; cur = v.order; opts = [['asc', 'Ascending'], ['desc', 'Descending']];
       hint = ({ rewards: 'Descending shows the highest rates first.', name: 'Ascending is A to Z.', bank: 'Ascending is A to Z.', added: 'Descending shows the newest cards first.' } as Record<string, string>)[v.sort] || '';
@@ -95,8 +98,12 @@ export default function Display() {
             {row('arrowUp', 'Ordering', v.sort === 'custom' ? 'Your order' : v.order === 'asc' ? 'Ascending' : 'Descending', 'order', v.sort === 'custom')}
           </View>
           {v.sort === 'custom' ? <Text style={[styles.hint, { color: c.muted }]}>Press and hold any card in your wallet to drag it into place.</Text> : null}
-          <Text style={[styles.sec, { color: c.muted }]}>SHOW ON EACH CARD</Text>
-          <View style={[styles.group, { backgroundColor: c.surface }]}>{toggle('showRate', 'Top reward rate', true)}{toggle('showLast4', 'Last 4 digits')}</View>
+          {SHOW_CARD_TOGGLES ? (
+            <>
+              <Text style={[styles.sec, { color: c.muted }]}>SHOW ON EACH CARD</Text>
+              <View style={[styles.group, { backgroundColor: c.surface }]}>{toggle('showRate', 'Top reward rate', true)}{toggle('showLast4', 'Last 4 digits')}</View>
+            </>
+          ) : null}
         </>
       ) : (
         <>

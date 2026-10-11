@@ -41,9 +41,11 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
           <Stack.Protected guard={onboarded}>
             <Stack.Screen name="(tabs)" />
-            {['answer', 'card/[id]', 'add', 'notifications', 'profile', 'display', 'report'].map(name => (
+            {['answer', 'card/[id]', 'add', 'notifications', 'display', 'report'].map(name => (
               <Stack.Screen key={name} name={name} options={sheet} />
             ))}
+            {/* Profile is a sidebar from the right (ui/side-sheet.tsx animates it), so the route itself just appears */}
+            <Stack.Screen name="profile" options={{ presentation: 'transparentModal', animation: 'none', contentStyle: { backgroundColor: 'transparent' } }} />
           </Stack.Protected>
           <Stack.Protected guard={!onboarded}>
             <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />

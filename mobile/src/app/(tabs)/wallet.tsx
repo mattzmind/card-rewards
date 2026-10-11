@@ -1,9 +1,9 @@
 /* Wallet: summary, sort/filter, pinned + grouped lists. Press and hold a card to drag it (My order);
    swipe a card for actions; tap for details. */
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useScrollToTop } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
@@ -11,12 +11,11 @@ import Sortable from 'react-native-sortables';
 import { activeWallet, fmtRate } from '@/core/engine';
 import type { WalletCard, WalletFilter } from '@/core/types';
 import {
-  FILTER_DEFAULT, SORTS, activeFilterCount, filterValueLabel, viewOf, walletFiltered, walletGroups, walletSorted, walletSummary,
+  FILTER_DEFAULT, VIEW_DEFAULT, activeFilterCount, filterValueLabel, viewOf, walletFiltered, walletGroups, walletSorted, walletSummary,
 } from '@/core/wallet';
 import { reorder } from '@/store/actions';
 import { useApp, useCtx } from '@/store/app';
-import { CardArt } from '@/ui/card-art';
-import { HeaderButtons } from '@/ui/header-buttons';
+import { HeaderButtons, ScreenTitle } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
 import { Button, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
@@ -25,6 +24,7 @@ import { WalletRow } from '@/ui/wallet-row';
 export default function Wallet() {
   const c = useColors(), insets = useSafeAreaInsets(), ctx = useCtx(), update = useApp(s => s.update);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  useScrollToTop(scrollRef);
   const [showOff, setShowOff] = useState(false);
   const v = viewOf(ctx), nf = activeFilterCount(v.f);
   const act = activeWallet(ctx), all = ctx.state.wallet;
@@ -32,9 +32,11 @@ export default function Wallet() {
   const off = walletFiltered(ctx, all.filter(w => w.inactive), v.f).sort((a, b) => b.inactive!.localeCompare(a.inactive!));
   const pinned = walletSorted(ctx, active.filter(w => w.pinned), v), groups = walletGroups(ctx, walletSorted(ctx, active.filter(w => !w.pinned), v), v);
   const shown = [...pinned, ...groups.flatMap(g => g.items)].map(w => w.id);
-  const canDrag = !nf; // dragging a filtered list would be confusing
+  const canDrag = v.sort === 'custom' && !nf; // drag to reorder only in "My order" (hidden for now), and never on a filtered list
+  /* Bottom spacing. On iOS the inset already includes the floating tab bar, so the + sits just above it and
+     the list ends just above the +. Android's tab screen already stops above its bar. */
+  const fabBottom = Platform.OS === 'ios' ? insets.bottom + 12 : 16, listPad = fabBottom + 60 + 12;
   const sum = walletSummary(ctx);
-  const fan = [...act.filter(w => w.pinned), ...act.filter(w => !w.pinned)].slice(0, 3);
   const clearFilter = (k: keyof WalletFilter | '*') => { tap(); update(s => { const cur = viewOf({ ...ctx, state: s }); s.view = { ...cur, f: k === '*' ? { ...FILTER_DEFAULT } : { ...cur.f, [k]: FILTER_DEFAULT[k] } }; }); };
 
   const list = (items: WalletCard[], key: string) => {
@@ -53,20 +55,10 @@ export default function Wallet() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Animated.ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}>
+      <Animated.ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: listPad }}>
         <LinearGradient colors={[c.heroA, c.heroB, c.bg]} locations={[0, 0.45, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.4, y: 1 }}
-          style={[styles.hero, { paddingTop: insets.top + 12 }]}>
-          <View style={styles.topRow}><Text style={[styles.brand, { color: c.ink }]}>lucro</Text><HeaderButtons /></View>
-          {fan.length ? (
-            <View style={styles.fan} pointerEvents="none">
-              {fan.map((w, i) => (
-                <View key={w.id} style={[styles.fanCard, { zIndex: 3 - i, transform: [{ translateX: [8, -14, -36][i] }, { translateY: [0, 10, 22][i] }, { rotate: ['2deg', '-8deg', '-16deg'][i] }] }]}>
-                  <CardArt product={w.product} width={140} plain />
-                </View>
-              ))}
-            </View>
-          ) : null}
-          <Text style={[styles.title, { color: c.ink }]}>Your wallet</Text>
+          style={[styles.hero, { paddingTop: insets.top + 4 }]}>
+          <View style={styles.topRow}><ScreenTitle>Wallet</ScreenTitle><HeaderButtons /></View>
           <Text style={[styles.meta, { color: c.ink }]}>{act.length} CARD{act.length === 1 ? '' : 'S'}  ·  {sum.banks} BANK{sum.banks === 1 ? '' : 'S'}</Text>
         </LinearGradient>
 
@@ -80,7 +72,7 @@ export default function Wallet() {
               {sum.best ? (
                 <Pressable onPress={() => { tap(); router.push({ pathname: '/answer', params: { c: sum.best!.catId } }); }}
                   style={({ pressed }) => [styles.best, { backgroundColor: pressed ? c.surface2 : c.surface }]}>
-                  <Icon name="star" color={c.star} size={20} />
+                  <Icon name="trophy" color={c.rate} size={20} />
                   <Text style={[styles.bestText, { color: c.ink }]}>Your best rate: <Text style={{ fontFamily: fonts.bold }}>{fmtRate(sum.best.rate)}% at {sum.best.catLabel.toLowerCase()}</Text> with {sum.best.card}</Text>
                   <Icon name="chevR" color={c.muted} size={18} />
                 </Pressable>
@@ -90,7 +82,7 @@ export default function Wallet() {
 
           {all.length ? (
             <View style={styles.toolbar}>
-              <Pill c={c} icon="sort" label={SORTS[v.sort]} on={v.sort !== 'custom' || v.group !== 'none'} onPress={() => router.push({ pathname: '/display', params: { mode: 'sort' } })} />
+              <Pill c={c} icon="sort" label="Sort" on={v.sort !== VIEW_DEFAULT.sort || v.order !== VIEW_DEFAULT.order || v.group !== 'none'} onPress={() => router.push({ pathname: '/display', params: { mode: 'sort' } })} />
               <Pill c={c} icon="filter" label={`Filter${nf ? ` · ${nf}` : ''}`} on={!!nf} onPress={() => router.push({ pathname: '/display', params: { mode: 'filter' } })} />
             </View>
           ) : null}
@@ -130,7 +122,7 @@ export default function Wallet() {
               ))}
               {!ctx.state.dragTipSeen && active.length > 1 ? (
                 <Text style={[styles.hint, { color: c.muted, textAlign: 'center' }]}>
-                  Tip: press and hold a card to move it. Swipe a card for more options.{' '}
+                  {canDrag ? 'Tip: press and hold a card to move it. Swipe a card for more options.' : 'Tip: swipe a card to pin, edit, deactivate or delete it.'}{' '}
                   <Text style={{ color: c.accent, fontFamily: fonts.semibold }} onPress={() => update(s => { s.dragTipSeen = true; })}>Got it</Text>
                 </Text>
               ) : null}
@@ -157,8 +149,9 @@ export default function Wallet() {
         </View>
       </Animated.ScrollView>
 
+      {/* Bottom right, just above the tab bar (like Todoist) */}
       <Pressable onPress={() => { tap(); router.push('/add'); }} accessibilityLabel="Add a card"
-        style={({ pressed }) => [styles.fab, { backgroundColor: c.primary, bottom: insets.bottom + 72, transform: [{ scale: pressed ? 0.94 : 1 }] }]}>
+        style={({ pressed }) => [styles.fab, { backgroundColor: c.primary, bottom: fabBottom, transform: [{ scale: pressed ? 0.94 : 1 }] }]}>
         <Icon name="plus" color={c.onPrimary === '#ffffff' ? c.hl : c.onPrimary} size={28} strokeWidth={2.2} />
       </Pressable>
     </View>
@@ -186,12 +179,8 @@ function SecHead({ c, title, icon, n }: { c: C; title: string; icon?: string; n?
 
 const styles = StyleSheet.create({
   hero: { paddingHorizontal: GUTTER, paddingBottom: 18, overflow: 'hidden' },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, marginBottom: 18 },
-  brand: { fontFamily: fonts.displayHeavy, fontSize: 24, letterSpacing: -0.8 },
-  fan: { position: 'absolute', right: -6, top: 92, width: 180, height: 130 },
-  fanCard: { position: 'absolute', right: 0, top: 0 },
-  title: { fontFamily: fonts.display, fontSize: 34, letterSpacing: -0.8, maxWidth: '60%' },
-  meta: { fontFamily: fonts.bold, fontSize: 13, letterSpacing: 1, marginTop: 16 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, marginBottom: 8 },
+  meta: { fontFamily: fonts.bold, fontSize: 13, letterSpacing: 1 },
   stats: { flexDirection: 'row', borderRadius: 22, paddingVertical: 16, marginTop: 8 },
   stat: { flex: 1, alignItems: 'center' },
   statN: { fontFamily: fonts.display, fontSize: 26, letterSpacing: -0.4 },
@@ -216,5 +205,5 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'stretch', gap: 10, paddingVertical: 36 },
   emptyH: { fontFamily: fonts.display, fontSize: 22, textAlign: 'center' },
   emptyP: { fontFamily: fonts.body, fontSize: 15, textAlign: 'center', marginBottom: 8 },
-  fab: { position: 'absolute', right: 18, width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
+  fab: { position: 'absolute', right: 20, width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
 });

@@ -5,11 +5,15 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 const mem: Record<string, string> = {};
 jest.mock('expo-sqlite/kv-store', () => ({ __esModule: true, default: { getItemSync: (k: string) => mem[k] ?? null, setItemSync: (k: string, v: string) => { mem[k] = v; } } }));
 const params: Record<string, string> = {};
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() }, useLocalSearchParams: () => params }));
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() }, useLocalSearchParams: () => params, useScrollToTop: jest.fn(),
+  useNavigation: () => ({ setOptions: jest.fn(), addListener: () => () => {}, dispatch: jest.fn() }) }));
+jest.mock('expo-router/react-navigation', () => ({ usePreventRemove: jest.fn() }));
 jest.mock('react-native-reanimated', () => {
   const { View, ScrollView } = jest.requireActual('react-native');
   const anim = { duration: () => anim };
-  return { __esModule: true, default: { View, ScrollView }, useAnimatedRef: () => ({ current: null }), FadeInRight: anim, FadeOutLeft: anim, FadeInDown: anim, FadeOutDown: anim };
+  return { __esModule: true, default: { View, ScrollView }, useAnimatedRef: () => ({ current: null }), FadeInRight: anim, FadeOutLeft: anim, FadeInDown: anim, FadeOutDown: anim,
+    useSharedValue: (v: any) => ({ value: v, get: () => v, set: () => {} }), useAnimatedStyle: () => ({}), withTiming: (v: any) => v, interpolate: () => 1, runOnJS: (fn: any) => fn,
+    Easing: { out: () => () => 0, cubic: () => 0 } };
 });
 jest.mock('react-native-sortables', () => {
   const { View } = jest.requireActual('react-native');
@@ -19,6 +23,11 @@ jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
   const { forwardRef } = jest.requireActual('react');
   const { View } = jest.requireActual('react-native');
   return { __esModule: true, default: forwardRef(({ children }: any, _ref: any) => <View>{children}</View>) };
+});
+jest.mock('react-native-gesture-handler', () => {
+  const { View } = jest.requireActual('react-native');
+  const pan: any = new Proxy({}, { get: () => () => pan });
+  return { GestureHandlerRootView: View, GestureDetector: ({ children }: any) => children, Gesture: { Pan: () => pan } };
 });
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
 jest.spyOn(require('react-native').Alert, 'alert').mockImplementation((_t: any, _m: any, buttons: any) => { buttons?.[buttons.length - 1]?.onPress?.(); });
@@ -48,11 +57,26 @@ beforeEach(() => {
 
 test('Earn shows the greeting, search results and categories', async () => {
   await render(<Earn />);
-  expect(screen.getByText('Alex')).toBeTruthy();
-  expect(screen.getByText(/4 CARDS READY/)).toBeTruthy();
+  expect(screen.getByText(/Alex/)).toBeTruthy();
+  expect(screen.queryByText(/CARDS READY/)).toBeNull(); // hidden for now (SHOW.cardCount)
   expect(screen.getByText('All categories')).toBeTruthy();
   await fireEvent.changeText(screen.getByPlaceholderText('Where are you shopping?'), 'costco');
   expect(screen.getAllByText('Costco').length).toBeGreaterThan(0);
+});
+
+test('Earn keeps popular categories when there are favorites', async () => {
+  useApp.getState().update(s => { s.favs = ['c:dining']; });
+  await render(<Earn />);
+  expect(screen.getByText('Favorites')).toBeTruthy();
+  expect(screen.getByText('Popular categories')).toBeTruthy();
+});
+
+test('Earn offers to request a store that is not listed', async () => {
+  const { router } = jest.requireMock('expo-router');
+  await render(<Earn />);
+  await fireEvent.changeText(screen.getByPlaceholderText('Where are you shopping?'), 'Rosas Taqueria ');
+  await fireEvent.press(screen.getByText('Request “Rosas Taqueria”'));
+  expect(router.push).toHaveBeenCalledWith({ pathname: '/report', params: { missing: 'Rosas Taqueria' } });
 });
 
 test('Earn with no cards asks for one', async () => {
@@ -78,9 +102,9 @@ test('Answer at Costco only ranks Visa cards', async () => {
 
 test('Wallet shows the summary, toolbar and cards', async () => {
   await render(<Wallet />);
-  expect(screen.getByText('Your wallet')).toBeTruthy();
+  expect(screen.getByText('Wallet')).toBeTruthy();
   expect(screen.getByText(/4 CARDS/)).toBeTruthy();
-  expect(screen.getByText('My order')).toBeTruthy();
+  expect(screen.getByText('Sort')).toBeTruthy();
   expect(screen.getByText('Amex Gold')).toBeTruthy();
   expect(screen.getByText(/Your best rate/)).toBeTruthy();
 });
@@ -97,6 +121,20 @@ test('Card details: mark the quarterly bonus activated', async () => {
   }
 });
 
+test('Card details: Save changes stays off until an edit, then saves last 4', async () => {
+  const gold = st().wallet.find(w => w.product === 'amex_gold')!;
+  params.id = gold.id;
+  await render(<CardDetails />);
+  expect(screen.getByText('Last 4 digits (optional)')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Save changes'));
+  expect(st().wallet.find(w => w.id === gold.id)!.last4).toBe('');
+  await fireEvent.changeText(screen.getByLabelText('Last 4 digits'), '12');
+  expect(screen.getByText(/Enter all 4 digits/)).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText('Last 4 digits'), '4321');
+  await fireEvent.press(screen.getByText('Save changes'));
+  expect(st().wallet.find(w => w.id === gold.id)!.last4).toBe('4321');
+});
+
 test('Add: search a card and add it', async () => {
   await render(<Add />);
   expect(screen.getByText('Add a card')).toBeTruthy();
@@ -111,6 +149,14 @@ test('Add: search a card and add it', async () => {
 test('Notifications render', async () => {
   await render(<Notifications />);
   expect(screen.getByText('Notifications')).toBeTruthy();
+});
+
+test('Profile invites a guest to add a name', async () => {
+  useApp.getState().update(s => { s.profile.name = ''; });
+  await render(<Profile />);
+  expect(screen.getByText('Hi there!')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Add your name'));
+  expect(screen.getByPlaceholderText('First name')).toBeTruthy();
 });
 
 test('Profile: change appearance', async () => {
@@ -137,9 +183,19 @@ test('Report saves feedback', async () => {
   expect(st().reports[0].where).toBe('Dining');
 });
 
+test('Report: request a missing store', async () => {
+  params.missing = 'Rosas Taqueria';
+  await render(<Report />);
+  await fireEvent.changeText(screen.getByPlaceholderText('Search categories'), 'restaurant');
+  await fireEvent.press(screen.getByText('Dining'));
+  await fireEvent.changeText(screen.getByPlaceholderText(/Austin/), 'Austin, TX');
+  await fireEvent.press(screen.getByText('Send request'));
+  expect(st().reports[0]).toMatchObject({ where: 'Rosas Taqueria', cat: 'Dining', card: 'Store not listed', note: 'Austin, TX' });
+});
+
 test('Onboarding starts on the welcome screen', async () => {
   await render(<Onboarding />);
   expect(screen.getByText('Get paid back on every purchase.')).toBeTruthy();
   await fireEvent.press(screen.getByText('Get started'));
-  expect(screen.getByText('What should we call you?')).toBeTruthy();
+  expect(screen.getByText('What is your name?')).toBeTruthy();
 });

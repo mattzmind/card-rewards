@@ -44,9 +44,9 @@ export default function Notifications() {
   return (
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
       <View style={styles.head}>
-        <Pressable onPress={() => router.back()} accessibilityLabel="Close" style={[styles.round, { backgroundColor: c.surface, borderColor: c.line }]}><Icon name="x" color={c.ink} size={20} /></Pressable>
-        <Text style={[styles.title, { color: c.ink }]}>Notifications</Text>
         <View style={{ width: 44 }} />
+        <Text style={[styles.title, { color: c.ink }]}>Notifications</Text>
+        <Pressable onPress={() => router.back()} accessibilityLabel="Close" style={[styles.round, { backgroundColor: c.surface, borderColor: c.line }]}><Icon name="x" color={c.ink} size={20} /></Pressable>
       </View>
 
       {tasks.length && !ctx.state.profile.reminders ? (

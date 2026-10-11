@@ -5,8 +5,10 @@ import { type Ctx, activeWallet, brandOf, dn, evalCard, fmtRate, netLabel, netOf
 import type { WalletCard, WalletFilter, WalletView } from './types';
 
 export const FILTER_DEFAULT: WalletFilter = { person: 'all', earns: 'all', type: 'all', bank: 'all', network: 'all', fee: 'all', status: 'all' };
-export const VIEW_DEFAULT: WalletView = { sort: 'custom', order: 'asc', group: 'none', f: { ...FILTER_DEFAULT }, showRate: true, showLast4: true };
+export const VIEW_DEFAULT: WalletView = { sort: 'rewards', order: 'desc', group: 'none', f: { ...FILTER_DEFAULT }, showRate: true, showLast4: true };
 export const SORTS: Record<WalletView['sort'], string> = { custom: 'My order', rewards: 'Highest rewards', name: 'Name A–Z', bank: 'Bank', added: 'Recently added' };
+/* Sorts offered in the Sort sheet. "My order" (custom, drag to reorder) is off for now but still works. */
+export const SORT_CHOICES = (Object.keys(SORTS) as WalletView['sort'][]).filter(k => k !== 'custom');
 export const GROUPS: Record<WalletView['group'], string> = { none: 'No groups', person: 'Person', bank: 'Bank', type: 'Reward type' };
 /* Each sort's natural direction: A–Z, highest first, newest first */
 export const SORT_NATURAL: Record<WalletView['sort'], 'asc' | 'desc'> = { custom: 'asc', rewards: 'desc', name: 'asc', bank: 'asc', added: 'desc' };
@@ -16,6 +18,8 @@ const TYPE_LABEL: Record<string, string> = { cash: 'Cash back', points: 'Points'
 export function viewOf(ctx: Ctx): WalletView {
   const v = { ...VIEW_DEFAULT, ...(ctx.state.view || {}) } as WalletView;
   v.f = { ...FILTER_DEFAULT, ...(v.f || {}) };
+  if (v.sort === 'custom') { v.sort = 'rewards'; v.order = 'desc'; } // "My order" is hidden, so older saved views fall back to the default
+  v.showRate = true; v.showLast4 = true; // always on while the Sort sheet's toggles are hidden
   return v;
 }
 

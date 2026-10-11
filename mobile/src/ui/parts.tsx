@@ -1,10 +1,11 @@
-/* Small shared building blocks: section heading, list row, category tile, primary button. */
+/* Small shared building blocks: section heading, list row, category tile, primary button,
+   sheet top bar with a close (X) button, last-4 digits field. */
 import * as Haptics from 'expo-haptics';
-import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { type ReactNode, useState } from 'react';
+import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View, type TextStyle, type ViewStyle } from 'react-native';
 
 import { Icon } from './icon';
-import { fonts, useColors } from './theme';
+import { GUTTER, fonts, useColors } from './theme';
 
 export const tap = () => Haptics.selectionAsync().catch(() => {});
 
@@ -39,11 +40,12 @@ export function Row({ icon, title, sub, right, onPress, first, left, danger }:
   );
 }
 
-export function Tile({ icon, label, onPress, wide }: { icon: string; label: string; onPress: () => void; wide?: boolean }) {
+/* width: a fixed size (Favorites stay one third wide even when there are only one or two) */
+export function Tile({ icon, label, onPress, wide, width }: { icon: string; label: string; onPress: () => void; wide?: boolean; width?: number }) {
   const c = useColors();
   return (
     <Pressable onPress={() => { tap(); onPress(); }}
-      style={({ pressed }) => [styles.tile, wide && styles.tileWide, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line, transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
+      style={({ pressed }) => [styles.tile, wide && styles.tileWide, width != null && { width, flexBasis: width, flexGrow: 0 }, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line, transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
       <Icon name={icon} color={c.accent} size={wide ? 26 : 24} />
       <Text style={[styles.tileLabel, { color: c.ink }]} numberOfLines={2}>{label}</Text>
     </Pressable>
@@ -63,7 +65,57 @@ export function Button({ title, onPress, disabled, kind = 'primary' }:
   );
 }
 
+/* Round X used at the top right of every slide-up sheet */
+export function CloseButton({ onPress, label = 'Close' }: { onPress: () => void; label?: string }) {
+  const c = useColors();
+  return (
+    <Pressable onPress={() => { tap(); onPress(); }} hitSlop={8} accessibilityRole="button" accessibilityLabel={label}
+      style={({ pressed }) => [styles.round, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+      <Icon name="x" color={c.ink} size={20} />
+    </Pressable>
+  );
+}
+
+/* Top of a sheet: optional left content (e.g. a Back link), X on the right. Put it as the FIRST child of the
+   sheet's root ScrollView with stickyHeaderIndices={[0]}: it stays pinned while the content scrolls under it.
+   Keep the ScrollView as the sheet's root. iOS form sheets don't give a wrapper View a height, so a
+   View > [bar, ScrollView] layout either overlaps the bar or collapses the ScrollView to nothing. */
+export function SheetBar({ onClose, left }: { onClose: () => void; left?: ReactNode }) {
+  const c = useColors();
+  return <View style={[styles.bar, { backgroundColor: c.bg }]}><View style={{ flex: 1 }}>{left}</View><CloseButton onPress={onClose} /></View>;
+}
+
+/* Last 4 digits: digits only, standard iOS field behavior. The system clear button (circled ✕ while editing)
+   erases it in one tap, and a Done bar sits above the number pad, which has no return key of its own. */
+export const last4Ok = (v: string) => v.length === 0 || v.length === 4;
+let doneBarSeq = 0;
+export function Last4Input({ value, onChangeText, style }: { value: string; onChangeText: (v: string) => void; style?: TextStyle | TextStyle[] }) {
+  const c = useColors();
+  const [barId] = useState(() => `last4-done-${++doneBarSeq}`);
+  return (
+    <View>
+      <TextInput value={value} onChangeText={v => onChangeText(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" maxLength={4}
+        placeholder="1234" placeholderTextColor={c.muted} accessibilityLabel="Last 4 digits" returnKeyType="done" clearButtonMode="while-editing"
+        inputAccessoryViewID={Platform.OS === 'ios' ? barId : undefined} style={style} />
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={barId}>
+          <View style={[styles.doneBar, { backgroundColor: c.surface2, borderTopColor: c.line }]}>
+            <Pressable onPress={() => Keyboard.dismiss()} hitSlop={10} accessibilityRole="button" accessibilityLabel="Done" style={styles.doneBtn}>
+              <Text style={[styles.doneText, { color: c.accent }]}>Done</Text>
+            </Pressable>
+          </View>
+        </InputAccessoryView>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  doneBar: { flexDirection: 'row', justifyContent: 'flex-end', borderTopWidth: StyleSheet.hairlineWidth, paddingHorizontal: 8 },
+  doneBtn: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12 },
+  doneText: { fontFamily: fonts.semibold, fontSize: 17 },
+  round: { width: 44, height: 44, borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
+  bar: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: -GUTTER, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
   secHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 28, marginBottom: 12, marginHorizontal: 2 },
   secTitle: { fontFamily: fonts.display, fontSize: 22, letterSpacing: -0.3 },
   list: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },

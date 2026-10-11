@@ -1,4 +1,5 @@
-/* Profile: name, stats, appearance, backup/restore, privacy, erase, share, version. */
+/* Profile (a sidebar from the right): name, stats, appearance, backup/restore, privacy, erase, share, version.
+   Guests (no name given in onboarding) get an invitation to add one. */
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -12,7 +13,8 @@ import { exportBackup, importBackup } from '@/store/backup';
 import { disableReminders, enableReminders } from '@/store/reminders';
 import { Avatar } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
-import { List, Row, tap } from '@/ui/parts';
+import { Button, List, Row, tap } from '@/ui/parts';
+import { SideSheet } from '@/ui/side-sheet';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 import { toast } from '@/ui/toast';
 
@@ -46,7 +48,10 @@ export default function Profile() {
     { text: 'Cancel', style: 'cancel' }, { text: 'Erase', style: 'destructive', onPress: () => replace(fresh()) },
   ]);
 
+  const startEdit = () => { tap(); setDraft(nm); setEditing(true); };
+
   return (
+    <SideSheet title="Profile">
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       <View style={styles.head}>
         <Avatar size={76} />
@@ -58,11 +63,17 @@ export default function Profile() {
             <Pressable onPress={saveName} accessibilityLabel="Save name" style={[styles.iconBtn, { backgroundColor: c.primary }]}><Icon name="check" color={c.onPrimary} size={18} /></Pressable>
             <Pressable onPress={() => setEditing(false)} accessibilityLabel="Cancel" style={styles.iconBtn}><Icon name="x" color={c.ink} size={18} /></Pressable>
           </View>
-        ) : (
-          <Pressable onPress={() => { tap(); setDraft(nm); setEditing(true); }} style={styles.nameRow} accessibilityLabel="Edit name">
-            <Text style={[styles.name, { color: nm ? c.ink : c.muted }]}>{nm || 'Add your name'}</Text>
+        ) : nm ? (
+          <Pressable onPress={startEdit} style={styles.nameRow} accessibilityLabel="Edit name">
+            <Text style={[styles.name, { color: c.ink }]}>{nm}</Text>
             <View style={[styles.pencil, { backgroundColor: c.surface2 }]}><Icon name="edit" color={c.muted} size={16} /></View>
           </Pressable>
+        ) : (
+          <View style={[styles.invite, { backgroundColor: c.surface }]}>
+            <Text style={[styles.inviteH, { color: c.ink }]}>Hi there!</Text>
+            <Text style={[styles.inviteP, { color: c.muted }]}>Add your first name and Lucro will greet you by name every time you open it.</Text>
+            <Button kind="lime" title="Add your name" onPress={startEdit} />
+          </View>
         )}
         {since ? <Text style={[styles.sub, { color: c.muted }]}>Using Lucro since {since}</Text> : null}
       </View>
@@ -109,11 +120,12 @@ export default function Profile() {
         <Row icon="info" title={`Lucro ${Constants.expoConfig?.version || ''}`} sub={`${Object.keys(ctx.catalog.products).length} cards and ${(ctx.catalog.stores || []).length} stores${d ? `, updated ${d}` : ''}`} />
       </List>
     </ScrollView>
+    </SideSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: GUTTER, paddingTop: 28, paddingBottom: 48 },
+  wrap: { paddingHorizontal: GUTTER, paddingTop: 8, paddingBottom: 48 },
   head: { alignItems: 'center', gap: 10 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
   name: { fontFamily: fonts.display, fontSize: 26 },
@@ -122,6 +134,9 @@ const styles = StyleSheet.create({
   field: { flex: 1, fontFamily: fonts.semibold, fontSize: 18, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   sub: { fontFamily: fonts.body, fontSize: 15 },
+  invite: { alignSelf: 'stretch', borderRadius: 20, padding: 16, gap: 6 },
+  inviteH: { fontFamily: fonts.display, fontSize: 22, textAlign: 'center' },
+  inviteP: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, textAlign: 'center', marginBottom: 8 },
   stats: { flexDirection: 'row', borderRadius: 22, paddingVertical: 16, marginTop: 20 },
   stat: { flex: 1, alignItems: 'center' },
   statN: { fontFamily: fonts.display, fontSize: 26 },
