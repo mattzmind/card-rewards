@@ -1,5 +1,5 @@
 {
- "version": "2026.10.02-v1",
+ "version": "2026.10.13-v2",
  "updated": "2026-09-29",
  "brands": {
   "amex": {
@@ -265,6 +265,33 @@
     "#1e3a8a",
     "#0f172a"
    ]
+  },
+  "pnc": {
+   "name": "PNC",
+   "short": "PNC",
+   "mono": "PN",
+   "colors": [
+    "#f97316",
+    "#1f2937"
+   ]
+  },
+  "synchrony": {
+   "name": "Synchrony",
+   "short": "Synchrony",
+   "mono": "SY",
+   "colors": [
+    "#facc15",
+    "#1f2937"
+   ]
+  },
+  "td": {
+   "name": "TD Bank",
+   "short": "TD",
+   "mono": "TD",
+   "colors": [
+    "#16a34a",
+    "#14532d"
+   ]
   }
  },
  "products": {
@@ -458,6 +485,12 @@
      ]
     }
    ],
+   "firstYear": {
+    "extra": 1.5,
+    "months": 12,
+    "label": "First-year bonus: +1.5% on everything",
+    "note": "Only if your welcome offer was an extra 1.5% (on up to $20,000 spent in year one). Chase's current offer is a $200 bonus instead."
+   },
    "perks": [],
    "source": {
     "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
@@ -815,8 +848,7 @@
     ]
    },
    "perks": [
-    "5% goes automatically to your top eligible category each billing cycle",
-    "Closed to new applicants since May 28, 2026; existing cards keep their rewards"
+    "Citi pays 5% automatically on whichever eligible category you spend the most in each billing cycle. Use this card for one category so Citi's pick matches yours."
    ],
    "source": {
     "url": "https://www.nerdwallet.com/credit-cards/news/citi-custom-cash-closed-to-new-applications",
@@ -1175,7 +1207,11 @@
       "gas"
      ],
      "rate": 3,
-     "label": "Gas stations"
+     "label": "Gas stations",
+     "note": "Not gas at warehouse clubs like Costco",
+     "excl": [
+      "costco_gas"
+     ]
     },
     {
      "cats": [
@@ -1203,8 +1239,9 @@
     "No foreign transaction fees"
    ],
    "source": {
-    "url": "https://creditcards.wellsfargo.com/autograph-visa-credit-card/",
-    "checked": "2026-09-29"
+    "url": "https://www.wellsfargo.com/credit-cards/autograph-visa/terms/?lang=en",
+    "checked": "2026-10-13",
+    "note": "Wells Fargo's terms: gas at warehouse/membership clubs, superstores and grocery stores may not earn bonus points"
    }
   },
   "wells_active_cash": {
@@ -1349,6 +1386,9 @@
        "label": "Gas & EV charging",
        "cats": [
         "gas"
+       ],
+       "excl": [
+        "costco_gas"
        ]
       },
       {
@@ -2201,9 +2241,7 @@
      "label": "Restaurants worldwide"
     }
    ],
-   "perks": [
-    "Closed to new applicants since July 2026; existing cards keep their rewards"
-   ],
+   "perks": [],
    "source": {
     "url": "https://www.nerdwallet.com/credit-cards/reviews/american-express-green",
     "checked": "2026-09-29",
@@ -3046,7 +3084,7 @@
     }
    },
    "perks": [
-    "No longer offered, but existing cards earn the same quarterly 5% as Freedom Flex"
+    "Earns the same quarterly 5% as Freedom Flex"
    ],
    "source": {
     "url": "https://www.nerdwallet.com/credit-cards/learn/chase-freedom-calendar",
@@ -3476,7 +3514,10 @@
      ],
      "rate": 4,
      "label": "Gas & EV charging",
-     "note": "First $1,000/quarter, then 1x"
+     "note": "First $1,000/quarter, then 1x. Not warehouse clubs.",
+     "excl": [
+      "costco_gas"
+     ]
     },
     {
      "cats": [
@@ -4182,6 +4223,621 @@
    "source": {
     "url": "https://www.creditonebank.com/credit-cards/platinum-no-fee",
     "checked": "2026-09-29"
+   }
+  },
+  "citi_rewards_plus": {
+   "brand": "citi",
+   "name": "Rewards+",
+   "short": "Citi Rewards+",
+   "network": "mastercard",
+   "status": "closed",
+   "fee": 0,
+   "type": "points",
+   "cpp": 1,
+   "base": 1,
+   "rules": [
+    {
+     "cats": [
+      "grocery",
+      "gas"
+     ],
+     "rate": 2,
+     "label": "Supermarkets & gas stations",
+     "note": "First $6,000/yr combined, then 1x. Not warehouse clubs or discount stores.",
+     "excl": [
+      "costco_gas"
+     ]
+    }
+   ],
+   "perks": [
+    "Every purchase rounds up to the nearest 10 points",
+    "10% of your points back when you redeem (first 100,000 points a year)",
+    "Citi's Rewards+ page now points to Citi Strata. If your card was switched, add Citi Strata instead."
+   ],
+   "source": {
+    "url": "https://www.cardbenefits.citi.com/~/media/CPP/Files/LegalDocs/FAQs/106001_FAQs_Citi_PremierPass_Expedia_Card_Conversion_2_2.aspx",
+    "checked": "2026-10-13",
+    "note": "Citi's Rewards+ disclosures (the card's product page now redirects to Strata)"
+   }
+  },
+  "citi_diamond_preferred": {
+   "brand": "citi",
+   "name": "Diamond Preferred",
+   "short": "Citi Diamond",
+   "network": "mastercard",
+   "networkOptions": [
+    "mastercard",
+    "visa"
+   ],
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "No rewards",
+   "perks": [
+    "Doesn't earn rewards. People usually keep it for a 0% intro APR or to build credit.",
+    "Long 0% intro APR on balance transfers and purchases"
+   ],
+   "source": {
+    "url": "https://www.citi.com/credit-cards/citi-diamond-preferred-credit-card",
+    "checked": "2026-10-13",
+    "note": "Citi lists Mastercard ID Theft Protection but doesn't name the network; pick the logo on your card"
+   }
+  },
+  "citi_simplicity": {
+   "brand": "citi",
+   "name": "Simplicity",
+   "short": "Citi Simplicity",
+   "network": "mastercard",
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "No rewards",
+   "perks": [
+    "Doesn't earn rewards. People usually keep it for a 0% intro APR or to build credit.",
+    "No late fees and no penalty APR"
+   ],
+   "source": {
+    "url": "https://www.citi.com/credit-cards/citi-simplicity-credit-card",
+    "checked": "2026-10-13"
+   }
+  },
+  "wells_reflect": {
+   "brand": "wells",
+   "name": "Reflect",
+   "short": "Wells Reflect",
+   "network": "visa",
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "No rewards",
+   "perks": [
+    "Doesn't earn rewards. People usually keep it for a 0% intro APR or to build credit.",
+    "0% intro APR for 21 months on purchases and qualifying balance transfers",
+    "Up to $600 cell phone protection ($25 deductible) when you pay your phone bill with this card"
+   ],
+   "source": {
+    "url": "https://creditcards.wellsfargo.com/reflect-visa-credit-card/",
+    "checked": "2026-10-13"
+   }
+  },
+  "chase_slate_edge": {
+   "brand": "chase",
+   "name": "Slate Edge",
+   "short": "Slate Edge",
+   "network": "visa",
+   "networkOptions": [
+    "visa",
+    "mastercard"
+   ],
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "No rewards",
+   "perks": [
+    "Doesn't earn rewards. Built to help you build credit, with an automatic credit line review every 6 months."
+   ],
+   "source": {
+    "url": "https://creditcards.chase.com/credit-building-credit-cards/edge",
+    "checked": "2026-10-13",
+    "note": "The issuer's page doesn't say which network; pick the logo on your card"
+   }
+  },
+  "chase_aeroplan": {
+   "brand": "chase",
+   "name": "Air Canada Aeroplan",
+   "short": "Aeroplan",
+   "network": "mastercard",
+   "fee": 195,
+   "type": "points",
+   "cpp": 1.3,
+   "base": 1,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 3,
+     "label": "Air Canada",
+     "cond": "Bought directly from Air Canada (up to 5x with Aeroplan 25K status)"
+    },
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 3,
+     "label": "Travel"
+    },
+    {
+     "cats": [
+      "grocery"
+     ],
+     "rate": 3,
+     "label": "Grocery stores",
+     "note": "3x through Dec 31, 2026, then 2x"
+    },
+    {
+     "cats": [
+      "dining"
+     ],
+     "rate": 3,
+     "label": "Dining, takeout & delivery",
+     "note": "3x through Dec 31, 2026, then 2x"
+    },
+    {
+     "cats": [
+      "gas"
+     ],
+     "rate": 2,
+     "label": "Gas stations"
+    }
+   ],
+   "perks": [
+    "Points valued at 1.3¢ for ranking",
+    "No foreign transaction fees"
+   ],
+   "source": {
+    "url": "https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan",
+    "checked": "2026-10-13",
+    "note": "Mastercard per the World Mastercard benefits on Chase's page"
+   }
+  },
+  "chase_united_gateway": {
+   "brand": "chase",
+   "name": "United Gateway",
+   "short": "United Gateway",
+   "network": "visa",
+   "fee": 0,
+   "type": "miles",
+   "cpp": 1.2,
+   "base": 1,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 2,
+     "label": "United purchases",
+     "cond": "United purchases only (5x total on your own United fare)",
+     "m": [
+      "united"
+     ]
+    },
+    {
+     "cats": [
+      "gas"
+     ],
+     "rate": 2,
+     "label": "Gas stations"
+    },
+    {
+     "cats": [
+      "transit"
+     ],
+     "rate": 2,
+     "label": "Local transit & commuting",
+     "note": "Rideshare, taxis, trains, tolls, mass transit"
+    }
+   ],
+   "perks": [
+    "Miles valued at 1.2¢ for ranking",
+    "25% back on United in-flight food, drinks and Wi-Fi"
+   ],
+   "source": {
+    "url": "https://creditcards.chase.com/travel-credit-cards/united/united-gateway",
+    "checked": "2026-10-13"
+   }
+  },
+  "chase_ink_premier": {
+   "brand": "chase",
+   "name": "Ink Business Premier",
+   "short": "Ink Premier",
+   "network": "visa",
+   "networkOptions": [
+    "visa",
+    "mastercard"
+   ],
+   "business": true,
+   "fee": 195,
+   "type": "cash",
+   "base": 2,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 5,
+     "label": "Chase Travel",
+     "cond": "Only when booked through Chase Travel"
+    },
+    {
+     "cats": [
+      "transit"
+     ],
+     "rate": 5,
+     "label": "Lyft",
+     "cond": "Lyft rides only, through Sep 30, 2027",
+     "m": [
+      "lyft"
+     ]
+    }
+   ],
+   "perks": [
+    "Business card",
+    "2.5% on single purchases of $5,000 or more"
+   ],
+   "source": {
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/premier",
+    "checked": "2026-10-13",
+    "note": "The issuer's page doesn't say which network; pick the logo on your card"
+   }
+  },
+  "amex_delta_blue": {
+   "brand": "amex",
+   "name": "Delta SkyMiles Blue",
+   "short": "Delta Blue",
+   "network": "amex",
+   "fee": 0,
+   "type": "miles",
+   "cpp": 1.1,
+   "base": 1,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 2,
+     "label": "Delta purchases",
+     "cond": "Bought directly from Delta",
+     "m": [
+      "delta"
+     ]
+    },
+    {
+     "cats": [
+      "dining"
+     ],
+     "rate": 2,
+     "label": "Restaurants worldwide",
+     "note": "Including takeout and delivery in the U.S."
+    }
+   ],
+   "perks": [
+    "Miles valued at 1.1¢ for ranking"
+   ],
+   "source": {
+    "url": "https://www.americanexpress.com/en-us/account/get-started/deltablue/earn-rewards",
+    "checked": "2026-10-13",
+    "note": "Amex's Delta Blue benefits guide"
+   }
+  },
+  "amex_blue_business_cash": {
+   "brand": "amex",
+   "name": "Blue Business Cash",
+   "short": "Blue Business Cash",
+   "network": "amex",
+   "business": true,
+   "fee": 0,
+   "type": "cash",
+   "base": 2,
+   "baseLabel": "Everything (first $50,000/yr, then 1%)",
+   "perks": [
+    "Business card",
+    "2.7% foreign transaction fee"
+   ],
+   "source": {
+    "url": "https://www.americanexpress.com/content/dam/amex/en-us/company/legal/cardmember-agreements/public-site-2024-q2-pdf-cmas/gcs-small-business/blue-business-cash-06-30-2024.pdf",
+    "checked": "2026-10-13",
+    "note": "Amex's Blue Business Cash cardmember agreement (product page needs JavaScript)"
+   }
+  },
+  "capone_platinum": {
+   "brand": "capone",
+   "name": "Platinum",
+   "short": "Capital One Platinum",
+   "network": "mastercard",
+   "networkOptions": [
+    "visa",
+    "mastercard",
+    "discover"
+   ],
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "No rewards",
+   "perks": [
+    "Doesn't earn rewards. People usually keep it for a 0% intro APR or to build credit."
+   ],
+   "source": {
+    "url": "https://www.capitalone.com/credit-cards/platinum/",
+    "checked": "2026-10-13",
+    "note": "Capital One's page shows no rewards program; its guide calls it a no-rewards Mastercard"
+   }
+  },
+  "capone_spark_cash_plus": {
+   "brand": "capone",
+   "name": "Spark Cash Plus",
+   "short": "Spark Cash Plus",
+   "network": "mastercard",
+   "networkOptions": [
+    "visa",
+    "mastercard",
+    "discover"
+   ],
+   "business": true,
+   "fee": 150,
+   "feeNote": "Refunded every year you spend $150,000+",
+   "type": "cash",
+   "base": 2,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 5,
+     "label": "Capital One Business Travel",
+     "cond": "Hotels, vacation rentals & rental cars through Capital One Business Travel"
+    }
+   ],
+   "perks": [
+    "Business card"
+   ],
+   "source": {
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-cash-plus/",
+    "checked": "2026-10-13",
+    "note": "The issuer's page doesn't say which network; pick the logo on your card"
+   }
+  },
+  "capone_spark_miles": {
+   "brand": "capone",
+   "name": "Venture Business",
+   "short": "Venture Business",
+   "network": "visa",
+   "networkOptions": [
+    "visa",
+    "mastercard",
+    "discover"
+   ],
+   "business": true,
+   "fee": 95,
+   "type": "miles",
+   "cpp": 1,
+   "base": 2,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 5,
+     "label": "Capital One Business Travel",
+     "cond": "Hotels, vacation rentals & rental cars through Capital One Business Travel"
+    }
+   ],
+   "perks": [
+    "Business card",
+    "Formerly Spark Miles"
+   ],
+   "source": {
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-miles/",
+    "checked": "2026-10-13",
+    "note": "Capital One now lists this card as Venture Business. The issuer's page doesn't say which network; pick the logo on your card"
+   }
+  },
+  "capone_venture_x_business": {
+   "brand": "capone",
+   "name": "Venture X Business",
+   "short": "Venture X Business",
+   "network": "visa",
+   "networkOptions": [
+    "visa",
+    "mastercard",
+    "discover"
+   ],
+   "business": true,
+   "fee": 395,
+   "type": "miles",
+   "cpp": 1,
+   "base": 2,
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 10,
+     "label": "Capital One Business Travel hotels & cars",
+     "cond": "Hotels & rental cars through Capital One Business Travel"
+    },
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 5,
+     "label": "Capital One Business Travel flights",
+     "cond": "Flights & vacation rentals through Capital One Business Travel"
+    }
+   ],
+   "perks": [
+    "Business card"
+   ],
+   "source": {
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-miles/",
+    "checked": "2026-10-13",
+    "note": "The issuer's page doesn't say which network; pick the logo on your card"
+   }
+  },
+  "boa_bankamericard": {
+   "brand": "boa",
+   "name": "BankAmericard",
+   "short": "BankAmericard",
+   "network": "mastercard",
+   "networkOptions": [
+    "mastercard",
+    "visa"
+   ],
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "No rewards",
+   "perks": [
+    "Doesn't earn rewards. People usually keep it for a 0% intro APR or to build credit.",
+    "No penalty APR"
+   ],
+   "source": {
+    "url": "https://www.bankofamerica.com/credit-cards/products/bankamericard-credit-card/",
+    "checked": "2026-10-13",
+    "note": "The issuer's page doesn't say which network; pick the logo on your card"
+   }
+  },
+  "boa_premium_rewards_elite": {
+   "brand": "boa",
+   "name": "Premium Rewards Elite",
+   "short": "BofA Premium Elite",
+   "network": "visa",
+   "fee": 550,
+   "type": "points",
+   "cpp": 1,
+   "base": 1.5,
+   "rules": [
+    {
+     "cats": [
+      "travel",
+      "transit"
+     ],
+     "rate": 2,
+     "label": "Travel"
+    },
+    {
+     "cats": [
+      "dining"
+     ],
+     "rate": 2,
+     "label": "Dining"
+    }
+   ],
+   "perks": [
+    "Up to $300 airline incidental credit each year",
+    "No foreign transaction fees"
+   ],
+   "source": {
+    "url": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-elite-credit-card/",
+    "checked": "2026-10-13",
+    "note": "Visa Infinite per the benefits on BofA's page"
+   }
+  },
+  "usbank_shield": {
+   "brand": "usbank",
+   "name": "Shield",
+   "short": "US Bank Shield",
+   "network": "visa",
+   "fee": 0,
+   "type": "cash",
+   "base": 0,
+   "baseLabel": "Everything else (no rewards)",
+   "rules": [
+    {
+     "cats": [
+      "travel"
+     ],
+     "rate": 4,
+     "label": "U.S. Bank Travel Center",
+     "cond": "Prepaid air, hotel & car booked in the Travel Center"
+    }
+   ],
+   "perks": [
+    "Built for a long 0% intro APR"
+   ],
+   "source": {
+    "url": "https://www.usbank.com/credit-cards/shield-visa-credit-card.html",
+    "checked": "2026-10-13"
+   }
+  },
+  "pnc_cash_rewards": {
+   "brand": "pnc",
+   "name": "Cash Rewards Visa",
+   "short": "PNC Cash Rewards",
+   "network": "visa",
+   "fee": 0,
+   "type": "cash",
+   "base": 1,
+   "rules": [
+    {
+     "cats": [
+      "gas"
+     ],
+     "rate": 4,
+     "label": "Gas stations",
+     "note": "First $8,000/yr across gas, dining & grocery, then 1%"
+    },
+    {
+     "cats": [
+      "dining"
+     ],
+     "rate": 3,
+     "label": "Restaurants",
+     "note": "First $8,000/yr across gas, dining & grocery, then 1%"
+    },
+    {
+     "cats": [
+      "grocery"
+     ],
+     "rate": 2,
+     "label": "Grocery stores",
+     "note": "First $8,000/yr across gas, dining & grocery, then 1%"
+    }
+   ],
+   "perks": [],
+   "source": {
+    "url": "https://www.pnc.com/en/personal-banking/banking/credit-cards/pnc-cash-rewards-visa-credit-card.html",
+    "checked": "2026-10-13"
+   }
+  },
+  "synchrony_premier": {
+   "brand": "synchrony",
+   "name": "Premier World Mastercard",
+   "short": "Synchrony Premier",
+   "network": "mastercard",
+   "fee": 0,
+   "type": "cash",
+   "base": 2,
+   "perks": [
+    "Cash back posts as a statement credit"
+   ],
+   "source": {
+    "url": "https://www.synchrony.com/financing/synchrony-mastercards",
+    "checked": "2026-10-13"
+   }
+  },
+  "td_double_up": {
+   "brand": "td",
+   "name": "Double Up",
+   "short": "TD Double Up",
+   "network": "visa",
+   "fee": 0,
+   "type": "cash",
+   "base": 2,
+   "perks": [],
+   "source": {
+    "url": "https://www.td.com/us/en/personal-banking/credit-cards/double-up",
+    "checked": "2026-10-13"
    }
   }
  },

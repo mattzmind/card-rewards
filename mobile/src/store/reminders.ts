@@ -1,5 +1,6 @@
 /* Schedules the deadline reminders from core/reminders.ts as local phone notifications.
-   Off until you turn them on (Profile or Notifications), so we only ask for permission when it's useful. */
+   On by default: permission is asked the first time the wallet has a card with quarterly deadlines (see app/_layout.tsx).
+   profile.reminders: undefined = not asked yet, true = on, false = turned off (Profile) or permission denied. */
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 
@@ -11,6 +12,12 @@ import { useApp } from './app';
 Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true }),
 });
+
+/* Does the wallet have anything with a quarterly deadline? */
+export function needsReminders() {
+  const { state, catalog } = useApp.getState();
+  return state.wallet.some(w => { const p = catalog.products[w.product]; return !w.inactive && p && (p.rotating || (p.choice || []).some(s => s.period === 'quarter')); });
+}
 
 /* Ask once; returns whether we may show notifications */
 export async function enableReminders(): Promise<boolean> {

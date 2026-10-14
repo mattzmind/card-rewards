@@ -22,6 +22,11 @@ GitHub Pages: one self-contained `index.html` built from the files in `src/`.
   Placeholders (domain, email, legal name, App Store link) are listed in `site/README.md`. Header/footer are identical on every page.
 - `tools/build_catalog.py`: source of truth for card data; run it to regenerate `catalog.json`.
   Always raise `"version"` (phones only accept a newer version string).
+- **Every new or changed card must be checked against the issuer's own page or document** (product page, terms,
+  cardmember agreement) before it ships: rates, caps, exclusions, annual fee, network. Reviews (NerdWallet etc.)
+  can point the way but are never the source. Put the issuer URL in `source.url` with the check date.
+  If the issuer doesn't state the network, use `networkOptions` so the user picks the logo instead of a guess.
+  If a rate can't be confirmed on an issuer page, leave the card out and say so.
 
 ## Native app (`mobile/`)
 - Expo SDK 57 + TypeScript + Expo Router. See `mobile/README.md` and `mobile/AGENTS.md` (check versioned Expo docs; APIs change every SDK).

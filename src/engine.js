@@ -153,6 +153,8 @@ const optOf=(slot,id)=>(slot.options||[]).find(o=>o.id===id);
 const selOpts=(w,slot)=>{const s=w.sel[slot.id];return s&&s.opts&&s.opts.length?s.opts:(slot.default?[slot.default]:[])};
 const isDefaultSel=(w,slot)=>!(w.sel[slot.id]&&w.sel[slot.id].opts&&w.sel[slot.id].opts.length)&&!!slot.default;
 const selCats=(w,slot)=>selOpts(w,slot).flatMap(id=>optOf(slot,id)?.cats||[]);
+/* sub-categories a chosen option leaves out (e.g. US Bank gas: not Costco gas) */
+const selExcl=(w,slot)=>selOpts(w,slot).flatMap(id=>optOf(slot,id)?.excl||[]);
 const selLabels=(w,slot)=>selOpts(w,slot).map(id=>optOf(slot,id)?.label||id);
 
 /* ══════════════════════════════════════════════════════════
@@ -187,7 +189,7 @@ function evalCard(w,cat,store){
     take(r.rate,r.label,r.cond?`At ${store.name}`:r.note,[],per?{key,per,text:r.note}:null);
   });
   (p.choice||[]).forEach(slot=>{
-    if(!matches(selCats(w,slot),null,cat))return;
+    if(!matches(selCats(w,slot),selExcl(w,slot),cat))return;
     const key="c:"+slot.id,per=capPeriod(slot.note);
     if(per&&isCapped(w,key))return;
     const s=w.sel[slot.id];

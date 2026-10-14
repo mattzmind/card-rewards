@@ -12,7 +12,7 @@ export interface Rule {
   cond?: string;      // only at certain stores (see m)
   m?: string[];       // store ids or store tags the condition matches
 }
-export interface ChoiceOption { id: string; label: string; cats: string[] }
+export interface ChoiceOption { id: string; label: string; cats: string[]; excl?: string[] }
 export interface ChoiceSlot {
   id: string;
   label: string;
@@ -48,6 +48,8 @@ export interface Product {
   rules?: Rule[];
   choice?: ChoiceSlot[];
   rotating?: Rotating;
+  /* new-account bonus added to every purchase, e.g. Freedom Unlimited +1.5% in year one */
+  firstYear?: { extra: number; months: number; label: string; note?: string };
   auto?: { rate: number; note?: string; options: string[] };
   perks?: string[];
   networkOptions?: string[];
@@ -74,7 +76,7 @@ export interface Category {
   niche?: boolean;
 }
 
-export interface Promo { extra: number; until: string; label?: string }
+export interface Promo { extra: number; until: string; label?: string; opened?: string; src?: string }
 export interface Report { at: string; where: string; cat: string; card: string; reason: string; note: string }
 export interface WalletCard {
   id: string;
@@ -104,7 +106,8 @@ export interface AppState {
   wallet: WalletCard[];
   recents: { c: string; s?: string }[];
   usage: Record<string, number>;
-  reports: Report[];
+  reports: Report[];   // old on-phone feedback (feedback is emailed now)
+  outbox?: Report[];   // feedback waiting to be sent
   favs: string[];
   profile: Profile;
   onboarded?: boolean;

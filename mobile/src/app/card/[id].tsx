@@ -1,6 +1,6 @@
-/* Card details: setup (quarterly bonus, chosen categories, top category), caps, reward tiers,
+/* Card details: setup (quarterly bonus, chosen categories, top category, first-year bonus), caps, reward tiers,
    perks, last 4 / network, and Deactivate / Remove.
-   Last 4 and network are a draft: Save changes commits them. Closing with unsaved edits (X or a swipe
+   Setup, last 4 and network are one draft: Save changes commits them (it also appears right under the setup form). Closing with unsaved edits (X or a swipe
    down) asks Save / Discard / Keep editing. This uses usePreventRemove, which makes the native sheet
    cancel the swipe itself. Don't toggle the sheet's options (e.g. gestureEnabled) from here: changing a
    formSheet's options while it's open re-applies its native setup, and the X bar was lost that way. */
@@ -10,13 +10,14 @@ import { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { catName } from '@/core/cats';
-import { isoToDate, qDeadline, qEnd, qLabel, qStart, shortDate } from '@/core/dates';
-import { brandOf, capWord, dn, fmtRate, netLabel, netOf, productOf, selLabels, selOpts } from '@/core/engine';
+import { isoToDate, qLabel, shortDate } from '@/core/dates';
+import { brandOf, capWord, dn, fmtRate, netLabel, netOf, productOf, selLabels } from '@/core/engine';
 import type { ChoiceSlot, WalletCard } from '@/core/types';
 import { capLabel } from '@/core/wallet';
-import { confirmSame, removeCards, rename, savePicks, setField, setInactive, toggleAct, undoCap } from '@/store/actions';
+import { confirmSame, removeCards, rename, saveSetup, setField, setInactive, undoCap } from '@/store/actions';
 import { useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
+import { CardSetupForm, type SetupDraft, draftComplete, draftDirty, draftOf, missingText, needsSetup } from '@/ui/card-setup';
 import { Icon } from '@/ui/icon';
 import { Button, Last4Input, SheetBar, last4Ok, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
@@ -33,9 +34,17 @@ export default function CardDetails() {
   const navigation = useNavigation(), [leaving, setLeaving] = useState(false);
   /* Compare the network shown on screen (the card's choice, else the product default), not the raw saved value */
   const netChanged = !!w && netOf(ctx, { ...w, network: net }) !== netOf(ctx, w);
-  const dirty = !!w && (last4 !== (w.last4 || '') || netChanged);
-  const canSave = dirty && last4Ok(last4);
-  const commit = () => { if (!w) return; setField(w.id, 'last4', last4); if (netChanged) setField(w.id, 'network', net); toast('Changes saved'); };
+  /* Categories, activations and the first-year bonus are part of the same draft, so Save changes covers them */
+  const [draft, setDraft] = useState<SetupDraft | null>(() => (w ? draftOf(ctx, w) : null));
+  const pr = w ? productOf(ctx, w.product) : undefined;
+  const setupDirty = !!w && !!draft && draftDirty(ctx, w, draft), setupOk = !draft || draftComplete(pr, draft);
+  const dirty = !!w && (last4 !== (w.last4 || '') || netChanged || setupDirty);
+  const canSave = dirty && last4Ok(last4) && (!setupDirty || setupOk);
+  const commit = () => {
+    if (!w) return;
+    setField(w.id, 'last4', last4); if (netChanged) setField(w.id, 'network', net);
+    if (setupDirty && draft) saveSetup(w.id, draft, 'Changes saved'); else toast('Changes saved');
+  };
   /* Close after the guard has switched off (next render), so Save / Remove don't trigger the prompt */
   useEffect(() => { if (leaving) router.back(); }, [leaving]);
 
@@ -44,12 +53,12 @@ export default function CardDetails() {
     Alert.alert('Save your changes?', "You edited this card but haven't saved it yet.", [
       { text: 'Keep editing', style: 'cancel' },
       { text: 'Discard', style: 'destructive', onPress: go },
-      ...(last4Ok(last4) ? [{ text: 'Save', onPress: () => { commit(); go(); } }] : []),
+      ...(canSave ? [{ text: 'Save', onPress: () => { commit(); go(); } }] : []),
     ]);
   });
   if (!w) return null;
   const p = productOf(ctx, w.product), name = dn(ctx, w);
-  const { QK, NQK, TODAY } = ctx.clock;
+  const { QK, TODAY } = ctx.clock;
   const S = makeStyles(c);
 
   const footer = (
@@ -72,6 +81,12 @@ export default function CardDetails() {
   );
 
   const unit = p.type !== 'cash' ? 'x' : '%', brand = brandOf(ctx, p.brand);
+  /* Under the setup form: "New quarter: keep the same picks?" or a saved check */
+  const { PICK_Q } = ctx.clock, slots = p.choice || [];
+  const qSlots = slots.filter(s => s.period === 'quarter' && w.sel[s.id]?.opts?.length);
+  const staleQ = qSlots.some(s => (w.sel[s.id]!.quarter || '') < PICK_Q);
+  const savedNote = staleQ ? '' : slots.length && slots.every(s => w.sel[s.id]?.opts?.length) ? (qSlots.length ? `Saved for ${qLabel(PICK_Q)}` : 'Saved')
+    : !slots.length && p.auto && w.autoFocus ? 'Saved' : '';
   const tiers: { rate: number; t: string; s: string }[] = [];
   (p.rules || []).forEach(r => tiers.push({ rate: r.rate, t: r.label, s: [r.cond, r.note].filter(Boolean).join(' · ') }));
   (p.choice || []).forEach(s => { const l = selLabels(w, s); tiers.push({ rate: s.rate, t: `${s.label}: ${l.length ? l.join(', ') : 'not set'}${isDefaultSel(w, s) ? ' (default)' : ''}`, s: s.note || '' }); });
@@ -105,12 +120,30 @@ export default function CardDetails() {
             </Pressable>
           )}
           <Text style={S.sub}>{brand.name} {p.name} · {netLabel(netOf(ctx, w))}{w.last4 ? ` · •••• ${w.last4}` : ''}</Text>
-          {p.status === 'closed' ? <Pill c={c} text="No longer offered to new applicants" warn /> : null}
           {w.inactive ? <Pill c={c} text={`Deactivated ${shortDate(isoToDate(w.inactive))}`} /> : null}
         </View>
       </View>
 
-      <Setup w={w} />
+      {draft && needsSetup(p) ? (
+        <>
+          <Text style={S.sec}>{p.rotating ? 'Quarterly bonus' : (p.choice || []).length ? 'Your categories' : p.auto ? `Your ${fmtRate(p.auto.rate)}% category` : 'First-year bonus'}</Text>
+          {staleQ ? (
+            <View style={[S.newQ, { backgroundColor: c.warnBg }]}>
+              <Text style={[S.rowSub, { color: c.warn, flex: 1, marginTop: 0 }]}>New quarter: keep the same picks for {qLabel(PICK_Q)}?</Text>
+              <SmallBtn c={c} title="Keep same" onPress={() => confirmSame(w.id)} />
+            </View>
+          ) : null}
+          <CardSetupForm ctx={ctx} w={w} draft={draft} onChange={setDraft} />
+          {setupDirty ? (
+            <View style={{ marginTop: 12 }}>
+              <Button title="Save changes" disabled={!canSave} onPress={commit} />
+              {!setupOk ? <Text style={[S.hint, { textAlign: 'center' }]}>{missingText(p, draft)}</Text> : null}
+            </View>
+          ) : savedNote ? (
+            <View style={S.savedRow}><Icon name="check" color={c.rate} size={18} strokeWidth={2.4} /><Text style={[S.rowSub, { marginTop: 0 }]}>{savedNote}</Text></View>
+          ) : null}
+        </>
+      ) : null}
 
       {caps.length ? (
         <>
@@ -163,114 +196,6 @@ export default function CardDetails() {
       </Text>
       {footer}
     </ScrollView>
-  );
-}
-
-/* Quarterly bonus activation, chosen categories, top category */
-function Setup({ w }: { w: WalletCard }) {
-  const c = useColors(), ctx = useCtx(), S = makeStyles(c);
-  const p = productOf(ctx, w.product)!; const { QK, NQK, PICK_Q } = ctx.clock;
-  const slots = p.choice || [];
-  const saved = (s: ChoiceSlot) => !!w.sel[s.id]?.opts?.length;
-  const needs = slots.some(s => !saved(s) && !isDefaultSel(w, s));
-  const [editing, setEditing] = useState(needs);
-  const [draft, setDraft] = useState<Record<string, string[]>>(() => Object.fromEntries(slots.map(s => [s.id, [...selOpts(w, s)]])));
-  if (!p.rotating && !slots.length && !p.auto) return null;
-
-  const per = slots.some(s => s.period === 'quarter') ? ` for ${qLabel(PICK_Q)}` : '';
-  const stale = slots.filter(s => s.period === 'quarter' && saved(s) && (!w.sel[s.id]!.quarter || w.sel[s.id]!.quarter! < PICK_Q));
-  const complete = slots.every(s => (draft[s.id] || []).length === s.pick);
-  const toggle = (s: ChoiceSlot, opt: string) => {
-    tap();
-    setDraft(d => { const cur = d[s.id] || []; const next = cur.includes(opt) ? cur.filter(x => x !== opt) : s.pick === 1 ? [opt] : cur.length >= s.pick ? [...cur.slice(1), opt] : [...cur, opt]; return { ...d, [s.id]: next }; });
-  };
-  const askEdit = () => Alert.alert('Edit your saved categories?', 'Use this to fix a mistake or match a change you made with your bank. Your new picks replace the saved ones.',
-    [{ text: 'Cancel', style: 'cancel' }, { text: 'Edit', onPress: () => { setDraft(Object.fromEntries(slots.map(s => [s.id, [...selOpts(w, s)]]))); setEditing(true); } }]);
-
-  return (
-    <>
-      <Text style={S.sec}>{p.rotating ? 'Quarterly bonus' : 'Your categories'}</Text>
-      {p.rotating ? (
-        <View style={S.card}>
-          {[QK, NQK].map(k => {
-            const q = p.rotating!.schedule[k]; if (!q) return null; const on = w.activated.includes(k), r = p.rotating!;
-            const when = k === QK ? `Now until ${shortDate(qEnd(k))}` : `Starts ${shortDate(qStart(k))}`;
-            const due = r.retroactive ? ` · activate by ${shortDate(qDeadline(k, r.deadlineDay || 31))}` : '';
-            return (
-              <View key={k} style={[S.capRow, k === NQK && S.divider]}>
-                <View style={{ flex: 1 }}><Text style={S.rowTitle}>{qLabel(k)}: {q.label}</Text><Text style={S.rowSub}>{when}{due}</Text></View>
-                <Chip c={c} label={on ? 'Activated' : 'Mark activated'} on={on} icon={on ? 'check' : undefined} onPress={() => toggleAct(w.id, k)} />
-              </View>
-            );
-          })}
-        </View>
-      ) : null}
-      {p.rotating ? <Text style={S.hint}>{p.rotating.activateHint || "Activate in your card's app first, then mark it here."}</Text> : null}
-
-      {slots.length ? (
-        <View style={[S.card, { padding: 14, marginTop: p.rotating ? 12 : 0 }]}>
-          {slots.map((s, si) => (
-            <View key={s.id} style={[{ flexDirection: 'row', gap: 12 }, si > 0 && { marginTop: 16 }]}>
-              <Text style={S.pickRate}>{fmtRate(s.rate)}%</Text>
-              <View style={{ flex: 1 }}>
-                {editing ? (
-                  <>
-                    <Text style={S.rowTitle}>Choose {s.pick}{s.period === 'quarter' ? per : ''}</Text>
-                    {s.note ? <Text style={S.rowSub}>{s.note}</Text> : null}
-                    <View style={[S.chips, { marginTop: 8 }]}>
-                      {s.options.map(o => <Chip key={o.id} c={c} label={o.label} on={(draft[s.id] || []).includes(o.id)} onPress={() => toggle(s, o.id)} />)}
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={S.rowTitle}>{s.label.replace(/^Your /, '').replace(/^\w/, x => x.toUpperCase())}</Text>
-                    <Text style={S.rowSub}>{selLabels(w, s).join(', ') || 'Not set'}{isDefaultSel(w, s) ? ' (card default)' : ''}</Text>
-                  </>
-                )}
-              </View>
-            </View>
-          ))}
-          {editing ? (
-            <>
-              <Text style={[S.hint, { marginTop: 14 }]}>Pick the same categories you chose with {brandOf(ctx, p.brand).name}. Most banks lock them until next quarter.</Text>
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
-                {slots.some(saved) ? <View style={{ minWidth: 100 }}><Button kind="ghost" title="Cancel" onPress={() => setEditing(false)} /></View> : null}
-                <View style={{ flex: 1 }}><Button title="Save categories" disabled={!complete} onPress={() => { savePicks(w.id, draft); setEditing(false); }} /></View>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={[S.pickFoot, { borderTopColor: c.line }]}>
-                <Icon name="check" color={c.rate} size={18} />
-                <Text style={[S.rowSub, { flex: 1 }]}>{stale.length ? `Saved for ${qLabel(w.sel[stale[0].id]!.quarter || QK)}` : `Saved${per}`}</Text>
-                <SmallBtn c={c} title="Edit" alt onPress={askEdit} />
-              </View>
-              {stale.length ? (
-                <View style={[S.newQ, { backgroundColor: c.warnBg }]}>
-                  <Text style={[S.rowSub, { color: c.warn, flex: 1 }]}>New quarter: keep the same picks for {qLabel(PICK_Q)}?</Text>
-                  <SmallBtn c={c} title="Keep same" onPress={() => confirmSame(w.id)} />
-                </View>
-              ) : null}
-            </>
-          )}
-        </View>
-      ) : null}
-
-      {p.auto ? (
-        <View style={[S.card, { padding: 14, marginTop: 12 }]}>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Text style={S.pickRate}>{fmtRate(p.auto.rate)}%</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={S.rowTitle}>Where will you spend most this month?</Text>
-              <Text style={S.rowSub}>Only your top category earns {fmtRate(p.auto.rate)}%. This is a guess you can change any time.</Text>
-              <View style={[S.chips, { marginTop: 8 }]}>
-                {p.auto.options.map(o => <Chip key={o} c={c} label={catName(o)} on={w.autoFocus === o} onPress={() => setField(w.id, 'autoFocus', o)} />)}
-              </View>
-            </View>
-          </View>
-        </View>
-      ) : null}
-    </>
   );
 }
 
@@ -329,6 +254,7 @@ const makeStyles = (c: C) => StyleSheet.create({
   label: { fontFamily: fonts.semibold, fontSize: 13, color: c.muted, marginTop: 6, marginBottom: 8 },
   field: { fontFamily: fonts.semibold, fontSize: 18, letterSpacing: 2, color: c.ink, borderWidth: 1, borderColor: c.line, backgroundColor: c.surface, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  savedRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, marginHorizontal: 4 },
   outline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 52, borderRadius: 14, borderWidth: 1, borderColor: c.line, backgroundColor: c.surface },
   outlineText: { fontFamily: fonts.semibold, fontSize: 16, color: c.ink },
 });

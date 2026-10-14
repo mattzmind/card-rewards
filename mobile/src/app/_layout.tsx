@@ -8,7 +8,8 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useApp } from '@/store/app';
-import { listenForReminderTaps, syncReminders } from '@/store/reminders';
+import { flushOutbox } from '@/store/feedback';
+import { listenForReminderTaps, needsReminders, syncReminders, enableReminders } from '@/store/reminders';
 import { useColors, useScheme } from '@/ui/theme';
 import { ToastHost } from '@/ui/toast';
 
@@ -24,10 +25,15 @@ export default function RootLayout() {
   const syncCatalog = useApp(s => s.syncCatalog);
 
   useEffect(() => { if (loaded) SplashScreen.hideAsync(); }, [loaded]);
-  useEffect(() => { syncCatalog(); }, [syncCatalog]);
-  /* Keep deadline reminders in step with the wallet (only when turned on) */
+  useEffect(() => { syncCatalog(); flushOutbox(); }, [syncCatalog]);
+  /* Keep deadline reminders in step with the wallet. They're on by default: the first time the wallet has a card
+     with quarterly deadlines, ask for notification permission (unless reminders were turned off in Profile). */
   const wallet = useApp(s => s.state.wallet), reminders = useApp(s => s.state.profile.reminders);
-  useEffect(() => { if (!reminders) return; const t = setTimeout(syncReminders, 800); return () => clearTimeout(t); }, [wallet, reminders]);
+  useEffect(() => {
+    if (reminders === false || !onboarded) return;
+    const t = setTimeout(() => { if (reminders) syncReminders(); else if (needsReminders()) enableReminders(); }, 800);
+    return () => clearTimeout(t);
+  }, [wallet, reminders, onboarded]);
   useEffect(() => listenForReminderTaps(), []);
   if (!loaded) return null;
 

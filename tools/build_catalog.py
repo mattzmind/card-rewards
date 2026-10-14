@@ -16,7 +16,7 @@ def src(url, note=None):
     return s
 
 R = lambda cats, rate, label, cond=None, note=None, excl=None: {k: v for k, v in dict(cats=cats, rate=rate, label=label, cond=cond, note=note, excl=excl).items() if v is not None}
-O = lambda id, label, cats: {"id": id, "label": label, "cats": cats}
+O = lambda id, label, cats, excl=None: {k: v for k, v in dict(id=id, label=label, cats=cats, excl=excl).items() if v is not None}
 
 brands = {
     "amex":     {"name": "American Express", "short": "Amex",            "mono": "AX", "colors": ["#2563eb", "#1e3a8a"]},
@@ -74,6 +74,9 @@ products = {
       R(["dining"], 3, "Dining, takeout & delivery"),
       R(["drugstore"], 3, "Drugstores"),
       R(["transit"], 2, "Lyft", cond="Lyft rides only, through Sep 30, 2027")],
+    # Not every account gets this: Chase's page offered a $200 bonus instead on 2026-10-13, so the app asks.
+    "firstYear": {"extra": 1.5, "months": 12, "label": "First-year bonus: +1.5% on everything",
+                  "note": "Only if your welcome offer was an extra 1.5% (on up to $20,000 spent in year one). Chase's current offer is a $200 bonus instead."},
     "perks": [],
     "source": src("https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited")},
   "chase_freedom_flex": {
@@ -148,8 +151,7 @@ products = {
     "fee": 0, "type": "cash", "base": 1, "status": "closed",
     "auto": {"rate": 5, "note": "Up to $500 per billing cycle, then 1%",
              "options": ["grocery", "dining", "gas", "streaming", "drugstore", "home", "fitness", "travel", "transit", "entertainment"]},
-    "perks": ["5% goes automatically to your top eligible category each billing cycle",
-              "Closed to new applicants since May 28, 2026; existing cards keep their rewards"],
+    "perks": ["Citi pays 5% automatically on whichever eligible category you spend the most in each billing cycle. Use this card for one category so Citi's pick matches yours."],
     "source": src("https://www.nerdwallet.com/credit-cards/news/citi-custom-cash-closed-to-new-applications",
                   "Citi's page no longer lists terms because the card closed to new applicants")},
   "citi_costco": {
@@ -226,10 +228,11 @@ products = {
     "fee": 0, "type": "points", "cpp": 1, "base": 1,
     "rules": [
       R(["dining"], 3, "Restaurants"), R(["travel"], 3, "Travel"),
-      R(["gas"], 3, "Gas stations"), R(["transit"], 3, "Transit"),
+      R(["gas"], 3, "Gas stations", note="Not gas at warehouse clubs like Costco", excl=["costco_gas"]), R(["transit"], 3, "Transit"),
       R(["streaming"], 3, "Streaming"), R(["phone"], 3, "Phone plans")],
     "perks": ["No foreign transaction fees"],
-    "source": src("https://creditcards.wellsfargo.com/autograph-visa-credit-card/")},
+    "source": {"url": "https://www.wellsfargo.com/credit-cards/autograph-visa/terms/?lang=en", "checked": "2026-10-13",
+               "note": "Wells Fargo's terms: gas at warehouse/membership clubs, superstores and grocery stores may not earn bonus points"}},
   "wells_active_cash": {
     "brand": "wells", "name": "Active Cash", "short": "Wells Active Cash", "network": "visa",
     "fee": 0, "type": "cash", "base": 2, "perks": ["3% foreign transaction fee"],
@@ -249,7 +252,7 @@ products = {
                    O("electronics", "Electronics stores", ["electronics"]), O("furniture", "Furniture stores", ["furniture"]),
                    O("clothing", "Select clothing stores", ["clothing"]), O("sporting", "Sporting goods", ["sporting"])]},
       {"id": "two", "rate": 2, "pick": 1, "period": "quarter", "label": "Your 2% pick", "note": "No cap. Gas and grocery exclude superstores and warehouse clubs.",
-       "options": [O("gas", "Gas & EV charging", ["gas"]), O("grocery", "Grocery stores", ["grocery"]), O("dining", "Restaurants", ["dining"])]}],
+       "options": [O("gas", "Gas & EV charging", ["gas"], ["costco_gas"]), O("grocery", "Grocery stores", ["grocery"]), O("dining", "Restaurants", ["dining"])]}],
     "perks": ["Choose your 5% and 2% categories every quarter, or everything earns 1%"],
     "source": src("https://www.usbank.com/credit-cards/cash-plus-visa-signature-credit-card.html")},
   "usbank_altitude_go": {
@@ -409,7 +412,7 @@ products.update({
     "fee": 150, "type": "points", "cpp": 1, "base": 1, "status": "closed",
     "rules": [R(["travel", "transit"], 3, "Travel & transit", note="Flights, hotels, rideshare, trains, tolls, parking"),
               R(["dining"], 3, "Restaurants worldwide")],
-    "perks": ["Closed to new applicants since July 2026; existing cards keep their rewards"],
+    "perks": [],
     "source": src("https://www.nerdwallet.com/credit-cards/reviews/american-express-green", "Amex's page didn't load; rates from NerdWallet")},
   "amex_delta_gold": {
     "brand": "amex", "name": "Delta SkyMiles Gold", "short": "Delta Gold", "network": "amex",
@@ -578,7 +581,7 @@ products.update({
   "chase_freedom": {
     "brand": "chase", "name": "Freedom (original)", "short": "Chase Freedom (original)", "network": "visa", "status": "closed",
     "fee": 0, "type": "cash", "base": 1, "rotating": FROT,
-    "perks": ["No longer offered, but existing cards earn the same quarterly 5% as Freedom Flex"],
+    "perks": ["Earns the same quarterly 5% as Freedom Flex"],
     "source": src("https://www.nerdwallet.com/credit-cards/learn/chase-freedom-calendar", "Same quarterly calendar as Freedom Flex")},
 
   # ── Discover ──
@@ -650,7 +653,7 @@ products.update({
     "fee": 0, "type": "points", "cpp": 1, "base": 1,
     "rules": [R(["travel"], 5, "U.S. Bank Travel Center", cond="Prepaid hotels & car rentals in the Travel Center"),
               R(["travel", "transit"], 4, "Travel", note="Airlines, hotels, car rentals, taxis, trains, cruises"),
-              R(["gas"], 4, "Gas & EV charging", note="First $1,000/quarter, then 1x"),
+              R(["gas"], 4, "Gas & EV charging", note="First $1,000/quarter, then 1x. Not warehouse clubs.", excl=["costco_gas"]),
               R(["dining"], 2, "Dining"), R(["streaming"], 2, "Streaming"),
               R(["grocery"], 2, "Grocery stores", note="Not discount stores, supercenters or warehouse clubs")],
     "perks": [],
@@ -800,6 +803,165 @@ products.update({
     "source": src("https://www.creditonebank.com/credit-cards/platinum-no-fee")},
 })
 
+# ════════════════ Batch 4 (2026-10-13): cards testers asked for + more of each bank ════════════════
+# Every card here was checked against the issuer's own page or document (source.url) on 2026-10-13.
+# Where the issuer doesn't say which network a card runs on, `networkOptions` lets the person pick
+# the logo on their card instead of us guessing. No-rewards cards (0% intro APR, credit builders)
+# are listed so people can keep them in the wallet; they earn 0.
+def src4(url, note=None):
+    s = {"url": url, "checked": "2026-10-13"}
+    if note: s["note"] = note
+    return s
+NO_REWARDS = "Doesn't earn rewards. People usually keep it for a 0% intro APR or to build credit."
+NET_UNSTATED = "The issuer's page doesn't say which network; pick the logo on your card"
+brands.update({
+    "pnc":       {"name": "PNC",       "short": "PNC",       "mono": "PN", "colors": ["#f97316", "#1f2937"]},
+    "synchrony": {"name": "Synchrony", "short": "Synchrony", "mono": "SY", "colors": ["#facc15", "#1f2937"]},
+    "td":        {"name": "TD Bank",   "short": "TD",        "mono": "TD", "colors": ["#16a34a", "#14532d"]},
+})
+products.update({
+  # ── Citi ──
+  "citi_rewards_plus": {
+    "brand": "citi", "name": "Rewards+", "short": "Citi Rewards+", "network": "mastercard", "status": "closed",
+    "fee": 0, "type": "points", "cpp": 1, "base": 1,
+    "rules": [R(["grocery", "gas"], 2, "Supermarkets & gas stations", note="First $6,000/yr combined, then 1x. Not warehouse clubs or discount stores.",
+                excl=["costco_gas"])],
+    "perks": ["Every purchase rounds up to the nearest 10 points", "10% of your points back when you redeem (first 100,000 points a year)",
+              "Citi's Rewards+ page now points to Citi Strata. If your card was switched, add Citi Strata instead."],
+    "source": src4("https://www.cardbenefits.citi.com/~/media/CPP/Files/LegalDocs/FAQs/106001_FAQs_Citi_PremierPass_Expedia_Card_Conversion_2_2.aspx",
+                   "Citi's Rewards+ disclosures (the card's product page now redirects to Strata)")},
+  "citi_diamond_preferred": {
+    "brand": "citi", "name": "Diamond Preferred", "short": "Citi Diamond", "network": "mastercard", "networkOptions": ["mastercard", "visa"],
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "No rewards",
+    "perks": [NO_REWARDS, "Long 0% intro APR on balance transfers and purchases"],
+    "source": src4(CT + "/citi-diamond-preferred-credit-card", "Citi lists Mastercard ID Theft Protection but doesn't name the network; pick the logo on your card")},
+  "citi_simplicity": {
+    "brand": "citi", "name": "Simplicity", "short": "Citi Simplicity", "network": "mastercard",
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "No rewards",
+    "perks": [NO_REWARDS, "No late fees and no penalty APR"],
+    "source": src4(CT + "/citi-simplicity-credit-card")},
+
+  # ── Wells Fargo ──
+  "wells_reflect": {
+    "brand": "wells", "name": "Reflect", "short": "Wells Reflect", "network": "visa",
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "No rewards",
+    "perks": [NO_REWARDS, "0% intro APR for 21 months on purchases and qualifying balance transfers",
+              "Up to $600 cell phone protection ($25 deductible) when you pay your phone bill with this card"],
+    "source": src4("https://creditcards.wellsfargo.com/reflect-visa-credit-card/")},
+
+  # ── Chase ──
+  "chase_slate_edge": {
+    "brand": "chase", "name": "Slate Edge", "short": "Slate Edge", "network": "visa", "networkOptions": ["visa", "mastercard"],
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "No rewards",
+    "perks": ["Doesn't earn rewards. Built to help you build credit, with an automatic credit line review every 6 months."],
+    "source": src4(CH + "/credit-building-credit-cards/edge", NET_UNSTATED)},
+  "chase_aeroplan": {
+    "brand": "chase", "name": "Air Canada Aeroplan", "short": "Aeroplan", "network": "mastercard",
+    "fee": 195, "type": "points", "cpp": 1.3, "base": 1,
+    "rules": [R(["travel"], 3, "Air Canada", cond="Bought directly from Air Canada (up to 5x with Aeroplan 25K status)"),
+              R(["travel"], 3, "Travel"),
+              # TODO 2027-01-01: grocery and dining drop to 2x (Chase: 3x through Dec 31, 2026)
+              R(["grocery"], 3, "Grocery stores", note="3x through Dec 31, 2026, then 2x"),
+              R(["dining"], 3, "Dining, takeout & delivery", note="3x through Dec 31, 2026, then 2x"),
+              R(["gas"], 2, "Gas stations")],
+    "perks": ["Points valued at 1.3¢ for ranking", "No foreign transaction fees"],
+    "source": src4(CH + "/travel-credit-cards/aircanada/aeroplan", "Mastercard per the World Mastercard benefits on Chase's page")},
+  "chase_united_gateway": {
+    "brand": "chase", "name": "United Gateway", "short": "United Gateway", "network": "visa",
+    "fee": 0, "type": "miles", "cpp": 1.2, "base": 1,
+    "rules": [R(["travel"], 2, "United purchases", cond="United purchases only (5x total on your own United fare)"),
+              R(["gas"], 2, "Gas stations"), R(["transit"], 2, "Local transit & commuting", note="Rideshare, taxis, trains, tolls, mass transit")],
+    "perks": ["Miles valued at 1.2¢ for ranking", "25% back on United in-flight food, drinks and Wi-Fi"],
+    "source": src4(CH + "/travel-credit-cards/united/united-gateway")},
+  "chase_ink_premier": {
+    "brand": "chase", "name": "Ink Business Premier", "short": "Ink Premier", "network": "visa", "networkOptions": ["visa", "mastercard"], "business": True,
+    "fee": 195, "type": "cash", "base": 2,
+    "rules": [R(["travel"], 5, "Chase Travel", cond="Only when booked through Chase Travel"),
+              R(["transit"], 5, "Lyft", cond="Lyft rides only, through Sep 30, 2027")],
+    "perks": ["Business card", "2.5% on single purchases of $5,000 or more"],
+    "source": src4(CH + "/business-credit-cards/ink/premier", NET_UNSTATED)},
+
+  # ── American Express ──
+  "amex_delta_blue": {
+    "brand": "amex", "name": "Delta SkyMiles Blue", "short": "Delta Blue", "network": "amex",
+    "fee": 0, "type": "miles", "cpp": 1.1, "base": 1,
+    "rules": [R(["travel"], 2, "Delta purchases", cond="Bought directly from Delta"),
+              R(["dining"], 2, "Restaurants worldwide", note="Including takeout and delivery in the U.S.")],
+    "perks": ["Miles valued at 1.1¢ for ranking"],
+    "source": src4("https://www.americanexpress.com/en-us/account/get-started/deltablue/earn-rewards", "Amex's Delta Blue benefits guide")},
+  "amex_blue_business_cash": {
+    "brand": "amex", "name": "Blue Business Cash", "short": "Blue Business Cash", "network": "amex", "business": True,
+    "fee": 0, "type": "cash", "base": 2, "baseLabel": "Everything (first $50,000/yr, then 1%)",
+    "perks": ["Business card", "2.7% foreign transaction fee"],
+    "source": src4("https://www.americanexpress.com/content/dam/amex/en-us/company/legal/cardmember-agreements/public-site-2024-q2-pdf-cmas/gcs-small-business/blue-business-cash-06-30-2024.pdf",
+                   "Amex's Blue Business Cash cardmember agreement (product page needs JavaScript)")},
+
+  # ── Capital One ──
+  "capone_platinum": {
+    "brand": "capone", "name": "Platinum", "short": "Capital One Platinum", "network": "mastercard", "networkOptions": CAPONE_NETS,
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "No rewards",
+    "perks": [NO_REWARDS],
+    "source": src4(CO + "/platinum/", "Capital One's page shows no rewards program; its guide calls it a no-rewards Mastercard")},
+  "capone_spark_cash_plus": {
+    "brand": "capone", "name": "Spark Cash Plus", "short": "Spark Cash Plus", "network": "mastercard", "networkOptions": CAPONE_NETS, "business": True,
+    "fee": 150, "feeNote": "Refunded every year you spend $150,000+", "type": "cash", "base": 2,
+    "rules": [R(["travel"], 5, "Capital One Business Travel", cond="Hotels, vacation rentals & rental cars through Capital One Business Travel")],
+    "perks": ["Business card"],
+    "source": src4("https://www.capitalone.com/small-business/credit-cards/spark-cash-plus/", NET_UNSTATED)},
+  "capone_spark_miles": {
+    "brand": "capone", "name": "Venture Business", "short": "Venture Business", "network": "visa", "networkOptions": CAPONE_NETS, "business": True,
+    "fee": 95, "type": "miles", "cpp": 1, "base": 2,
+    "rules": [R(["travel"], 5, "Capital One Business Travel", cond="Hotels, vacation rentals & rental cars through Capital One Business Travel")],
+    "perks": ["Business card", "Formerly Spark Miles"],
+    "source": src4("https://www.capitalone.com/small-business/credit-cards/spark-miles/", "Capital One now lists this card as Venture Business. " + NET_UNSTATED)},
+  "capone_venture_x_business": {
+    "brand": "capone", "name": "Venture X Business", "short": "Venture X Business", "network": "visa", "networkOptions": CAPONE_NETS, "business": True,
+    "fee": 395, "type": "miles", "cpp": 1, "base": 2,
+    "rules": [R(["travel"], 10, "Capital One Business Travel hotels & cars", cond="Hotels & rental cars through Capital One Business Travel"),
+              R(["travel"], 5, "Capital One Business Travel flights", cond="Flights & vacation rentals through Capital One Business Travel")],
+    "perks": ["Business card"],
+    "source": src4("https://www.capitalone.com/small-business/credit-cards/spark-miles/", NET_UNSTATED)},
+
+  # ── Bank of America ──
+  "boa_bankamericard": {
+    "brand": "boa", "name": "BankAmericard", "short": "BankAmericard", "network": "mastercard", "networkOptions": ["mastercard", "visa"],
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "No rewards",
+    "perks": [NO_REWARDS, "No penalty APR"],
+    "source": src4(BA + "/bankamericard-credit-card/", NET_UNSTATED)},
+  "boa_premium_rewards_elite": {
+    "brand": "boa", "name": "Premium Rewards Elite", "short": "BofA Premium Elite", "network": "visa",
+    "fee": 550, "type": "points", "cpp": 1, "base": 1.5,
+    "rules": [R(["travel", "transit"], 2, "Travel"), R(["dining"], 2, "Dining")],
+    "perks": ["Up to $300 airline incidental credit each year", "No foreign transaction fees"],
+    "source": src4(BA + "/premium-rewards-elite-credit-card/", "Visa Infinite per the benefits on BofA's page")},
+
+  # ── U.S. Bank ──
+  "usbank_shield": {
+    "brand": "usbank", "name": "Shield", "short": "US Bank Shield", "network": "visa",
+    "fee": 0, "type": "cash", "base": 0, "baseLabel": "Everything else (no rewards)",
+    "rules": [R(["travel"], 4, "U.S. Bank Travel Center", cond="Prepaid air, hotel & car booked in the Travel Center")],
+    "perks": ["Built for a long 0% intro APR"],
+    "source": src4(UB + "/shield-visa-credit-card.html")},
+
+  # ── Other banks ──
+  "pnc_cash_rewards": {
+    "brand": "pnc", "name": "Cash Rewards Visa", "short": "PNC Cash Rewards", "network": "visa",
+    "fee": 0, "type": "cash", "base": 1,
+    "rules": [R(["gas"], 4, "Gas stations", note="First $8,000/yr across gas, dining & grocery, then 1%"),
+              R(["dining"], 3, "Restaurants", note="First $8,000/yr across gas, dining & grocery, then 1%"),
+              R(["grocery"], 2, "Grocery stores", note="First $8,000/yr across gas, dining & grocery, then 1%")],
+    "perks": [],
+    "source": src4("https://www.pnc.com/en/personal-banking/banking/credit-cards/pnc-cash-rewards-visa-credit-card.html")},
+  "synchrony_premier": {
+    "brand": "synchrony", "name": "Premier World Mastercard", "short": "Synchrony Premier", "network": "mastercard",
+    "fee": 0, "type": "cash", "base": 2, "perks": ["Cash back posts as a statement credit"],
+    "source": src4("https://www.synchrony.com/financing/synchrony-mastercards")},
+  "td_double_up": {
+    "brand": "td", "name": "Double Up", "short": "TD Double Up", "network": "visa",
+    "fee": 0, "type": "cash", "base": 2, "perks": [],
+    "source": src4("https://www.td.com/us/en/personal-banking/credit-cards/double-up")},
+})
+
 # ════════════════ Stores (chains with known rules) + merchant tags on card rules ════════════════
 # Only brands where knowing the store changes the answer: its real category, network limits,
 # or a card that pays more there. Small businesses just use the category tiles.
@@ -925,7 +1087,7 @@ LOGIN = {
 for k, u in LOGIN.items():
     brands[k]["login"] = u
 
-catalog = {"version": "2026.10.02-v1", "updated": CHECKED, "brands": brands, "products": products, "stores": stores}
+catalog = {"version": "2026.10.13-v2", "updated": CHECKED, "brands": brands, "products": products, "stores": stores}
 out = pathlib.Path(__file__).resolve().parent.parent / "catalog.json"  # repo root, next to index.html
 out.write_text(json.dumps(catalog, indent=1, ensure_ascii=False))
 print(f"{len(products)} cards, {len(brands)} brands -> {out}")

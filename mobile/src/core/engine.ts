@@ -44,6 +44,8 @@ export const selOpts = (w: WalletCard, slot: ChoiceSlot): string[] => {
   return s && s.opts && s.opts.length ? s.opts : (slot.default ? [slot.default] : []);
 };
 export const selCats = (w: WalletCard, slot: ChoiceSlot) => selOpts(w, slot).flatMap(id => optOf(slot, id)?.cats || []);
+/* sub-categories a chosen option leaves out (e.g. US Bank gas: not Costco gas) */
+export const selExcl = (w: WalletCard, slot: ChoiceSlot) => selOpts(w, slot).flatMap(id => optOf(slot, id)?.excl || []);
 export const selLabels = (w: WalletCard, slot: ChoiceSlot) => selOpts(w, slot).map(id => optOf(slot, id)?.label || id);
 
 /* ─── Ranking ─── */
@@ -105,7 +107,7 @@ export function evalCard(ctx: Ctx, w: WalletCard, cat: Category, store?: Store |
     take(r.rate, r.label, r.cond ? `At ${store!.name}` : r.note, [], per ? { key, per, text: r.note } : null);
   });
   (p.choice || []).forEach(slot => {
-    if (!matches(selCats(w, slot), null, cat)) return;
+    if (!matches(selCats(w, slot), selExcl(w, slot), cat)) return;
     const key = 'c:' + slot.id, per = capPeriod(slot.note);
     if (per && isCapped(ctx, w, key)) return;
     const s = w.sel[slot.id];

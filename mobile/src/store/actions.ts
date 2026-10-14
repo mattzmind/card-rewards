@@ -7,9 +7,11 @@ import { iso, isoToDate, makeClock, shortDate } from '@/core/dates';
 import { type Ctx, dn, fmtRate, periodEnd, productOf } from '@/core/engine';
 import type { AppState, Report, WalletCard } from '@/core/types';
 import { capLabel } from '@/core/wallet';
+import { type SetupDraft, firstYearPromo } from '@/ui/card-setup';
 import { toast } from '@/ui/toast';
 
 import { newCard, useApp } from './app';
+import { sendFeedback } from './feedback';
 
 const st = () => useApp.getState();
 const card = (s: AppState, id: string) => s.wallet.find(w => w.id === id);
@@ -98,6 +100,27 @@ export function savePicks(id: string, draft: Record<string, (string | undefined)
   buzz();
   toast('Categories saved', () => st().update(s => { const w = card(s, id); if (w) w.sel = before; }));
 }
+/* Save the card setup form (ui/card-setup.tsx): picks, top category, activations, first-year bonus.
+   Saving quarterly picks also confirms them for the quarter being picked. */
+export function saveSetup(id: string, d: SetupDraft, msg = 'Card setup saved') {
+  const ctx = ctxNow(), w0 = card(ctx.state, id); if (!w0) return; const p = productOf(ctx, w0.product)!;
+  const before = structuredClone(w0), { QK, NQK, PICK_Q } = ctx.clock;
+  st().update(s => {
+    const w = card(s, id)!;
+    (p.choice || []).forEach(sl => {
+      const opts = (d.sel[sl.id] || []).filter(Boolean).slice(0, sl.pick) as string[];
+      if (opts.length) w.sel[sl.id] = { opts, quarter: sl.period === 'quarter' ? PICK_Q : undefined };
+    });
+    if (p.auto && d.autoFocus) w.autoFocus = d.autoFocus;
+    if (p.rotating) w.activated = [...w.activated.filter(k => k !== QK && k !== NQK), ...d.activated];
+    if (p.firstYear) {
+      w.promos = w.promos.filter(x => x.src !== 'firstYear');
+      const fy = firstYearPromo(p, d.opened); if (fy) w.promos.push(fy);
+    }
+  });
+  buzz();
+  toast(msg, () => st().update(s => { const i = s.wallet.findIndex(w => w.id === id); if (i >= 0) s.wallet[i] = before; }));
+}
 export function confirmSame(id: string) {
   const ctx = ctxNow();
   st().update(s => { const w = card(s, id); if (!w) return; (productOf(ctx, w.product)?.choice || []).forEach(sl => { const x = w.sel[sl.id]; if (sl.period === 'quarter' && x) x.quarter = ctx.clock.PICK_Q; }); });
@@ -132,14 +155,9 @@ export function addCard(product: string, opts: { nickname?: string; last4?: stri
 }
 
 export const REASONS = ['Another card earns more here', "This card isn't accepted here", 'The store is in the wrong category', 'The rate shown is wrong'];
-export function addReport(r: Omit<Report, 'at'>) {
-  st().update(s => { s.reports.unshift({ at: iso(new Date()), ...r }); });
-  buzz(); toast('Thanks! Feedback saved in notifications');
+/* Feedback is emailed to the Lucro team (store/feedback.ts); it isn't kept on the phone */
+export function addReport(r: Omit<Report, 'at'>, thanks = 'Thanks! Your feedback was sent') {
+  sendFeedback({ at: iso(new Date()), ...r });
+  buzz(); toast(thanks);
 }
-export function clearReports() {
-  Alert.alert('Clear all feedback?', 'Your saved reports will be deleted from this phone.', [
-    { text: 'Cancel', style: 'cancel' }, { text: 'Clear', style: 'destructive', onPress: () => { st().update(s => { s.reports = []; }); toast('Reports cleared'); } },
-  ]);
-}
-export const reportLine = (r: Report) => `${r.at} | ${r.where} | ${r.card} | ${r.reason}${r.note ? ' | ' + r.note : ''}`;
 export const rateText = (r: number) => fmtRate(r) + '%';

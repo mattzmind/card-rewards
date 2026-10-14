@@ -1,12 +1,12 @@
-/* Notifications (bell): quarterly activations, picks to confirm or choose, caps reached, your feedback. */
+/* Notifications (bell): quarterly activations, picks to confirm or choose, caps reached. */
 import { router } from 'expo-router';
-import { Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { isoToDate, shortDate } from '@/core/dates';
 import { type Task, activeWallet, allTasks, brandOf, dn, productOf } from '@/core/engine';
 import type { WalletCard } from '@/core/types';
 import { capLabel } from '@/core/wallet';
-import { clearReports, confirmSame, dismissTask, finishAct, reportLine, startAct, undoCap } from '@/store/actions';
+import { confirmSame, dismissTask, finishAct, startAct, undoCap } from '@/store/actions';
 import { useCtx } from '@/store/app';
 import { enableReminders } from '@/store/reminders';
 import { toast } from '@/ui/toast';
@@ -23,7 +23,6 @@ export default function Notifications() {
   const tasks = allTasks(ctx), { TODAY } = ctx.clock;
   const caps: { w: WalletCard; k: string; u: string }[] = [];
   activeWallet(ctx).forEach(w => Object.entries(w.capped || {}).forEach(([k, u]) => { if (u >= TODAY) caps.push({ w, k, u }); }));
-  const reports = ctx.state.reports;
   const openCard = (id: string) => router.push({ pathname: '/card/[id]', params: { id } });
   const openBank = (w: WalletCard) => { const u = brandOf(ctx, productOf(ctx, w.product)?.brand || '').login; if (u) Linking.openURL(u).catch(() => {}); };
 
@@ -40,7 +39,7 @@ export default function Notifications() {
     return <Btn c={c} title="Choose" onPress={() => openCard(id)} />;
   };
 
-  const empty = !tasks.length && !caps.length && !reports.length;
+  const empty = !tasks.length && !caps.length;
   return (
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
       <View style={styles.head}>
@@ -88,22 +87,11 @@ export default function Notifications() {
         </>
       ) : null}
 
-      {reports.length ? (
-        <>
-          <Sec c={c} title="Your feedback" />
-          {reports.map((r, i) => <Card key={i} c={c} icon="flag" tone="muted" title={`${r.where} · ${r.card}`} body={`${r.reason}${r.note ? ` · ${r.note}` : ''} · ${shortDate(isoToDate(r.at))}`} />)}
-          <View style={styles.actions}>
-            <Btn c={c} title="Share all" onPress={() => Share.share({ message: reports.map(reportLine).join('\n') }).catch(() => {})} />
-            <Btn c={c} alt title="Clear" onPress={clearReports} />
-          </View>
-        </>
-      ) : null}
-
       {empty ? (
         <View style={styles.empty}>
           <View style={[styles.emptyIc, { backgroundColor: c.hl }]}><Icon name="check" color={c.hlInk} size={30} strokeWidth={2.4} /></View>
           <Text style={[styles.emptyH, { color: c.ink }]}>You’re all caught up</Text>
-          <Text style={[styles.emptyP, { color: c.muted }]}>Quarterly activations, category picks, spending caps and your feedback will show up here.</Text>
+          <Text style={[styles.emptyP, { color: c.muted }]}>Quarterly activations, category picks and spending caps will show up here.</Text>
         </View>
       ) : null}
     </ScrollView>

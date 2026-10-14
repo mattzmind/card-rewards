@@ -1,6 +1,6 @@
-/* Feedback, saved in Notifications so it can be shared. Two modes:
-   "Wrong card?" from an answer (c, s), or a request to add a store that search couldn't find (missing),
-   with a searchable category list. */
+/* Feedback, emailed to the Lucro team (store/feedback.ts). Three modes:
+   "Wrong card?" from an answer (c, s), a request to add a store that search couldn't find (missing),
+   with a searchable category list, or a request to add a card that isn't in the catalog (card). */
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -14,7 +14,8 @@ import { Button, List, Row, SheetBar, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 
 export default function Report() {
-  const { c: catId, s: storeId, missing } = useLocalSearchParams<{ c?: string; s?: string; missing?: string }>();
+  const { c: catId, s: storeId, missing, card } = useLocalSearchParams<{ c?: string; s?: string; missing?: string; card?: string }>();
+  if (card != null) return <RequestCard name={card} />;
   if (missing != null) return <RequestStore name={missing} />;
   return <WrongCard catId={catId || ''} storeId={storeId} />;
 }
@@ -33,7 +34,7 @@ function WrongCard({ catId, storeId }: { catId: string; storeId?: string }) {
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
       <SheetBar onClose={() => router.back()} />
       <Text style={[styles.h, { color: c.ink }]}>What went wrong?</Text>
-      <Text style={[styles.sub, { color: c.muted }]}>Your feedback is saved in notifications so you can send it in.</Text>
+      <Text style={[styles.sub, { color: c.muted }]}>Your report goes straight to the Lucro team so we can fix the card data.</Text>
       <View style={{ gap: 8 }}>
         {REASONS.map((r, i) => (
           <Pressable key={r} onPress={() => { tap(); setReason(i); }} accessibilityRole="radio" accessibilityState={{ checked: reason === i }}
@@ -62,14 +63,14 @@ function RequestStore({ name: initial }: { name: string }) {
   const cats = CATS.filter(x => !f || (x.label + ' ' + (x.kw || '')).toLowerCase().includes(f))
     .sort((a, b) => (a.id === 'other' ? 1 : 0) - (b.id === 'other' ? 1 : 0) || a.label.localeCompare(b.label));
   const submit = () => {
-    addReport({ where: name.trim(), cat: picked ? picked.label : '', card: 'Store not listed', reason: picked ? `Please add this store (${picked.label.toLowerCase()})` : 'Please add this store', note: note.trim() });
+    addReport({ where: name.trim(), cat: picked ? picked.label : '', card: 'Store not listed', reason: picked ? `Please add this store (${picked.label.toLowerCase()})` : 'Please add this store', note: note.trim() }, 'Thanks! Your request was sent');
     router.back();
   };
   return (
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
       <SheetBar onClose={() => router.back()} />
       <Text style={[styles.h, { color: c.ink }]}>Request a store</Text>
-      <Text style={[styles.sub, { color: c.muted }]}>Tell us which store or restaurant is missing. Your request is saved in notifications so you can send it in.</Text>
+      <Text style={[styles.sub, { color: c.muted }]}>Tell us which store or restaurant is missing. Your request goes straight to the Lucro team.</Text>
       <Text style={[styles.label, { color: c.muted, marginTop: 0 }]}>Store name</Text>
       <TextInput value={name} onChangeText={setName} placeholder="For example: Rosa's Taqueria" placeholderTextColor={c.muted} autoCorrect={false} returnKeyType="next"
         style={[styles.field, { color: c.ink, backgroundColor: c.surface, borderColor: c.line }]} />
@@ -91,6 +92,36 @@ function RequestStore({ name: initial }: { name: string }) {
       <TextInput value={note} onChangeText={setNote} multiline placeholder="For example: Austin, TX. Family-owned Mexican restaurant" placeholderTextColor={c.muted}
         style={[styles.field, styles.multi, { color: c.ink, backgroundColor: c.surface, borderColor: c.line }]} />
       <View style={{ marginTop: 18, gap: 4 }}>
+        <Button title="Send request" onPress={submit} disabled={!name.trim()} />
+        <Button kind="ghost" title="Cancel" onPress={() => router.back()} />
+      </View>
+    </ScrollView>
+  );
+}
+
+/* A card that isn't in the catalog yet (e.g. a credit union card) */
+function RequestCard({ name: initial }: { name: string }) {
+  const c = useColors();
+  const [name, setName] = useState(initial), [bank, setBank] = useState(''), [note, setNote] = useState('');
+  const submit = () => {
+    addReport({ where: bank.trim() || 'Bank not given', cat: '', card: name.trim(), reason: 'Please add this card', note: note.trim() }, 'Thanks! Your request was sent');
+    router.back();
+  };
+  const field = [styles.field, { color: c.ink, backgroundColor: c.surface, borderColor: c.line }];
+  return (
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar onClose={() => router.back()} />
+      <Text style={[styles.h, { color: c.ink }]}>Request a card</Text>
+      <Text style={[styles.sub, { color: c.muted }]}>Tell us which card is missing and we’ll add its rewards to Lucro. Your request goes straight to the Lucro team.</Text>
+      <Text style={[styles.label, { color: c.muted, marginTop: 0 }]}>Card name</Text>
+      <TextInput value={name} onChangeText={setName} placeholder="For example: Diamond Preferred" placeholderTextColor={c.muted} autoCorrect={false} returnKeyType="next" style={field} />
+      <Text style={[styles.label, { color: c.muted }]}>Bank (optional)</Text>
+      <TextInput value={bank} onChangeText={setBank} placeholder="For example: Citi" placeholderTextColor={c.muted} autoCorrect={false} returnKeyType="next" style={field} />
+      <Text style={[styles.label, { color: c.muted }]}>What it earns, if you know (optional)</Text>
+      <TextInput value={note} onChangeText={setNote} multiline placeholder="For example: 3% at grocery stores, 1% everything else" placeholderTextColor={c.muted}
+        style={[...field, styles.multi]} />
+      <Text style={[styles.sub, { color: c.muted, fontSize: 13, marginTop: 10 }]}>Never include your card number.</Text>
+      <View style={{ marginTop: 8, gap: 4 }}>
         <Button title="Send request" onPress={submit} disabled={!name.trim()} />
         <Button kind="ghost" title="Cancel" onPress={() => router.back()} />
       </View>

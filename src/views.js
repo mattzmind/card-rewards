@@ -398,7 +398,6 @@ function openDrawer(id,keep){
           <button class="icon-btn" onclick="cancelInlineName('${w.id}')" aria-label="Cancel">${ic("x")}</button></div>`
         :`<h2 class="sheet-title title-edit"><span>${esc(dn(w))}</span><button class="pencil" onclick="startInlineName('${w.id}')" aria-label="Rename card">${ic("edit")}</button>${ownerBadge(w)}</h2>`}
       <p class="sheet-sub">${esc(brand.name)} ${esc(p.name)} · ${netLabel(netOf(w))}${w.last4?` · <span class="mono">•••• ${esc(w.last4)}</span>`:""}</p>
-      ${p.status==="closed"?`<span class="pill warn">No longer offered to new applicants</span>`:""}
       ${w.inactive?`<span class="pill">Deactivated ${shortDate(isoToDate(w.inactive))}</span>`:""}</div></div>
     ${SHOW.accountDetails?`<div class="stats"><div><b>Due</b>${ordinal(w.dueDay)}</div><div><b>Limit</b>${esc(w.limit)||"—"}</div><div><b>Fee</b>$${p.fee}</div><div><b>Rewards</b>${esc(w.rewards)||"—"}</div></div>`:""}
     ${setupHTML(w)}
@@ -629,7 +628,7 @@ function renderBankCards(){
 function cardFull(id){const p=P(id),owned=ownedCount(id)&&SINGLE_CARD_PER_PRODUCT;
   return `<div class="offer ${owned?"muted":""}"><div class="offer-art">${cardArt(id)}</div>
     <div class="row-title">${esc(B(p.brand).name)} ${esc(p.name)}</div>
-    <div class="row-sub">${netLabel(p.network)}${p.business?" · Business":""}${p.status==="closed"?" · No longer offered":""}${owned?(inactiveOf(id)?" · Deactivated":" · In your wallet"):""}</div>
+    <div class="row-sub">${netLabel(p.network)}${p.business?" · Business":""}${owned?(inactiveOf(id)?" · Deactivated":" · In your wallet"):""}</div>
     ${owned?(inactiveOf(id)?`<button class="btn" onclick="reactivateFromAdd('${id}')">Reactivate</button>`:`<button class="btn" disabled>Already added</button>`):`<button class="btn" onclick="startAdd('${id}')">Add</button>`}</div>`}
 function startAdd(pid){if(SINGLE_CARD_PER_PRODUCT&&ownedCount(pid))return;if(addIss)bankCardsScroll=curScroll();else banksScroll=curScroll();const p=P(pid);draft={product:pid,owner:state.people[0]?.id||"",nickname:"",last4:"",network:p.network};renderDraft(false)}
 function renderDraft(keep=true){

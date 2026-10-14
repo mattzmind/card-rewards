@@ -1,7 +1,7 @@
 /* First run: welcome → your name → your cards → a first answer from their own wallet. */
 import * as Haptics from 'expo-haptics';
-import { useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -29,45 +29,100 @@ export default function Onboarding() {
   );
 }
 
+/* Intro: swipeable slides (big visual, one idea each), page dots, Skip, then Get started */
+const SLIDES = [
+  { key: 'earn', title: 'Get paid back on every purchase.', body: 'Lucro knows the rewards on 100+ cards and picks the one that pays you most.' },
+  { key: 'answer', title: 'The right card, before you pay.', body: 'Search any store or category and see which of your cards earns the most there.' },
+  { key: 'remind', title: 'Never miss a quarterly bonus.', body: 'A heads-up when it’s time to pick your categories or activate a 5% bonus.' },
+  { key: 'private', title: 'Private by design.', body: 'Your cards stay on this phone. No bank logins, no card numbers, ever.' },
+];
+
 function Welcome({ next }: { next: () => void }) {
-  const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets(), win = useWindowDimensions();
+  const [width, setWidth] = useState(win.width || 390); // the pager's own width (measured), so each slide is exactly one page
+  const ref = useRef<ScrollView>(null), [i, setI] = useState(0), last = i === SLIDES.length - 1;
   const restore = async () => {
     try { await importBackup(); } catch (e) { Alert.alert('Could not restore', e instanceof Error ? e.message : String(e)); }
   };
-  const vals: [string, string, string][] = [
-    ['tag', 'The right card at every store', 'Search any store and see which card earns the most.'],
-    ['bolt', 'Never miss a bonus', 'Reminders for quarterly activations and category picks.'],
-    ['lock', 'Private by design', 'Your cards stay on this phone. No bank logins, ever.'],
-  ];
+  const go = (n: number) => { ref.current?.scrollTo({ x: n * width, animated: true }); setI(n); };
   return (
     <View style={{ flex: 1, backgroundColor: INK }}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 22, paddingHorizontal: GUTTER, paddingBottom: 24 }}>
+      <View style={[styles.introTop, { paddingTop: insets.top + 10 }]}>
         <Text style={styles.word}>lucro</Text>
-        <View style={styles.fan} pointerEvents="none">
-          {POPULAR_CARDS.slice(0, 3).map((id, i) => (
-            <View key={id} style={[styles.fanCard, { transform: [{ translateX: [-58, 58, 0][i] }, { translateY: [18, 18, -4][i] }, { rotate: ['-12deg', '12deg', '0deg'][i] }], zIndex: i }]}>
-              <CardArt product={id} width={190} plain />
-            </View>
-          ))}
-        </View>
-        <Text style={styles.welcomeH}>Get paid back on every purchase.</Text>
-        <View style={{ gap: 16, marginTop: 24 }}>
-          {vals.map(([i, t, s]) => (
-            <View key={t} style={styles.val}>
-              <View style={styles.valIc}><Icon name={i} color={LIME} size={21} /></View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.valT}>{t}</Text>
-                <Text style={styles.valS}>{s}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
+        {!last ? <Pressable onPress={() => { tap(); next(); }} hitSlop={10} style={styles.skip} accessibilityRole="button"><Text style={styles.skipText}>Skip</Text></Pressable> : null}
+      </View>
+      <ScrollView ref={ref} horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={{ flex: 1 }}
+        onLayout={e => { const w = Math.round(e.nativeEvent.layout.width); if (w && w !== width) setWidth(w); }}
+        onMomentumScrollEnd={e => setI(Math.round(e.nativeEvent.contentOffset.x / width))}>
+        {SLIDES.map(s => (
+          <View key={s.key} style={{ width, flexShrink: 0, paddingHorizontal: GUTTER }}>
+            <View style={styles.visual} pointerEvents="none"><SlideArt k={s.key} /></View>
+            <Text style={styles.welcomeH}>{s.title}</Text>
+            <Text style={styles.welcomeP}>{s.body}</Text>
+          </View>
+        ))}
       </ScrollView>
       <View style={{ paddingHorizontal: GUTTER, paddingBottom: insets.bottom + 8 }}>
-        <Button kind="lime" title="Get started" onPress={next} />
+        <View style={styles.pager} accessibilityLabel={`Page ${i + 1} of ${SLIDES.length}`}>
+          {SLIDES.map((s, n) => <View key={s.key} style={[styles.pageDot, n === i && styles.pageDotOn]} />)}
+        </View>
+        <Button kind="lime" title={last ? 'Get started' : 'Next'} onPress={() => (last ? next() : go(i + 1))} />
         <Pressable onPress={restore} style={styles.restore}>
           <Text style={styles.restoreText}>Have a backup? <Text style={{ color: '#fff', textDecorationLine: 'underline' }}>Restore it</Text></Text>
         </Pressable>
+      </View>
+    </View>
+  );
+}
+
+/* Each slide's picture, drawn with the app's own pieces */
+function SlideArt({ k }: { k: string }) {
+  if (k === 'earn') return (
+    <View style={styles.fan}>
+      {POPULAR_CARDS.slice(0, 3).map((id, n) => (
+        <View key={id} style={[styles.fanCard, { transform: [{ translateX: [-62, 62, 0][n] }, { translateY: [22, 22, 0][n] }, { rotate: ['-12deg', '12deg', '0deg'][n] }], zIndex: n }]}>
+          <CardArt product={id} width={196} plain />
+        </View>
+      ))}
+    </View>
+  );
+  if (k === 'answer') return (
+    <View style={styles.mock}>
+      <View style={styles.mockSearch}><Icon name="search" color="rgba(255,255,255,0.6)" size={18} /><Text style={styles.mockSearchT}>Whole Foods</Text></View>
+      {[['amex_gold', 'Amex Gold', 'U.S. supermarkets', '4x', true], ['citi_double_cash', 'Citi Double Cash', 'Everything', '2%', false], ['chase_freedom_unlimited', 'Chase Freedom', 'Everything else', '1.5%', false]].map(([id, n, s, r, best]) => (
+        <View key={id as string} style={[styles.mockRow, best ? styles.mockBest : null]}>
+          <CardArt product={id as string} width={52} plain />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.mockT}>{n as string}</Text>
+            <Text style={styles.mockS}>{best ? 'Best card here · ' : ''}{s as string}</Text>
+          </View>
+          <Text style={[styles.mockRate, !best && { color: 'rgba(255,255,255,0.55)', fontSize: 18 }]}>{r as string}</Text>
+        </View>
+      ))}
+    </View>
+  );
+  if (k === 'remind') return (
+    <View style={[styles.mock, { gap: 10 }]}>
+      {[['Choose your Q1 2027 categories', 'US Bank Cash+ earns 1% until you pick. Tap to set them.', 'now'],
+        ['Activate your Q1 2027 bonus', 'Chase Freedom Flex: 5% at grocery stores is open.', '9:41']].map(([t, b, when], n) => (
+        <View key={t} style={[styles.banner, n === 1 && { opacity: 0.7, transform: [{ scale: 0.96 }] }]}>
+          <View style={styles.bannerIc}><Text style={styles.bannerL}>l</Text></View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}><Text style={styles.bannerApp}>LUCRO</Text><Text style={styles.bannerApp}>{when}</Text></View>
+            <Text style={styles.bannerT}>{t}</Text>
+            <Text style={styles.bannerB}>{b}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+  return (
+    <View style={[styles.mock, { alignItems: 'center', gap: 18 }]}>
+      <View style={styles.lockIc}><Icon name="lock" color={INK} size={44} strokeWidth={2} /></View>
+      <View style={styles.pills}>
+        {['No bank logins', 'No card numbers', 'No account', 'Stays on your phone'].map(t => (
+          <View key={t} style={styles.pill}><Icon name="check" color={LIME} size={14} strokeWidth={2.6} /><Text style={styles.pillT}>{t}</Text></View>
+        ))}
       </View>
     </View>
   );
@@ -193,13 +248,35 @@ function CardsAndDone({ back }: { back: () => void }) {
 
 const styles = StyleSheet.create({
   word: { fontFamily: fonts.displayHeavy, fontSize: 26, color: '#fff', letterSpacing: -0.8 },
-  fan: { height: 170, marginTop: 26, marginBottom: 18, alignItems: 'center' },
-  fanCard: { position: 'absolute', top: 8 },
-  welcomeH: { fontFamily: fonts.display, fontSize: 36, lineHeight: 38, letterSpacing: -1, color: '#fff', maxWidth: 320 },
-  val: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
-  valIc: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(163,230,53,0.14)', alignItems: 'center', justifyContent: 'center' },
-  valT: { fontFamily: fonts.semibold, fontSize: 16, color: '#fff' },
-  valS: { fontFamily: fonts.body, fontSize: 14, color: 'rgba(255,255,255,0.66)', marginTop: 2 },
+  introTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: GUTTER, minHeight: 44 },
+  skip: { minHeight: 44, minWidth: 44, alignItems: 'flex-end', justifyContent: 'center' },
+  skipText: { fontFamily: fonts.semibold, fontSize: 16, color: 'rgba(255,255,255,0.72)' },
+  visual: { height: 300, justifyContent: 'center', marginTop: 8, marginBottom: 20 },
+  fan: { height: 190, alignItems: 'center' },
+  fanCard: { position: 'absolute', top: 12 },
+  welcomeH: { fontFamily: fonts.display, fontSize: 36, lineHeight: 39, letterSpacing: -1, color: '#fff', maxWidth: 330 },
+  welcomeP: { fontFamily: fonts.body, fontSize: 17, lineHeight: 24, color: 'rgba(255,255,255,0.7)', marginTop: 12, maxWidth: 340 },
+  pager: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginBottom: 18 },
+  pageDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.25)' },
+  pageDotOn: { width: 22, backgroundColor: LIME },
+  mock: { gap: 8 },
+  mockSearch: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 46, borderRadius: 14, paddingHorizontal: 14, backgroundColor: 'rgba(255,255,255,0.08)', marginBottom: 6 },
+  mockSearchT: { fontFamily: fonts.medium, fontSize: 16, color: '#fff' },
+  mockRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.05)' },
+  mockBest: { backgroundColor: 'rgba(163,230,53,0.12)', borderWidth: 1, borderColor: 'rgba(163,230,53,0.45)' },
+  mockT: { fontFamily: fonts.semibold, fontSize: 15, color: '#fff' },
+  mockS: { fontFamily: fonts.body, fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 1 },
+  mockRate: { fontFamily: fonts.display, fontSize: 26, color: LIME },
+  banner: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.12)' },
+  bannerIc: { width: 38, height: 38, borderRadius: 9, backgroundColor: LIME, alignItems: 'center', justifyContent: 'center' },
+  bannerL: { fontFamily: fonts.displayHeavy, fontSize: 22, color: INK, marginTop: -3 },
+  bannerApp: { fontFamily: fonts.medium, fontSize: 12, letterSpacing: 0.4, color: 'rgba(255,255,255,0.55)' },
+  bannerT: { fontFamily: fonts.semibold, fontSize: 15, color: '#fff', marginTop: 2 },
+  bannerB: { fontFamily: fonts.body, fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 1 },
+  lockIc: { width: 96, height: 96, borderRadius: 30, backgroundColor: LIME, alignItems: 'center', justifyContent: 'center' },
+  pills: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, maxWidth: 330 },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.08)' },
+  pillT: { fontFamily: fonts.medium, fontSize: 14, color: '#fff' },
   restore: { minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
   restoreText: { fontFamily: fonts.body, fontSize: 15, color: 'rgba(255,255,255,0.72)' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44, marginBottom: 18 },

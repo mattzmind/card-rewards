@@ -10,7 +10,7 @@ jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), re
 jest.mock('expo-router/react-navigation', () => ({ usePreventRemove: jest.fn() }));
 jest.mock('react-native-reanimated', () => {
   const { View, ScrollView } = jest.requireActual('react-native');
-  const anim = { duration: () => anim };
+  const anim: any = { duration: () => anim, delay: () => anim };
   return { __esModule: true, default: { View, ScrollView }, useAnimatedRef: () => ({ current: null }), FadeInRight: anim, FadeOutLeft: anim, FadeInDown: anim, FadeOutDown: anim,
     useSharedValue: (v: any) => ({ value: v, get: () => v, set: () => {} }), useAnimatedStyle: () => ({}), withTiming: (v: any) => v, interpolate: () => 1, runOnJS: (fn: any) => fn,
     Easing: { out: () => () => 0, cubic: () => 0 } };
@@ -117,16 +117,48 @@ test('Wallet shows the summary, toolbar and cards', async () => {
   expect(screen.getByText(/Your best rate/)).toBeTruthy();
 });
 
-test('Card details: mark the quarterly bonus activated', async () => {
+test('Card details: mark the quarterly bonus activated, then save', async () => {
   const flex = st().wallet.find(w => w.product === 'chase_freedom_flex')!;
   params.id = flex.id;
   await render(<CardDetails />);
   expect(screen.getByText('Rewards')).toBeTruthy();
-  const mark = screen.queryAllByText('Mark activated');
-  if (mark.length) {
-    await fireEvent.press(mark[0]);
-    expect(st().wallet.find(w => w.id === flex.id)!.activated.length).toBe(1);
-  }
+  await fireEvent.press(screen.getAllByText('Mark activated')[0]);
+  expect(st().wallet.find(w => w.id === flex.id)!.activated.length).toBe(0); // a draft until saved
+  await fireEvent.press(screen.getAllByText('Save changes')[0]);
+  expect(st().wallet.find(w => w.id === flex.id)!.activated.length).toBe(1);
+});
+
+test('Card details: category dropdowns turn Save changes on, and saving stores the picks', async () => {
+  useApp.getState().update(s => { s.wallet.push(newCard('usbank_cash_plus')); });
+  const cp = st().wallet.find(w => w.product === 'usbank_cash_plus')!;
+  params.id = cp.id;
+  await render(<CardDetails />);
+  await fireEvent.press(screen.getByLabelText('5% category 1: Choose a category'));
+  await fireEvent.press(screen.getByText('Fast food'));
+  expect(screen.getByText('Choose 2 categories for 5% to save.')).toBeTruthy();
+  await fireEvent.press(screen.getByLabelText('5% category 2: Choose a category'));
+  expect(screen.getByText('Already picked')).toBeTruthy(); // can't pick fast food twice
+  await fireEvent.press(screen.getByText('Cell phone'));
+  await fireEvent.press(screen.getByLabelText('2% category 1: Choose a category'));
+  await fireEvent.press(screen.getByText('Restaurants'));
+  await fireEvent.press(screen.getAllByText('Save changes')[0]);
+  const sel = st().wallet.find(w => w.id === cp.id)!.sel;
+  expect(sel.five?.opts).toEqual(['fast_food', 'phone']);
+  expect(sel.two?.opts).toEqual(['dining']);
+  expect(screen.getByText(/^Saved for Q/)).toBeTruthy();
+});
+
+test('Card details: Citi Custom Cash top category is saved with a button, not on tap', async () => {
+  useApp.getState().update(s => { s.wallet.push(newCard('citi_custom_cash')); });
+  const cc = st().wallet.find(w => w.product === 'citi_custom_cash')!;
+  params.id = cc.id;
+  await render(<CardDetails />);
+  expect(screen.queryByText(/No longer offered/)).toBeNull();
+  await fireEvent.press(screen.getByLabelText('Top category: Choose a category'));
+  await fireEvent.press(screen.getAllByText('Gas')[0]);
+  expect(st().wallet.find(w => w.id === cc.id)!.autoFocus).toBeUndefined();
+  await fireEvent.press(screen.getAllByText('Save changes')[0]);
+  expect(st().wallet.find(w => w.id === cc.id)!.autoFocus).toBe('gas');
 });
 
 test('Card details: Save changes stays off until an edit, then saves last 4', async () => {
@@ -143,15 +175,30 @@ test('Card details: Save changes stays off until an edit, then saves last 4', as
   expect(st().wallet.find(w => w.id === gold.id)!.last4).toBe('4321');
 });
 
-test('Add: search a card and add it', async () => {
+test('Add: pick several cards, add them, then set up the one with categories', async () => {
   await render(<Add />);
-  expect(screen.getByText('Add a card')).toBeTruthy();
+  expect(screen.getByText('Add cards')).toBeTruthy();
   await fireEvent.changeText(screen.getByPlaceholderText('Search banks or cards'), 'sapphire preferred');
   await fireEvent.press(screen.getByText('Chase Sapphire Preferred'));
-  await fireEvent.changeText(screen.getByPlaceholderText('1234'), '12a34');
+  await fireEvent.changeText(screen.getByPlaceholderText('Search banks or cards'), 'cash+');
+  await fireEvent.press(screen.getByText('U.S. Bank Cash+'));
+  await fireEvent.press(screen.getByText('Add 2 cards'));
+  await fireEvent.changeText(screen.getAllByPlaceholderText('1234')[0], '12a34');
   await fireEvent.press(screen.getByText('Add to wallet'));
-  const added = st().wallet.find(w => w.product === 'chase_sapphire_preferred');
-  expect(added?.last4).toBe('1234');
+  expect(st().wallet.find(w => w.product === 'chase_sapphire_preferred')?.last4).toBe('1234');
+  expect(st().wallet.find(w => w.product === 'usbank_cash_plus')).toBeTruthy();
+  expect(screen.getByText('2 cards added')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Continue'));
+  expect(screen.getByText(/Set up your/)).toBeTruthy(); // only Cash+ needs setup
+  await fireEvent.press(screen.getByText('Skip for now'));
+  expect(require('expo-router').router.back).toHaveBeenCalled();
+});
+
+test('Add: request a card that is not listed', async () => {
+  await render(<Add />);
+  await fireEvent.changeText(screen.getByPlaceholderText('Search banks or cards'), 'zzz platinum');
+  await fireEvent.press(screen.getByText('Request “zzz platinum”'));
+  expect(require('expo-router').router.push).toHaveBeenCalledWith({ pathname: '/report', params: { card: 'zzz platinum' } });
 });
 
 test('Notifications render', async () => {
@@ -183,12 +230,23 @@ test('Sort sheet saves a new sort', async () => {
   expect(st().view?.sort).toBe('name');
 });
 
-test('Report saves feedback', async () => {
+const tick = () => new Promise(r => setTimeout(r, 0));
+test('Report sends feedback (kept in the outbox until it can be emailed), not into notifications', async () => {
   params.c = 'dining';
   await render(<Report />);
   await fireEvent.press(screen.getByText('Submit feedback'));
-  expect(st().reports.length).toBe(1);
-  expect(st().reports[0].where).toBe('Dining');
+  await tick();
+  expect(st().reports.length).toBe(0);
+  expect(st().outbox?.[0].where).toBe('Dining');
+});
+
+test('Report: request a missing card', async () => {
+  params.card = 'Diamond Preferred';
+  await render(<Report />);
+  await fireEvent.changeText(screen.getByPlaceholderText('For example: Citi'), 'Citi');
+  await fireEvent.press(screen.getByText('Send request'));
+  await tick();
+  expect(st().outbox?.[0]).toMatchObject({ where: 'Citi', card: 'Diamond Preferred', reason: 'Please add this card' });
 });
 
 test('Report: request a missing store', async () => {
@@ -198,12 +256,14 @@ test('Report: request a missing store', async () => {
   await fireEvent.press(screen.getByText('Dining'));
   await fireEvent.changeText(screen.getByPlaceholderText(/Austin/), 'Austin, TX');
   await fireEvent.press(screen.getByText('Send request'));
-  expect(st().reports[0]).toMatchObject({ where: 'Rosas Taqueria', cat: 'Dining', card: 'Store not listed', note: 'Austin, TX' });
+  await tick();
+  expect(st().outbox?.[0]).toMatchObject({ where: 'Rosas Taqueria', cat: 'Dining', card: 'Store not listed', note: 'Austin, TX' });
 });
 
 test('Onboarding starts on the welcome screen', async () => {
   await render(<Onboarding />);
   expect(screen.getByText('Get paid back on every purchase.')).toBeTruthy();
+  for (let i = 0; i < 3; i++) await fireEvent.press(screen.getByText('Next'));
   await fireEvent.press(screen.getByText('Get started'));
   expect(screen.getByText('What is your name?')).toBeTruthy();
 });

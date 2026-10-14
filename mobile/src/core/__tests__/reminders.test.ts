@@ -14,14 +14,17 @@ const ctxAt = (when: string, wallet: WalletCard[]): Ctx => ({
 });
 const ids = (ctx: Ctx) => reminderPlan(ctx).map(r => r.id);
 
-test('Freedom Flex (activate by the 14th): a week before and the day before the deadline', () => {
+test('Freedom Flex (activate by the 14th): nudges early in the quarter, then a week and a day before the deadline', () => {
   const plan = reminderPlan(ctxAt('2026-10-04T12:00:00', [card('w1', 'chase_freedom_flex')]));
   expect(plan.map(r => [r.id, r.date.toDateString()])).toEqual([
+    ['act7:w1:2026-Q4', new Date(2026, 9, 8).toDateString()],
+    ['act14:w1:2026-Q4', new Date(2026, 9, 15).toDateString()],
+    ['act30:w1:2026-Q4', new Date(2026, 9, 31).toDateString()],
     ['due7:w1:2026-Q4', new Date(2026, 11, 7).toDateString()],
     ['due1:w1:2026-Q4', new Date(2026, 11, 13).toDateString()],
   ]);
   expect(plan[0].date.getHours()).toBe(10);
-  expect(plan[0].body).toMatch(/by Dec 14/);
+  expect(plan[3].body).toMatch(/by Dec 14/);
 });
 
 test('no reminders once activated, dismissed, or deactivated', () => {
@@ -37,18 +40,34 @@ test('past dates are never scheduled', () => {
 });
 
 test('Discover (activate before you spend, no retro deadline) reminds before quarter end', () => {
-  const plan = reminderPlan(ctxAt('2026-10-04T12:00:00', [card('w2', 'discover_it_cash_back')]));
-  expect(plan.map(r => r.date.toDateString())).toEqual([new Date(2026, 11, 24).toDateString(), new Date(2026, 11, 30).toDateString()]);
+  const plan = reminderPlan(ctxAt('2026-10-04T12:00:00', [card('w2', 'discover_it_cash_back', { activated: ['2026-Q4'] })]));
+  expect(plan).toEqual([]);
+  const off = reminderPlan(ctxAt('2026-11-20T12:00:00', [card('w2', 'discover_it_cash_back')]));
+  expect(off.map(r => r.date.toDateString())).toEqual([new Date(2026, 11, 24).toDateString(), new Date(2026, 11, 30).toDateString()]);
 });
 
-test('quarterly picks: one reminder 15 days before quarter end, until confirmed for next quarter', () => {
+test('quarterly picks: 15 and 3 days before quarter end and on day one, until confirmed for next quarter', () => {
   const sel = { five: { opts: ['fast_food', 'phone'], quarter: '2026-Q4' }, two: { opts: ['gas'], quarter: '2026-Q4' } };
   const plan = reminderPlan(ctxAt('2026-10-04T12:00:00', [card('w3', 'usbank_cash_plus', { sel })]));
-  expect(plan.map(r => [r.id, r.date.toDateString()])).toEqual([['picks:w3:2027-Q1', new Date(2026, 11, 16).toDateString()]]);
+  expect(plan.map(r => [r.id, r.date.toDateString()])).toEqual([
+    ['picks:w3:2027-Q1', new Date(2026, 11, 16).toDateString()],
+    ['picks3:w3:2027-Q1', new Date(2026, 11, 28).toDateString()],
+    ['picks0:w3:2027-Q1', new Date(2027, 0, 1).toDateString()],
+  ]);
   const confirmed = { five: { ...sel.five, quarter: '2027-Q1' }, two: { ...sel.two, quarter: '2027-Q1' } };
   expect(ids(ctxAt('2026-10-04T12:00:00', [card('w3', 'usbank_cash_plus', { sel: confirmed })]))).toEqual([]);
-  // picks never saved: the in-app task handles it, no dated reminder
-  expect(ids(ctxAt('2026-10-04T12:00:00', [card('w3', 'usbank_cash_plus')]))).toEqual([]);
+});
+
+test('quarterly picks missing this quarter (the missed-Q4 case): nudges on fixed days, not every app open', () => {
+  const lastQ = { five: { opts: ['fast_food', 'phone'], quarter: '2026-Q3' }, two: { opts: ['gas'], quarter: '2026-Q3' } };
+  for (const sel of [undefined, lastQ]) {
+    const plan = reminderPlan(ctxAt('2026-10-10T12:00:00', [card('w3', 'usbank_cash_plus', sel ? { sel } : {})]));
+    expect(plan.slice(0, 2).map(r => [r.id, r.date.toDateString()])).toEqual([
+      ['pick14:w3:2026-Q4', new Date(2026, 9, 15).toDateString()],
+      ['pick30:w3:2026-Q4', new Date(2026, 9, 31).toDateString()],
+    ]);
+    expect(plan[0].body).toMatch(/earns 1% on everything until you choose/);
+  }
 });
 
 test('sorted by date, capped, unique ids', () => {
