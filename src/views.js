@@ -780,7 +780,7 @@ function openProfile(keep){
     <h3 class="prof-sec">Preferences</h3>
     <div class="list">
       <div class="prof-pref"><span class="row-ic">${ic("sun")}</span><span class="row-title">Appearance</span><div class="seg" role="radiogroup" aria-label="Appearance">${seg}</div></div>
-      <button class="toggle-row" role="switch" aria-checked="${splashOn}" onclick="toggleSplashPref()"><span class="prof-toggle-l"><span class="row-ic">${ic("bolt")}</span>Opening animation</span><span class="switch ${splashOn?"on":""}"></span></button>
+      ${SHOW.splashToggle?`<button class="toggle-row" role="switch" aria-checked="${splashOn}" onclick="toggleSplashPref()"><span class="prof-toggle-l"><span class="row-ic">${ic("bolt")}</span>Opening animation</span><span class="switch ${splashOn?"on":""}"></span></button>`:""}
     </div>
     <h3 class="prof-sec">Your data</h3>
     <div class="list">
@@ -839,7 +839,7 @@ $("answer").addEventListener("click",e=>{if(e.target===$("answer"))closeAnswer()
 
 /* ─── Opening splash ─── */
 (function(){const sp=$("splash");if(!sp)return;
-  if(!SHOW.splash||state.profile.splash===false){sp.remove();return}
+  if(!SHOW.splash||(SHOW.splashToggle&&state.profile.splash===false)){sp.remove();return}
   const done=()=>sp.remove();
   sp.addEventListener("animationend",e=>{if(e.target===sp)done()});
   sp.addEventListener("click",()=>sp.classList.add("skip"));

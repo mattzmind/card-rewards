@@ -11,6 +11,7 @@ import { useApp } from '@/store/app';
 import { flushOutbox } from '@/store/feedback';
 import { listenForReminderTaps, needsReminders, syncReminders, enableReminders } from '@/store/reminders';
 import { useColors, useScheme } from '@/ui/theme';
+import { OpeningSplash } from '@/ui/opening';
 import { ToastHost } from '@/ui/toast';
 
 SplashScreen.preventAutoHideAsync();
@@ -58,6 +59,7 @@ export default function RootLayout() {
           </Stack.Protected>
         </Stack>
         <ToastHost />
+        <OpeningSplash />
       </ThemeProvider>
     </GestureHandlerRootView>
   );
