@@ -1,32 +1,39 @@
-/* Profile (a sidebar from the right): name, stats, appearance, backup/restore, privacy, erase, share, version.
-   Guests (no name given in onboarding) get an invitation to add one. */
+/* Profile (sheet from the avatar): who you are, your data, settings, support, version.
+   Standard grouped-settings layout: your name card and stats on top, then Your data (everything lives only on this
+   phone, so the backup matters most), Settings, Support, and the version as footer text. */
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import * as StoreReview from 'expo-store-review';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { isoToDate, shortDate } from '@/core/dates';
-import { activeWallet } from '@/core/engine';
+import { activeWallet, productOf } from '@/core/engine';
+import { notifyOn } from '@/core/reminders';
 import type { Profile as P } from '@/core/types';
-import { fresh, useApp, useCtx } from '@/store/app';
-import { exportBackup, importBackup } from '@/store/backup';
-import { disableReminders, enableReminders } from '@/store/reminders';
+import { useApp, useCtx } from '@/store/app';
 import { Avatar } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
-import { Button, List, Row, tap } from '@/ui/parts';
-import { SideSheet } from '@/ui/side-sheet';
+import { APP_URL, openSite } from '@/ui/links';
+import { List, Row, SheetBar, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 import { toast } from '@/ui/toast';
 
-const APP_URL = 'https://mattzmind.github.io/card-rewards/';
+/* rate: turn on once Lucro is in the App Store and Google Play (and add ios.appStoreUrl to app.json) */
+const SHOW = { rate: false };
+const STALE_DAYS = 30;
 
 export default function Profile() {
-  const c = useColors(), ctx = useCtx(), update = useApp(s => s.update), replace = useApp(s => s.replace);
+  const c = useColors(), ctx = useCtx(), update = useApp(s => s.update);
   const pr = ctx.state.profile, nm = (pr.name || '').trim();
   const [editing, setEditing] = useState(false), [draft, setDraft] = useState(nm);
-  const looks = Object.values(ctx.state.usage).reduce((a, b) => a + (+b || 0), 0);
   const since = pr.since ? isoToDate(pr.since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '';
   const d = ctx.catalog.updated ? shortDate(isoToDate(ctx.catalog.updated)) : '';
+  const cards = activeWallet(ctx);
+  const fees = cards.reduce((a, w) => a + (+(productOf(ctx, w.product)?.fee || 0) || 0), 0);
+  const backedUp = ctx.state.backedUp ? isoToDate(ctx.state.backedUp) : null;
+  const stale = cards.length > 0 && (!backedUp || (ctx.clock.NOW.getTime() - backedUp.getTime()) / 864e5 > STALE_DAYS);
+  const notify = pr.reminders ? (notifyOn(ctx, 'bonus') || notifyOn(ctx, 'picks') ? 'On' : 'Off') : pr.reminders === false ? 'Off in Settings' : 'Off';
 
   const saveName = () => {
     const old = pr.name, v = draft.trim().slice(0, 30);
@@ -34,61 +41,68 @@ export default function Profile() {
     setEditing(false);
     toast(v ? `Hi, ${v.split(/\s+/)[0]}` : 'Name removed', () => update(s => { s.profile.name = old; if (s.people[0]) s.people[0].name = old || 'Me'; }));
   };
-  const setTheme = (t: P['theme']) => { tap(); update(s => { s.profile.theme = t; }); };
-  const toggleReminders = async (on: boolean) => {
-    tap();
-    if (!on) { await disableReminders(); return; }
-    if (!(await enableReminders())) Alert.alert('Notifications are off', "Turn on notifications for Expo Go (or Lucro) in your phone's Settings to get reminders.");
-  };
-  const restore = async () => {
-    try { const n = await importBackup(); if (n != null) { router.back(); toast(`Restored ${n} card${n === 1 ? '' : 's'}`); } }
-    catch (e) { Alert.alert('Could not restore', e instanceof Error ? e.message : String(e)); }
-  };
-  const erase = () => Alert.alert('Erase all data?', 'This deletes your cards, picks, favorites and settings from this phone. Save a backup first if you might want them back.', [
-    { text: 'Cancel', style: 'cancel' }, { text: 'Erase', style: 'destructive', onPress: () => replace(fresh()) },
-  ]);
-
   const startEdit = () => { tap(); setDraft(nm); setEditing(true); };
+  const setTheme = (t: P['theme']) => { tap(); update(s => { s.profile.theme = t; }); };
+  const go = (to: Parameters<typeof router.push>[0]) => { tap(); router.push(to); };
+  const rate = () => {
+    tap();
+    const url = StoreReview.storeUrl();
+    if (url) Linking.openURL(Platform.OS === 'ios' ? `${url}?action=write-review` : url).catch(() => {});
+    else StoreReview.requestReview().catch(() => {});
+  };
+  const chev = (value?: string, dot?: boolean) => (
+    <View style={styles.right}>
+      {dot ? <View style={[styles.dot, { backgroundColor: c.warn }]} /> : null}
+      {value ? <Text style={[styles.value, { color: c.muted }]}>{value}</Text> : null}
+      <Icon name="chevR" color={c.muted} size={18} />
+    </View>
+  );
 
   return (
-    <SideSheet title="Profile">
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-      <View style={styles.head}>
-        <Avatar size={76} />
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Profile</Text>} />
+
+      <List style={styles.first}>
         {editing ? (
-          <View style={styles.renameRow}>
+          <View style={styles.id}>
+            <Avatar size={56} bg={c.surface2} />
             <TextInput value={draft} onChangeText={setDraft} placeholder="First name" placeholderTextColor={c.muted} autoFocus maxLength={30}
               autoComplete="given-name" textContentType="givenName" autoCapitalize="words" onSubmitEditing={saveName} returnKeyType="done"
-              style={[styles.field, { color: c.ink, backgroundColor: c.surface, borderColor: c.line }]} />
+              style={[styles.field, { color: c.ink, backgroundColor: c.bg, borderColor: c.line }]} />
             <Pressable onPress={saveName} accessibilityLabel="Save name" style={[styles.iconBtn, { backgroundColor: c.primary }]}><Icon name="check" color={c.onPrimary} size={18} /></Pressable>
             <Pressable onPress={() => setEditing(false)} accessibilityLabel="Cancel" style={styles.iconBtn}><Icon name="x" color={c.ink} size={18} /></Pressable>
           </View>
-        ) : nm ? (
-          <Pressable onPress={startEdit} style={styles.nameRow} accessibilityLabel="Edit name">
-            <Text style={[styles.name, { color: c.ink }]}>{nm}</Text>
-            <View style={[styles.pencil, { backgroundColor: c.surface2 }]}><Icon name="edit" color={c.muted} size={16} /></View>
-          </Pressable>
         ) : (
-          <View style={[styles.invite, { backgroundColor: c.surface }]}>
-            <Text style={[styles.inviteH, { color: c.ink }]}>Hi there!</Text>
-            <Text style={[styles.inviteP, { color: c.muted }]}>Add your first name and Lucro will greet you by name every time you open it.</Text>
-            <Button kind="lime" title="Add your name" onPress={startEdit} />
-          </View>
+          <Pressable onPress={startEdit} accessibilityLabel={nm ? `${nm}. Edit name` : 'Add your name'}
+            style={({ pressed }) => [styles.id, pressed && { backgroundColor: c.surface2 }]}>
+            <Avatar size={56} bg={c.surface2} />
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={[styles.name, { color: c.ink }]} numberOfLines={1}>{nm || 'Add your name'}</Text>
+              <Text style={[styles.sub, { color: c.muted }]} numberOfLines={1}>{nm ? (since ? `Member since ${since}` : 'Tap to change your name') : 'Lucro will greet you by name'}</Text>
+            </View>
+            <View style={[styles.pencil, { backgroundColor: c.surface2 }]}><Icon name={nm ? 'edit' : 'plus'} color={c.muted} size={16} /></View>
+          </Pressable>
         )}
-        {since ? <Text style={[styles.sub, { color: c.muted }]}>Using Lucro since {since}</Text> : null}
-      </View>
+      </List>
 
-      <View style={[styles.stats, { backgroundColor: c.surface }]}>
-        {[[activeWallet(ctx).length, 'CARDS'], [looks, 'LOOKUPS'], [ctx.state.favs.length, 'FAVORITES']].map(([n, l], i) => (
-          <View key={l} style={[styles.stat, i > 0 && { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: c.line }]}>
+      <View style={[styles.stats, { backgroundColor: c.surface, borderColor: c.line }]}>
+        {([[String(cards.length), 'CARDS'], [String(ctx.state.favs.length), 'FAVORITES'], [`$${fees.toLocaleString('en-US')}`, 'ANNUAL FEES']] as const).map(([n, l], i) => (
+          <View key={l} style={[styles.stat, i > 0 && { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: c.line }]} accessible accessibilityLabel={`${n} ${l.toLowerCase()}`}>
             <Text style={[styles.statN, { color: c.ink }]}>{n}</Text><Text style={[styles.statL, { color: c.muted }]}>{l}</Text>
           </View>
         ))}
       </View>
 
-      <Text style={[styles.sec, { color: c.ink }]}>Preferences</Text>
+      <Text style={[styles.sec, { color: c.ink }]}>Your data</Text>
       <List>
-        <View style={styles.pref}>
+        <Row first icon="lock" title="Data & Privacy" onPress={() => go('/privacy')} right={chev(undefined, stale)}
+          sub={backedUp ? `Last backup ${shortDate(backedUp)}` : 'No backup yet'} />
+      </List>
+
+      <Text style={[styles.sec, { color: c.ink }]}>Settings</Text>
+      <List>
+        <Row first icon="bell" title="Notifications" onPress={() => go('/notification-settings')} right={chev(notify)} />
+        <View style={[styles.pref, { borderTopColor: c.line }]}>
           <View style={styles.prefHead}>
             <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name="sun" color={c.accent} /></View>
             <Text style={[styles.prefTitle, { color: c.ink }]}>Appearance</Text>
@@ -102,51 +116,60 @@ export default function Profile() {
             ))}
           </View>
         </View>
-        <Row icon="bell" title="Deadline reminders" sub="A heads-up before quarterly bonuses and picks are due"
-          right={<Switch value={!!pr.reminders} onValueChange={toggleReminders} trackColor={{ true: '#16a34a' }} accessibilityLabel="Deadline reminders" />} />
       </List>
 
-      <Text style={[styles.sec, { color: c.ink }]}>Your data</Text>
+      <Text style={[styles.sec, { color: c.ink }]}>Support</Text>
       <List>
-        <Row first icon="download" title="Save a backup file" sub={ctx.state.backedUp ? `Last backup ${shortDate(isoToDate(ctx.state.backedUp))}` : 'No backup yet. Save one to iCloud Drive or Files.'} onPress={() => exportBackup().catch(() => {})} />
-        <Row icon="restore" title="Restore from a backup" sub="Works with backups from the Lucro web app too" onPress={restore} />
-        <Row icon="lock" title="Private by design" sub="Your cards stay on this phone. Lucro never asks for card numbers or bank logins." />
-        <Row icon="trash" title="Erase all data" onPress={erase} right={<View />} danger />
+        <Row first icon="help" title="Help & FAQ" onPress={() => { tap(); openSite('support'); }} />
+        <Row icon="mail" title="Send feedback" sub="Ideas, problems, anything" onPress={() => go({ pathname: '/report', params: { general: '1' } })} />
+        <Row icon="plus" title="Request a card" sub="Missing a card? We’ll add it" onPress={() => go({ pathname: '/report', params: { card: '' } })} />
+        {SHOW.rate ? <Row icon="star" title="Rate Lucro" onPress={rate} /> : null}
+        <Row icon="share" title="Share Lucro" onPress={() => { tap(); Share.share({ message: `Lucro tells you which credit card to use for every purchase. ${APP_URL}` }).catch(() => {}); }} />
       </List>
 
-      <Text style={[styles.sec, { color: c.ink }]}>About</Text>
-      <List>
-        <Row first icon="share" title="Share Lucro" sub="Send it to a friend" onPress={() => Share.share({ message: `Lucro tells you which credit card to use for every purchase. ${APP_URL}` }).catch(() => {})} />
-        <Row icon="info" title={`Lucro ${Constants.expoConfig?.version || ''}`} sub={`${Object.keys(ctx.catalog.products).length} cards and ${(ctx.catalog.stores || []).length} stores${d ? `, updated ${d}` : ''}`} />
-      </List>
+      <View style={styles.foot}>
+        <Text style={[styles.footText, { color: c.muted }]}>Lucro {Constants.expoConfig?.version || ''}</Text>
+        <Text style={[styles.footText, { color: c.muted }]}>
+          {Object.keys(ctx.catalog.products).length} cards and {(ctx.catalog.stores || []).length.toLocaleString('en-US')} stores{d ? `, updated ${d}` : ''}
+        </Text>
+        <View style={styles.legal}>
+          <Pressable onPress={() => openSite('terms')} accessibilityRole="link" style={styles.link}><Text style={[styles.linkText, { color: c.muted }]}>Terms of Use</Text></Pressable>
+          <Text style={[styles.footText, { color: c.muted }]}>·</Text>
+          <Pressable onPress={() => openSite('privacy')} accessibilityRole="link" style={styles.link}><Text style={[styles.linkText, { color: c.muted }]}>Privacy Policy</Text></Pressable>
+        </View>
+      </View>
     </ScrollView>
-    </SideSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: GUTTER, paddingTop: 8, paddingBottom: 48 },
-  head: { alignItems: 'center', gap: 10 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
-  name: { fontFamily: fonts.display, fontSize: 26 },
+  wrap: { paddingHorizontal: GUTTER, paddingBottom: 40 },
+  title: { fontFamily: fonts.display, fontSize: 20, paddingLeft: 4 },
+  first: { marginTop: 8 },
+  id: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, minHeight: 84 },
+  name: { fontFamily: fonts.display, fontSize: 22 },
+  sub: { fontFamily: fonts.body, fontSize: 14, marginTop: 2 },
   pencil: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  renameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'stretch' },
-  field: { flex: 1, fontFamily: fonts.semibold, fontSize: 18, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
+  field: { flex: 1, fontFamily: fonts.semibold, fontSize: 17, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  sub: { fontFamily: fonts.body, fontSize: 15 },
-  invite: { alignSelf: 'stretch', borderRadius: 20, padding: 16, gap: 6 },
-  inviteH: { fontFamily: fonts.display, fontSize: 22, textAlign: 'center' },
-  inviteP: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, textAlign: 'center', marginBottom: 8 },
-  stats: { flexDirection: 'row', borderRadius: 22, paddingVertical: 16, marginTop: 20 },
+  stats: { flexDirection: 'row', borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, paddingVertical: 14, marginTop: 12 },
   stat: { flex: 1, alignItems: 'center' },
-  statN: { fontFamily: fonts.display, fontSize: 26 },
-  statL: { fontFamily: fonts.semibold, fontSize: 12, letterSpacing: 0.8, marginTop: 4 },
+  statN: { fontFamily: fonts.display, fontSize: 24 },
+  statL: { fontFamily: fonts.semibold, fontSize: 11, letterSpacing: 0.8, marginTop: 4 },
   sec: { fontFamily: fonts.display, fontSize: 18, marginTop: 26, marginBottom: 10, marginHorizontal: 4 },
-  pref: { padding: 14, gap: 12 },
+  right: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  value: { fontFamily: fonts.body, fontSize: 15 },
+  dot: { width: 9, height: 9, borderRadius: 5 },
+  pref: { padding: 14, gap: 12, borderTopWidth: StyleSheet.hairlineWidth },
   prefHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   prefTitle: { fontFamily: fonts.semibold, fontSize: 16 },
   rowIc: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   seg: { flexDirection: 'row', borderRadius: 12, padding: 3 },
   segBtn: { flex: 1, minHeight: 40, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   segText: { fontFamily: fonts.semibold, fontSize: 14 },
+  foot: { alignItems: 'center', marginTop: 28, gap: 2 },
+  footText: { fontFamily: fonts.body, fontSize: 13, textAlign: 'center' },
+  legal: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 },
+  linkText: { fontFamily: fonts.medium, fontSize: 13, textDecorationLine: 'underline' },
 });

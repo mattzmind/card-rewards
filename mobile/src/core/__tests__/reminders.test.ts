@@ -78,3 +78,17 @@ test('sorted by date, capped, unique ids', () => {
   const all = reminderPlan(ctxAt('2026-10-04T12:00:00', wallet), 999);
   expect(new Set(all.map(r => r.id)).size).toBe(all.length);
 });
+
+test('a kind turned off in Notification settings drops only those reminders', () => {
+  const wallet = [card('w1', 'chase_freedom_flex'), card('w3', 'usbank_cash_plus')];
+  const withNotify = (notify: AppState['profile']['notify']) => {
+    const ctx = ctxAt('2026-10-04T12:00:00', wallet);
+    return reminderPlan({ ...ctx, state: { ...ctx.state, profile: { ...ctx.state.profile, notify } } });
+  };
+  const all = withNotify(undefined);
+  expect(new Set(all.map(r => r.kind))).toEqual(new Set(['bonus', 'picks']));
+  expect(all.filter(r => r.kind === 'bonus').every(r => r.cardId === 'w1')).toBe(true);
+  expect(withNotify({ bonus: false }).map(r => r.id)).toEqual(all.filter(r => r.kind === 'picks').map(r => r.id));
+  expect(withNotify({ picks: false }).map(r => r.id)).toEqual(all.filter(r => r.kind === 'bonus').map(r => r.id));
+  expect(withNotify({ bonus: false, picks: false })).toEqual([]);
+});

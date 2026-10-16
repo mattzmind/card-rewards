@@ -1,6 +1,7 @@
-/* Feedback, emailed to the Lucro team (store/feedback.ts). Three modes:
+/* Feedback, emailed to the Lucro team (store/feedback.ts). Four modes:
    "Wrong card?" from an answer (c, s), a request to add a store that search couldn't find (missing),
-   with a searchable category list, or a request to add a card that isn't in the catalog (card). */
+   with a searchable category list, a request to add a card that isn't in the catalog (card),
+   or general feedback from Profile (general). */
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -14,7 +15,8 @@ import { Button, List, Row, SheetBar, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 
 export default function Report() {
-  const { c: catId, s: storeId, missing, card } = useLocalSearchParams<{ c?: string; s?: string; missing?: string; card?: string }>();
+  const { c: catId, s: storeId, missing, card, general } = useLocalSearchParams<{ c?: string; s?: string; missing?: string; card?: string; general?: string }>();
+  if (general != null) return <General />;
   if (card != null) return <RequestCard name={card} />;
   if (missing != null) return <RequestStore name={missing} />;
   return <WrongCard catId={catId || ''} storeId={storeId} />;
@@ -123,6 +125,41 @@ function RequestCard({ name: initial }: { name: string }) {
       <Text style={[styles.sub, { color: c.muted, fontSize: 13, marginTop: 10 }]}>Never include your card number.</Text>
       <View style={{ marginTop: 8, gap: 4 }}>
         <Button title="Send request" onPress={submit} disabled={!name.trim()} />
+        <Button kind="ghost" title="Cancel" onPress={() => router.back()} />
+      </View>
+    </ScrollView>
+  );
+}
+
+/* Anything else: an idea, a problem, a question (from Profile) */
+const TOPICS = ['An idea', 'Something isn’t working', 'Something else'];
+function General() {
+  const c = useColors();
+  const [topic, setTopic] = useState(0), [note, setNote] = useState('');
+  const submit = () => {
+    addReport({ where: 'Lucro app', cat: '', card: '', reason: `Feedback: ${TOPICS[topic]}`, note: note.trim() }, 'Thanks! Your feedback was sent');
+    router.back();
+  };
+  return (
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar onClose={() => router.back()} />
+      <Text style={[styles.h, { color: c.ink }]}>Send feedback</Text>
+      <Text style={[styles.sub, { color: c.muted }]}>Tell us what would make Lucro better. It goes straight to the Lucro team.</Text>
+      <View style={{ gap: 8 }}>
+        {TOPICS.map((r, i) => (
+          <Pressable key={r} onPress={() => { tap(); setTopic(i); }} accessibilityRole="radio" accessibilityState={{ checked: topic === i }}
+            style={[styles.radio, { backgroundColor: c.surface, borderColor: topic === i ? c.accent : c.line }]}>
+            <View style={[styles.dot, { borderColor: topic === i ? c.accent : c.line }]}>{topic === i ? <View style={[styles.dotIn, { backgroundColor: c.accent }]} /> : null}</View>
+            <Text style={[styles.radioText, { color: c.ink }]}>{r}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <Text style={[styles.label, { color: c.muted }]}>Your message</Text>
+      <TextInput value={note} onChangeText={setNote} multiline placeholder="For example: I’d love a widget for my Home Screen" placeholderTextColor={c.muted}
+        style={[styles.field, styles.multi, { color: c.ink, backgroundColor: c.surface, borderColor: c.line }]} />
+      <Text style={[styles.sub, { color: c.muted, fontSize: 13, marginTop: 10 }]}>Never include card numbers. Add your email in the message if you’d like a reply.</Text>
+      <View style={{ marginTop: 8, gap: 4 }}>
+        <Button title="Send" onPress={submit} disabled={!note.trim()} />
         <Button kind="ghost" title="Cancel" onPress={() => router.back()} />
       </View>
     </ScrollView>

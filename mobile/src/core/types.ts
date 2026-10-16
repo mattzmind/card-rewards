@@ -100,7 +100,10 @@ export interface WalletCard {
   pending?: string | null;
 }
 
-export interface Profile { name: string; theme: 'system' | 'light' | 'dark'; splash?: boolean; since?: string; reminders?: boolean }
+/* reminders: notification permission as last seen (undefined = never asked, true = allowed, false = blocked).
+   notify: which activity sends a reminder (Notification settings); a missing key means on. */
+export type NotifyKind = 'bonus' | 'picks';
+export interface Profile { name: string; theme: 'system' | 'light' | 'dark'; splash?: boolean; since?: string; reminders?: boolean; notify?: Partial<Record<NotifyKind, boolean>> }
 export interface AppState {
   people: { id: string; name: string }[];
   wallet: WalletCard[];

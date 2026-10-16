@@ -5,11 +5,12 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useApp } from '@/store/app';
 import { flushOutbox } from '@/store/feedback';
-import { listenForReminderTaps, needsReminders, syncReminders, enableReminders } from '@/store/reminders';
+import { enableReminders, listenForReminderTaps, needsReminders, refreshPermission, syncReminders } from '@/store/reminders';
 import { useColors, useScheme } from '@/ui/theme';
 import { OpeningSplash } from '@/ui/opening';
 import { ToastHost } from '@/ui/toast';
@@ -28,7 +29,7 @@ export default function RootLayout() {
   useEffect(() => { if (loaded) SplashScreen.hideAsync(); }, [loaded]);
   useEffect(() => { syncCatalog(); flushOutbox(); }, [syncCatalog]);
   /* Keep deadline reminders in step with the wallet. They're on by default: the first time the wallet has a card
-     with quarterly deadlines, ask for notification permission (unless reminders were turned off in Profile). */
+     with quarterly deadlines, ask for notification permission (unless the phone has blocked it). */
   const wallet = useApp(s => s.state.wallet), reminders = useApp(s => s.state.profile.reminders);
   useEffect(() => {
     if (reminders === false || !onboarded) return;
@@ -36,6 +37,12 @@ export default function RootLayout() {
     return () => clearTimeout(t);
   }, [wallet, reminders, onboarded]);
   useEffect(() => listenForReminderTaps(), []);
+  /* The permission can change in the phone's Settings, so re-read it on launch and whenever the app comes back */
+  useEffect(() => {
+    refreshPermission();
+    const sub = AppState.addEventListener('change', st => { if (st === 'active') refreshPermission(); });
+    return () => sub.remove();
+  }, []);
   if (!loaded) return null;
 
   const sheet = { presentation: 'formSheet' as const, sheetGrabberVisible: true, sheetAllowedDetents: [0.92], sheetCornerRadius: 24, contentStyle: { backgroundColor: c.bg } };
@@ -48,11 +55,9 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
           <Stack.Protected guard={onboarded}>
             <Stack.Screen name="(tabs)" />
-            {['answer', 'card/[id]', 'add', 'notifications', 'display', 'report'].map(name => (
+            {['answer', 'card/[id]', 'add', 'notifications', 'notification-settings', 'display', 'report', 'profile', 'privacy'].map(name => (
               <Stack.Screen key={name} name={name} options={sheet} />
             ))}
-            {/* Profile is a sidebar from the right (ui/side-sheet.tsx animates it), so the route itself just appears */}
-            <Stack.Screen name="profile" options={{ presentation: 'transparentModal', animation: 'none', contentStyle: { backgroundColor: 'transparent' } }} />
           </Stack.Protected>
           <Stack.Protected guard={!onboarded}>
             <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />

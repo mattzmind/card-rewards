@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 const mem: Record<string, string> = {};
 jest.mock('expo-sqlite/kv-store', () => ({ __esModule: true, default: { getItemSync: (k: string) => mem[k] ?? null, setItemSync: (k: string, v: string) => { mem[k] = v; } } }));
 const params: Record<string, string> = {};
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() }, useLocalSearchParams: () => params, useScrollToTop: jest.fn(),
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), dismissAll: jest.fn() }, useLocalSearchParams: () => params, useScrollToTop: jest.fn(),
   useNavigation: () => ({ setOptions: jest.fn(), addListener: () => () => {}, dispatch: jest.fn() }) }));
 jest.mock('expo-router/react-navigation', () => ({ usePreventRemove: jest.fn() }));
 jest.mock('react-native-reanimated', () => {
@@ -30,6 +30,14 @@ jest.mock('react-native-gesture-handler', () => {
   return { GestureHandlerRootView: View, GestureDetector: ({ children }: any) => children, Gesture: { Pan: () => pan } };
 });
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
+jest.mock('expo-store-review', () => ({ storeUrl: () => null, requestReview: jest.fn(async () => {}) }));
+jest.mock('expo-web-browser', () => ({ openBrowserAsync: jest.fn(async () => ({})) }));
+const perm = { granted: true, canAskAgain: true };
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(), AndroidImportance: { DEFAULT: 3 }, SchedulableTriggerInputTypes: { DATE: 'date' },
+  getPermissionsAsync: jest.fn(async () => perm), requestPermissionsAsync: jest.fn(async () => perm),
+  cancelAllScheduledNotificationsAsync: jest.fn(async () => {}), scheduleNotificationAsync: jest.fn(async () => {}), setNotificationChannelAsync: jest.fn(async () => null),
+}));
 jest.spyOn(require('react-native').Alert, 'alert').mockImplementation((_t: any, _m: any, buttons: any) => { buttons?.[buttons.length - 1]?.onPress?.(); });
 
 import { newCard, useApp } from '@/store/app';
@@ -40,8 +48,10 @@ import Add from '../add';
 import Answer from '../answer';
 import CardDetails from '../card/[id]';
 import Display from '../display';
+import NotificationSettings from '../notification-settings';
 import Notifications from '../notifications';
 import Onboarding from '../onboarding';
+import Privacy from '../privacy';
 import Profile from '../profile';
 import Report from '../report';
 
@@ -209,16 +219,60 @@ test('Notifications render', async () => {
 test('Profile invites a guest to add a name', async () => {
   useApp.getState().update(s => { s.profile.name = ''; });
   await render(<Profile />);
-  expect(screen.getByText('Hi there!')).toBeTruthy();
   await fireEvent.press(screen.getByText('Add your name'));
-  expect(screen.getByPlaceholderText('First name')).toBeTruthy();
+  await fireEvent.changeText(screen.getByPlaceholderText('First name'), 'Sam');
+  await fireEvent.press(screen.getByLabelText('Save name'));
+  expect(st().profile.name).toBe('Sam');
 });
 
-test('Profile: change appearance', async () => {
+test('Profile: name card, stats, sections in order, and change appearance', async () => {
   await render(<Profile />);
   expect(screen.getByText('Alex')).toBeTruthy();
+  expect(screen.getByText('ANNUAL FEES')).toBeTruthy();
+  expect(screen.getByText('No backup yet')).toBeTruthy();
+  const order = ['Your data', 'Settings', 'Support'].map(t => JSON.stringify(screen.toJSON()).indexOf(`"${t}"`));
+  expect(order).toEqual([...order].sort((a, b) => a - b));
+  expect(screen.queryByText('Deadline reminders')).toBeNull();
+  expect(screen.queryByText('Rate Lucro')).toBeNull(); // hidden until Lucro is in the stores
   await fireEvent.press(screen.getByText('Dark'));
   expect(st().profile.theme).toBe('dark');
+});
+
+test('Profile opens Data & Privacy, Notification settings and feedback', async () => {
+  const { router } = jest.requireMock('expo-router');
+  await render(<Profile />);
+  await fireEvent.press(screen.getByText('Data & Privacy'));
+  expect(router.push).toHaveBeenCalledWith('/privacy');
+  await fireEvent.press(screen.getByText('Notifications'));
+  expect(router.push).toHaveBeenCalledWith('/notification-settings');
+  await fireEvent.press(screen.getByText('Send feedback'));
+  expect(router.push).toHaveBeenCalledWith({ pathname: '/report', params: { general: '1' } });
+});
+
+test('Data & Privacy: erase all data starts over', async () => {
+  await render(<Privacy />);
+  expect(screen.getByText('Save a backup file')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Erase all data'));
+  expect(st().wallet).toEqual([]);
+  expect(st().onboarded).toBeFalsy();
+});
+
+test('Notification settings: one switch per activity, no master switch', async () => {
+  useApp.getState().update(s => { s.profile.reminders = true; s.profile.notify = {}; });
+  await render(<NotificationSettings />);
+  expect(await screen.findByLabelText('Quarterly bonuses')).toBeTruthy();
+  expect(screen.queryByText('Turn on')).toBeNull();
+  await fireEvent(screen.getByLabelText('Category picks'), 'valueChange', false);
+  expect(st().profile.notify).toEqual({ picks: false });
+});
+
+test('Notification settings: blocked by the phone points to Settings', async () => {
+  perm.granted = false; perm.canAskAgain = false;
+  try {
+    await render(<NotificationSettings />);
+    expect(await screen.findByText('Open Settings')).toBeTruthy();
+    expect(st().profile.reminders).toBe(false);
+  } finally { perm.granted = true; perm.canAskAgain = true; }
 });
 
 test('Sort sheet saves a new sort', async () => {
@@ -258,6 +312,16 @@ test('Report: request a missing store', async () => {
   await fireEvent.press(screen.getByText('Send request'));
   await tick();
   expect(st().outbox?.[0]).toMatchObject({ where: 'Rosas Taqueria', cat: 'Dining', card: 'Store not listed', note: 'Austin, TX' });
+});
+
+test('Report: general feedback from Profile', async () => {
+  params.general = '1';
+  await render(<Report />);
+  await fireEvent.press(screen.getByText('Something isn’t working'));
+  await fireEvent.changeText(screen.getByPlaceholderText(/widget/), 'Search is slow');
+  await fireEvent.press(screen.getByText('Send'));
+  await tick();
+  expect(st().outbox?.[0]).toMatchObject({ where: 'Lucro app', reason: 'Feedback: Something isn’t working', note: 'Search is slow' });
 });
 
 test('Onboarding starts on the welcome screen', async () => {

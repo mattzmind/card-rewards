@@ -1,4 +1,5 @@
-/* Notifications (bell): quarterly activations, picks to confirm or choose, caps reached. */
+/* Notifications (bell): quarterly activations, picks to confirm or choose, caps reached.
+   The gear (top left) opens Notification settings. */
 import { router } from 'expo-router';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -43,13 +44,14 @@ export default function Notifications() {
   return (
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
       <View style={styles.head}>
-        <View style={{ width: 44 }} />
+        <Pressable onPress={() => { tap(); router.push('/notification-settings'); }} accessibilityLabel="Notification settings"
+          style={({ pressed }) => [styles.round, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}><Icon name="gear" color={c.ink} size={20} /></Pressable>
         <Text style={[styles.title, { color: c.ink }]}>Notifications</Text>
         <Pressable onPress={() => router.back()} accessibilityLabel="Close" style={[styles.round, { backgroundColor: c.surface, borderColor: c.line }]}><Icon name="x" color={c.ink} size={20} /></Pressable>
       </View>
 
       {tasks.length && !ctx.state.profile.reminders ? (
-        <Pressable onPress={async () => { tap(); toast((await enableReminders()) ? "Reminders on. We'll give you a heads-up before deadlines." : "Notifications are off for this app in Settings"); }}
+        <Pressable onPress={async () => { tap(); if (await enableReminders()) toast("Reminders on. We'll give you a heads-up before deadlines."); else router.push('/notification-settings'); }}
           style={({ pressed }) => [styles.remind, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
           <View style={[styles.ic, { backgroundColor: c.hl }]}><Icon name="bell" color={c.hlInk} size={22} /></View>
           <View style={{ flex: 1 }}>

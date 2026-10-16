@@ -15,11 +15,12 @@ export function ScreenTitle({ children }: { children: string }) {
   return <Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">{children}</Text>;
 }
 
-/* White circle like the bell: the first initial, or the usual person outline for a guest (no name given) */
-export function Avatar({ size = 44 }: { size?: number }) {
+/* White circle like the bell: the first initial, or the usual person outline for a guest (no name given).
+   bg: a different fill when it sits on a surface-colored card (Profile) */
+export function Avatar({ size = 44, bg }: { size?: number; bg?: string }) {
   const c = useColors(), name = myName(useApp(s => s.state));
   return (
-    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: c.surface }]}>
+    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: bg || c.surface }]}>
       {name ? <Text style={[styles.avatarText, { color: c.ink, fontSize: size * 0.42 }]}>{name[0].toUpperCase()}</Text>
         : <Icon name="user" color={c.ink} size={size * 0.5} />}
     </View>
