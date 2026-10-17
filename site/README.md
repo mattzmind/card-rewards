@@ -13,8 +13,8 @@ Every placeholder is marked in the HTML, so a search finds them all.
 
 | What | Where | How to find it | Now |
 |---|---|---|---|
-| **Domain** | canonical/OG tags, sitemap.xml, robots.txt | search `lucro.example` | `lucro.example` |
-| **Support email** | Support, Privacy, Terms, About | search `data-ph="email"` (text and `mailto:`) | `support@lucro.example` |
+| **Domain** | canonical/OG tags, sitemap.xml, robots.txt, `CNAME` | search `lucrorewards.com` | done: `lucrorewards.com` |
+| **Emails** | Support, Privacy, Terms, About | search `data-ph="email"` (text and `mailto:`) | done: `support@lucrorewards.com` for help, privacy and terms; `info@lucrorewards.com` for general questions and the launch list |
 | **Developer / legal name** | footer ©, Privacy, Terms | search `data-ph="entity"` | `Lucro` |
 | **App Store link** | "Get the app" buttons, store badge | search `data-ph="appstore"` (`href="#get"`) | coming-soon badge |
 | **Governing law state** | Terms §11 | search `data-ph="state"` | `[State]` |
@@ -31,12 +31,16 @@ The Privacy Policy and Terms are written in plain English to match how the app w
 and update them if the app ever starts collecting data.
 
 ## Publishing to your domain (GitHub Pages)
-1. Create a new GitHub repo (for example `lucro-site`) and copy this folder's contents into it.
-2. Add a file named `CNAME` containing just your domain, for example `getlucro.com`.
-3. In the repo: **Settings → Pages → Deploy from branch → main / root**.
+1. The site is published from the `mattzmind/lucro-site` repo. Copy this folder's contents to the top level of that repo
+   (not into a `site/` subfolder), including `assets/`, `CNAME` and `.nojekyll`. Leave out `README.md` and `REFERENCES.md`:
+   anything in that repo is public.
+2. The `CNAME` file (already here) holds the domain, `lucrorewards.com`. Keep it when you copy the folder.
+3. In the repo: **Settings → Pages → Deploy from branch → main / root**, and set Custom domain to `lucrorewards.com`.
+   Don’t add the domain to the `card-rewards` repo: that would move the web app and the `catalog.json` the phone app downloads.
 4. At your domain registrar, add DNS records:
    - `A` records for the root domain → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `CNAME` record for `www` → `<your-github-username>.github.io`
+   - `CNAME` record for `www` → `mattzmind.github.io`
+   - Delete any parking/forwarding records the registrar added for the root or `www`
 5. Back in Settings → Pages, tick **Enforce HTTPS** once the certificate is ready (can take up to a day).
 6. In App Store Connect use:
    - Marketing URL: `https://yourdomain/`

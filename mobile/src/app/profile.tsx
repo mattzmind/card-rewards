@@ -15,7 +15,7 @@ import type { Profile as P } from '@/core/types';
 import { useApp, useCtx } from '@/store/app';
 import { Avatar } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
-import { APP_URL, openSite } from '@/ui/links';
+import { SITE_URL, openSite } from '@/ui/links';
 import { List, Row, RowIcon, SheetBar, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 import { toast } from '@/ui/toast';
@@ -125,7 +125,7 @@ export default function Profile() {
         <Row icon="mail" title="Send feedback" sub="Ideas, problems, anything" onPress={() => go({ pathname: '/report', params: { general: '1' } })} />
         <Row icon="plus" title="Request a card" sub="Missing a card? We’ll add it" onPress={() => go({ pathname: '/report', params: { card: '' } })} />
         {SHOW.rate ? <Row icon="star" title="Rate Lucro" onPress={rate} /> : null}
-        <Row icon="share" title="Share Lucro" onPress={() => { tap(); Share.share({ message: `Lucro tells you which credit card to use for every purchase. ${APP_URL}` }).catch(() => {}); }} />
+        <Row icon="share" title="Share Lucro" onPress={() => { tap(); Share.share({ message: `Lucro tells you which credit card to use for every purchase. ${SITE_URL}` }).catch(() => {}); }} />
       </List>
 
       <View style={styles.foot}>
