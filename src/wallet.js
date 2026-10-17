@@ -98,7 +98,7 @@ function walletRow(w,{drag=true}={}){
 /* Bank tile: the bank's colors and short name (real card pictures need licensing) */
 function bankTile(w){const p=P(w.product),b=p?B(p.brand):B("?");const[c1,c2]=(typeof ART!=="undefined"&&ART[w.product])||b.colors;
   return `<span class="bank-tile" style="background:linear-gradient(135deg,${c1},${c2})" aria-hidden="true">${esc(b.mono||(b.short||b.name).slice(0,2))}</span>`}
-/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery and streaming",
+/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery & streaming",
    "3% gas". At most 2 pills (1 next to an activation pill) and 3 categories, 2 per pill. */
 function rateTiers(hits,maxTiers){
   const tiers=[];let n=0;
@@ -106,7 +106,7 @@ function rateTiers(hits,maxTiers){
     if(last&&last.rate===h.rate){if(last.labels.length<2){last.labels.push(h.label);n++}}
     else if(tiers.length<maxTiers){tiers.push({rate:h.rate,labels:[h.label]});n++}
     else break}
-  return tiers.map(t=>({rate:t.rate,label:t.labels.join(" and ")}));
+  return tiers.map(t=>({rate:t.rate,label:t.labels.join(" & ")}));
 }
 function bestFor(w){
   const p=P(w.product);if(!p)return"";const mult=p.type==="cash"?1:(p.cpp||1);

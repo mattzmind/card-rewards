@@ -117,6 +117,7 @@ export interface AppState {
   backedUp?: string;
   view?: WalletView;
   dragTipSeen?: boolean;
+  quarterOpen?: boolean; // Wallet quarter card shows each card's categories
   [k: string]: unknown;
 }
 

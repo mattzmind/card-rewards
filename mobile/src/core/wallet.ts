@@ -89,7 +89,7 @@ export function walletGroups(ctx: Ctx, list: WalletCard[], v: WalletView = viewO
   return [...map.values()].filter(x => x.items.length);
 }
 
-/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery and streaming",
+/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery & streaming",
    "3% gas". At most 2 pills (1 next to an activation pill) and 3 categories, 2 per pill. */
 export interface BestPill { rate: string; label: string; warn?: boolean }
 export const MAX_TIERS = 2, MAX_PER_TIER = 2, MAX_LABELS = 3;
@@ -103,7 +103,7 @@ export function rateTiers(hits: { rate: string; label: string }[], maxTiers = MA
     else if (tiers.length < maxTiers) { tiers.push({ rate: h.rate, labels: [h.label] }); n++; }
     else break;
   }
-  return tiers.map(t => ({ rate: t.rate, label: t.labels.join(' and ') }));
+  return tiers.map(t => ({ rate: t.rate, label: t.labels.join(' & ') }));
 }
 export function bestFor(ctx: Ctx, w: WalletCard): BestPill[] {
   const { QK } = ctx.clock;

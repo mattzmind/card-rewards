@@ -44,14 +44,14 @@ test('tip names a card that beats the everyday rate, and the seed changes which 
 
 test('wallet pills: same rate shares one pill, a new pill only when the rate changes', () => {
   const h = (rate: string, label: string) => ({ rate, label });
-  expect(rateTiers([h('3%', 'grocery'), h('3%', 'gas')])).toEqual([{ rate: '3%', label: 'grocery and gas' }]);
+  expect(rateTiers([h('3%', 'grocery'), h('3%', 'gas')])).toEqual([{ rate: '3%', label: 'grocery & gas' }]);
   expect(rateTiers([h('6%', 'grocery'), h('6%', 'streaming'), h('3%', 'gas'), h('3%', 'transit')]))
-    .toEqual([{ rate: '6%', label: 'grocery and streaming' }, { rate: '3%', label: 'gas' }]);
-  expect(rateTiers([h('5%', 'a'), h('5%', 'b'), h('5%', 'c'), h('2%', 'd')])).toEqual([{ rate: '5%', label: 'a and b' }, { rate: '2%', label: 'd' }]);
+    .toEqual([{ rate: '6%', label: 'grocery & streaming' }, { rate: '3%', label: 'gas' }]);
+  expect(rateTiers([h('5%', 'a'), h('5%', 'b'), h('5%', 'c'), h('2%', 'd')])).toEqual([{ rate: '5%', label: 'a & b' }, { rate: '2%', label: 'd' }]);
   expect(rateTiers([h('4%', 'dining'), h('2%', 'gas'), h('1%', 'x')], 1)).toEqual([{ rate: '4%', label: 'dining' }]);
 });
 
-test('Amex Gold shows 4% grocery and dining as one pill', () => {
+test('Amex Gold shows 4% grocery & dining as one pill', () => {
   const ctx = ctxAt('2026-10-04T12:00:00', [card('w1', 'amex_gold')]);
-  expect(bestFor(ctx, ctx.state.wallet[0])[0]).toEqual({ rate: '4%', label: 'grocery and dining' });
+  expect(bestFor(ctx, ctx.state.wallet[0])[0]).toEqual({ rate: '4%', label: 'grocery & dining' });
 });

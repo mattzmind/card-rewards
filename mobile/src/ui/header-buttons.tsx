@@ -32,12 +32,12 @@ export function HeaderButtons({ extra }: { extra?: React.ReactNode }) {
   return (
     <View style={styles.row}>
       <Pressable onPress={() => { tap(); router.push('/notifications'); }} accessibilityLabel={`Notifications${n ? `, ${n} need attention` : ''}`}
-        style={({ pressed }) => [styles.bell, { backgroundColor: pressed ? c.surface2 : c.surface }]}>
+        style={[styles.bell, { backgroundColor: c.surface }]}>
         <Icon name="bell" color={c.ink} size={22} />
         {n ? <View style={[styles.badge, { backgroundColor: c.badge }]}><Text style={[styles.badgeText, { color: c.onBadge }]}>{n}</Text></View> : null}
       </Pressable>
       {extra}
-      <Pressable onPress={() => { tap(); router.push('/profile'); }} accessibilityLabel="Profile" style={({ pressed }) => [styles.hit, { opacity: pressed ? 0.7 : 1 }]}>
+      <Pressable onPress={() => { tap(); router.push('/profile'); }} accessibilityLabel="Profile" style={styles.hit}>
         <Avatar />
       </Pressable>
     </View>

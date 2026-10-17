@@ -59,7 +59,7 @@ export function WalletRow({ w, showRate, showLast4, first }: { w: WalletCard; sh
         </View>
       )}>
       <Pressable onPressIn={e => { start.current = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY }; }} onPress={onRowPress}
-        style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surface2 : c.surface, opacity: w.inactive ? 0.6 : 1 },
+        style={[styles.row, { backgroundColor: c.surface, opacity: w.inactive ? 0.6 : 1 },
           !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }]}>
         <View style={styles.main}>
           <View style={styles.titleRow}>

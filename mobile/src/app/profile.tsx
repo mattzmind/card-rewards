@@ -75,7 +75,7 @@ export default function Profile() {
           </View>
         ) : (
           <Pressable onPress={startEdit} accessibilityLabel={nm ? `${nm}. Edit name` : 'Add your name'}
-            style={({ pressed }) => [styles.id, pressed && { backgroundColor: c.surface2 }]}>
+            style={styles.id}>
             <Avatar size={56} bg={c.surface2} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={[styles.name, { color: c.ink }]} numberOfLines={1}>{nm || 'Add your name'}</Text>

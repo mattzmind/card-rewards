@@ -61,7 +61,7 @@ export default function Display() {
         {hint ? <Text style={[styles.hint, { color: c.muted }]}>{hint}</Text> : null}
         <View style={[styles.group, { backgroundColor: c.surface }]}>
           {opts.map(([val, label], i) => (
-            <Pressable key={val} onPress={() => choose(val)} style={({ pressed }) => [styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }, pressed && { backgroundColor: c.surface2 }]}>
+            <Pressable key={val} onPress={() => choose(val)} style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }]}>
               <Text style={[styles.label, { color: c.ink, fontFamily: val === cur ? fonts.bold : fonts.medium }]}>{label}</Text>
               {val === cur ? <Icon name="check" color={c.accent} size={20} strokeWidth={2.4} /> : null}
             </Pressable>
@@ -73,7 +73,7 @@ export default function Display() {
 
   const row = (icon: string, label: string, value: string, key: Key, disabled = false, first = false) => (
     <Pressable key={key} disabled={disabled} onPress={() => { tap(); setPicking(key); }}
-      style={({ pressed }) => [styles.row, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }, pressed && { backgroundColor: c.surface2 }, disabled && { opacity: 0.45 }]}>
+      style={[styles.row, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }, disabled && { opacity: 0.45 }]}>
       <Icon name={icon} color={c.accent} size={20} />
       <Text style={[styles.label, { color: c.ink }]}>{label}</Text>
       <Text style={[styles.value, { color: c.muted }]} numberOfLines={1}>{value}</Text>
@@ -113,7 +113,7 @@ export default function Display() {
           <Text style={[styles.hint, { color: c.muted }]}>Showing {walletFiltered(ctx, ctx.state.wallet, v.f).length} of {ctx.state.wallet.length} cards.</Text>
         </>
       )}
-      <Pressable onPress={reset} style={({ pressed }) => [styles.reset, { borderColor: c.line, backgroundColor: pressed ? c.surface2 : c.surface }]}>
+      <Pressable onPress={reset} style={[styles.reset, { borderColor: c.line, backgroundColor: c.surface }]}>
         <Text style={[styles.resetText, { color: c.ink }]}>Reset {mode === 'sort' ? 'sort' : 'filters'}</Text>
       </Pressable>
     </ScrollView>

@@ -203,7 +203,7 @@ type C = ReturnType<typeof useColors>;
 function Chip({ c, label, on, onPress, icon }: { c: C; label: string; on: boolean; onPress: () => void; icon?: string }) {
   return (
     <Pressable onPress={() => { tap(); onPress(); }} accessibilityState={{ selected: on }}
-      style={({ pressed }) => [chipS.chip, { backgroundColor: on ? c.primary : pressed ? c.surface2 : c.surface, borderColor: on ? c.primary : c.line }]}>
+      style={[chipS.chip, { backgroundColor: on ? c.primary : c.surface, borderColor: on ? c.primary : c.line }]}>
       {icon ? <Icon name={icon} color={c.onPrimary} size={14} strokeWidth={2.4} /> : null}
       <Text style={[chipS.text, { color: on ? c.onPrimary : c.ink }]}>{label}</Text>
     </Pressable>
@@ -211,7 +211,7 @@ function Chip({ c, label, on, onPress, icon }: { c: C; label: string; on: boolea
 }
 function SmallBtn({ c, title, onPress, alt }: { c: C; title: string; onPress: () => void; alt?: boolean }) {
   return (
-    <Pressable onPress={() => { tap(); onPress(); }} style={({ pressed }) => [chipS.small, { backgroundColor: alt ? (pressed ? c.line : c.surface2) : c.primary }]}>
+    <Pressable onPress={() => { tap(); onPress(); }} style={[chipS.small, { backgroundColor: alt ? c.surface2 : c.primary }]}>
       <Text style={[chipS.smallText, { color: alt ? c.ink : c.onPrimary }]}>{title}</Text>
     </Pressable>
   );

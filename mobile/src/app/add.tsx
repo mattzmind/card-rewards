@@ -79,7 +79,7 @@ export default function Add() {
     </View>
   );
   const request = (name = '') => (
-    <Pressable onPress={() => { tap(); router.push({ pathname: '/report', params: { card: name } }); }} style={({ pressed }) => [S.request, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+    <Pressable onPress={() => { tap(); router.push({ pathname: '/report', params: { card: name } }); }} style={[S.request, { backgroundColor: c.surface, borderColor: c.line }]}>
       <View style={[S.reqIc, { backgroundColor: c.surface2 }]}><Icon name="plus" color={c.accent} /></View>
       <View style={{ flex: 1 }}>
         <Text style={[S.reqT, { color: c.ink }]}>{name ? `Request “${name}”` : "Can't find your card?"}</Text>

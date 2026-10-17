@@ -116,12 +116,12 @@ export default function Answer() {
       ) : null}
       <View style={styles.actions}>
       {b.cap ? (
-        <Pressable onPress={() => markCap(b.w.id, b.cap!.key, b.cap!.per)} style={({ pressed }) => [styles.quiet, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+        <Pressable onPress={() => markCap(b.w.id, b.cap!.key, b.cap!.per)} style={[styles.quiet, { backgroundColor: c.surface, borderColor: c.line }]}>
           <Icon name="gauge" color={c.ink} size={18} /><Text style={[styles.quietText, { color: c.ink }]}>Hit the cap?</Text>
         </Pressable>
       ) : null}
         <Pressable onPress={() => { tap(); router.push({ pathname: '/report', params: store ? { c: cat.id, s: store.id } : { c: cat.id } }); }}
-          style={({ pressed }) => [styles.quiet, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+          style={[styles.quiet, { backgroundColor: c.surface, borderColor: c.line }]}>
           <Icon name="flag" color={c.ink} size={18} /><Text style={[styles.quietText, { color: c.ink }]}>Wrong card?</Text>
         </Pressable>
       </View>

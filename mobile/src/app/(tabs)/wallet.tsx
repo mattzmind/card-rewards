@@ -76,7 +76,7 @@ export default function Wallet() {
               <QuarterCard />
               {tip ? (
                 <Pressable onPress={() => { tap(); router.push({ pathname: '/answer', params: { c: tip.catId } }); }}
-                  style={({ pressed }) => [styles.best, { backgroundColor: pressed ? c.surface2 : c.surface }]}>
+                  style={[styles.best, { backgroundColor: c.surface }]}>
                   <Icon name="trophy" color={c.rate} size={20} />
                   <Text style={[styles.bestText, { color: c.ink }]}>Tip: <Text style={{ fontFamily: fonts.bold }}>{tip.card}</Text> earns <Text style={{ fontFamily: fonts.bold, color: c.rate }}>{fmtRate(tip.rate)}%</Text> on {tip.catLabel.toLowerCase()}</Text>
                   <Icon name="chevR" color={c.muted} size={18} />
@@ -168,7 +168,7 @@ type C = ReturnType<typeof useColors>;
 function Pill({ c, icon, label, on, onPress }: { c: C; icon: string; label: string; on: boolean; onPress: () => void }) {
   return (
     <Pressable onPress={() => { tap(); onPress(); }}
-      style={({ pressed }) => [styles.pill, { borderColor: on ? c.ink : c.line, backgroundColor: on ? c.hl + '4D' : pressed ? c.surface2 : c.surface }]}>
+      style={[styles.pill, { borderColor: on ? c.ink : c.line, backgroundColor: on ? c.hl + '4D' : c.surface }]}>
       <Icon name={icon} color={c.ink} size={18} /><Text style={[styles.pillText, { color: c.ink }]} numberOfLines={1}>{label}</Text><Icon name="chevD" color={c.muted} size={16} />
     </Pressable>
   );

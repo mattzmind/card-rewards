@@ -46,14 +46,14 @@ export default function Notifications() {
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap}>
       <View style={styles.head}>
         <Pressable onPress={() => { tap(); router.push('/notification-settings'); }} accessibilityLabel="Notification settings"
-          style={({ pressed }) => [styles.round, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}><Icon name="gear" color={c.ink} size={20} /></Pressable>
+          style={[styles.round, { backgroundColor: c.surface, borderColor: c.line }]}><Icon name="gear" color={c.ink} size={20} /></Pressable>
         <Text style={[styles.title, { color: c.ink }]}>Notifications</Text>
         <Pressable onPress={() => router.back()} accessibilityLabel="Close" style={[styles.round, { backgroundColor: c.surface, borderColor: c.line }]}><Icon name="x" color={c.ink} size={20} /></Pressable>
       </View>
 
       {tasks.length && !ctx.state.profile.reminders ? (
         <Pressable onPress={async () => { tap(); if (await enableReminders()) toast("Reminders on. We'll give you a heads-up before deadlines."); else router.push('/notification-settings'); }}
-          style={({ pressed }) => [styles.remind, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+          style={[styles.remind, { backgroundColor: c.surface, borderColor: c.line }]}>
           <View style={[styles.ic, { backgroundColor: c.hl }]}><Icon name="bell" color={c.hlInk} size={22} /></View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.cTitle, { color: c.ink }]}>Remind me before deadlines</Text>
@@ -126,7 +126,7 @@ function Card({ c, icon, tone, title, body, dot, children }: { c: C; icon: strin
 }
 function Btn({ c, title, onPress, alt }: { c: C; title: string; onPress: () => void; alt?: boolean }) {
   return (
-    <Pressable onPress={() => { tap(); onPress(); }} style={({ pressed }) => [styles.btn, { backgroundColor: alt ? (pressed ? c.line : c.surface2) : c.primary }]}>
+    <Pressable onPress={() => { tap(); onPress(); }} style={[styles.btn, { backgroundColor: alt ? c.surface2 : c.primary }]}>
       <Text style={[styles.btnText, { color: alt ? c.ink : c.onPrimary }]}>{title}</Text>
     </Pressable>
   );

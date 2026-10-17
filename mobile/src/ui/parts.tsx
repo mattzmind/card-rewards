@@ -42,7 +42,7 @@ export function Row({ icon, title, sub, right, onPress, first, left, danger }:
   const c = useColors(), flat = useContext(FlatList);
   return (
     <Pressable onPress={onPress} disabled={!onPress}
-      style={({ pressed }) => [styles.row, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }, pressed && { backgroundColor: c.surface2 }]}>
+      style={[styles.row, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }]}>
       {left ?? (!icon ? null : flat ? <RowIcon name={icon} danger={danger} />
         : <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name={icon} color={danger ? c.danger : c.accent} /></View>)}
       <View style={styles.rowMain}>
@@ -59,7 +59,7 @@ export function Tile({ icon, label, onPress, wide, width }: { icon: string; labe
   const c = useColors();
   return (
     <Pressable onPress={() => { tap(); onPress(); }}
-      style={({ pressed }) => [styles.tile, wide && styles.tileWide, width != null && { width, flexBasis: width, flexGrow: 0 }, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line, transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
+      style={({ pressed }) => [styles.tile, wide && styles.tileWide, width != null && { width, flexBasis: width, flexGrow: 0 }, { backgroundColor: c.surface, borderColor: c.line, transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
       <Icon name={icon} color={c.accent} size={wide ? 26 : 24} />
       <Text style={[styles.tileLabel, { color: c.ink }]} numberOfLines={2}>{label}</Text>
     </Pressable>
@@ -84,7 +84,7 @@ export function CloseButton({ onPress, label = 'Close' }: { onPress: () => void;
   const c = useColors();
   return (
     <Pressable onPress={() => { tap(); onPress(); }} hitSlop={8} accessibilityRole="button" accessibilityLabel={label}
-      style={({ pressed }) => [styles.round, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+      style={[styles.round, { backgroundColor: c.surface, borderColor: c.line }]}>
       <Icon name="x" color={c.ink} size={20} />
     </Pressable>
   );

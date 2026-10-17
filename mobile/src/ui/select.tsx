@@ -18,7 +18,7 @@ export function Select({ value, options, onChange, open, onToggle, placeholder =
     <View style={[styles.box, { borderColor: open ? c.accent : c.line, backgroundColor: c.surface }]}>
       <Pressable onPress={() => { tap(); onToggle(); }} accessibilityRole="button" accessibilityState={{ expanded: open }}
         accessibilityLabel={`${label ? label + ': ' : ''}${cur ? cur.label : placeholder}`}
-        style={({ pressed }) => [styles.field, pressed && { backgroundColor: c.surface2 }]}>
+        style={styles.field}>
         <Text style={[styles.value, { color: cur ? c.ink : c.muted }]} numberOfLines={1}>{cur ? cur.label : placeholder}</Text>
         <View style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }}><Icon name="chevD" color={c.ink} size={20} /></View>
       </Pressable>
@@ -29,7 +29,7 @@ export function Select({ value, options, onChange, open, onToggle, placeholder =
             return (
               <Pressable key={o.id} disabled={off} onPress={() => { tap(); onChange(o.id); }} accessibilityRole="menuitem"
                 accessibilityState={{ selected: on, disabled: off }}
-                style={({ pressed }) => [styles.opt, pressed && { backgroundColor: c.surface2 }, on && { backgroundColor: c.surface2 }]}>
+                style={[styles.opt, on && { backgroundColor: c.surface2 }]}>
                 <Text style={[styles.optText, { color: off ? c.muted : c.ink, fontFamily: on ? fonts.semibold : fonts.body }]}>{o.label}</Text>
                 {on ? <Icon name="check" color={c.accent} size={18} strokeWidth={2.4} /> : off ? <Text style={[styles.taken, { color: c.muted }]}>Already picked</Text> : null}
               </Pressable>

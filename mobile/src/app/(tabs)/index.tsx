@@ -120,7 +120,7 @@ export default function Earn() {
                     const st = x.s ? stores.find(s => s.id === x.s) : null;
                     return (
                       <Pressable key={x.c + (x.s || '')} onPress={() => openAnswer(x.c, x.s || undefined)}
-                        style={({ pressed }) => [styles.chip, { backgroundColor: pressed ? c.surface2 : c.surface, borderColor: c.line }]}>
+                        style={[styles.chip, { backgroundColor: c.surface, borderColor: c.line }]}>
                         <Icon name={x.c} color={c.accent} size={18} />
                         <Text style={[styles.chipText, { color: c.ink }]}>{st ? st.name : catName(x.c)}</Text>
                       </Pressable>
