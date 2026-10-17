@@ -1,7 +1,7 @@
 /* Small shared building blocks: section heading, list row, category tile, primary button,
    sheet top bar with a close (X) button, last-4 digits field. */
 import * as Haptics from 'expo-haptics';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, createContext, useContext, useState } from 'react';
 import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View, type TextStyle, type ViewStyle } from 'react-native';
 
 import { Icon } from './icon';
@@ -19,18 +19,32 @@ export function SectionTitle({ children, right }: { children: ReactNode; right?:
   );
 }
 
-export function List({ children, style }: { children: ReactNode; style?: ViewStyle }) {
+/* flat: no box, just the rows and their dividers, for pages that are one plain surface (Profile, Data & Privacy,
+   Notification settings). Rows inside a flat list show a plain icon instead of one in a tinted square. */
+const FlatList = createContext(false);
+export function List({ children, style, flat = false }: { children: ReactNode; style?: ViewStyle; flat?: boolean }) {
   const c = useColors();
-  return <View style={[styles.list, { backgroundColor: c.surface, borderColor: c.line }, style]}>{children}</View>;
+  return (
+    <FlatList.Provider value={flat}>
+      <View style={[flat ? null : [styles.list, { backgroundColor: c.surface, borderColor: c.line }], style]}>{children}</View>
+    </FlatList.Provider>
+  );
+}
+
+/* Icon at the start of a settings row: no background, one color, one size, same width so titles line up */
+export function RowIcon({ name, danger }: { name: string; danger?: boolean }) {
+  const c = useColors();
+  return <View style={styles.rowIcPlain}><Icon name={name} color={danger ? c.danger : c.ink} size={22} /></View>;
 }
 
 export function Row({ icon, title, sub, right, onPress, first, left, danger }:
   { icon?: string; title: string; sub?: string; right?: ReactNode; onPress?: () => void; first?: boolean; left?: ReactNode; danger?: boolean }) {
-  const c = useColors();
+  const c = useColors(), flat = useContext(FlatList);
   return (
     <Pressable onPress={onPress} disabled={!onPress}
       style={({ pressed }) => [styles.row, !first && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.line }, pressed && { backgroundColor: c.surface2 }]}>
-      {left ?? (icon ? <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name={icon} color={danger ? c.danger : c.accent} /></View> : null)}
+      {left ?? (!icon ? null : flat ? <RowIcon name={icon} danger={danger} />
+        : <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name={icon} color={danger ? c.danger : c.accent} /></View>)}
       <View style={styles.rowMain}>
         <Text style={[styles.rowTitle, { color: danger ? c.danger : c.ink }]} numberOfLines={2}>{title}</Text>
         {sub ? <Text style={[styles.rowSub, { color: c.muted }]} numberOfLines={2}>{sub}</Text> : null}
@@ -80,9 +94,9 @@ export function CloseButton({ onPress, label = 'Close' }: { onPress: () => void;
    sheet's root ScrollView with stickyHeaderIndices={[0]}: it stays pinned while the content scrolls under it.
    Keep the ScrollView as the sheet's root. iOS form sheets don't give a wrapper View a height, so a
    View > [bar, ScrollView] layout either overlaps the bar or collapses the ScrollView to nothing. */
-export function SheetBar({ onClose, left }: { onClose: () => void; left?: ReactNode }) {
+export function SheetBar({ onClose, left, bg }: { onClose: () => void; left?: ReactNode; bg?: string }) {
   const c = useColors();
-  return <View style={[styles.bar, { backgroundColor: c.bg }]}><View style={{ flex: 1 }}>{left}</View><CloseButton onPress={onClose} /></View>;
+  return <View style={[styles.bar, { backgroundColor: bg || c.bg }]}><View style={{ flex: 1 }}>{left}</View><CloseButton onPress={onClose} /></View>;
 }
 
 /* Last 4 digits: digits only, standard iOS field behavior. The system clear button (circled ✕ while editing)
@@ -95,8 +109,8 @@ export function Last4Input({ value, onChangeText, style }: { value: string; onCh
   return (
     <View>
       <TextInput value={value} onChangeText={v => onChangeText(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" maxLength={4}
-        placeholder="1234" placeholderTextColor={c.muted} accessibilityLabel="Last 4 digits" returnKeyType="done" clearButtonMode="while-editing"
-        inputAccessoryViewID={Platform.OS === 'ios' ? barId : undefined} style={style} />
+        placeholder="0000" placeholderTextColor={c.muted + '99'} accessibilityLabel="Last 4 digits" returnKeyType="done" clearButtonMode="while-editing"
+        inputAccessoryViewID={Platform.OS === 'ios' ? barId : undefined} style={[style, !value && styles.last4Empty]} />
       {Platform.OS === 'ios' ? (
         <InputAccessoryView nativeID={barId}>
           <View style={[styles.doneBar, { backgroundColor: c.surface2, borderTopColor: c.line }]}>
@@ -121,6 +135,9 @@ const styles = StyleSheet.create({
   list: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14, minHeight: 56 },
   rowIc: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  /* Placeholders use the field's font, so an empty field drops to regular weight: "0000" stays soft, typed digits stay bold */
+  last4Empty: { fontFamily: fonts.body },
+  rowIcPlain:{ width: 26, alignItems: 'center', justifyContent: 'center' },
   rowMain: { flex: 1, minWidth: 0, gap: 1 },
   rowTitle: { fontFamily: fonts.semibold, fontSize: 16 },
   rowSub: { fontFamily: fonts.body, fontSize: 13 },

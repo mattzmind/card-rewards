@@ -12,7 +12,7 @@ jest.mock('react-native-reanimated', () => {
   const { View, ScrollView } = jest.requireActual('react-native');
   const anim: any = { duration: () => anim, delay: () => anim };
   return { __esModule: true, default: { View, ScrollView }, useAnimatedRef: () => ({ current: null }), FadeInRight: anim, FadeOutLeft: anim, FadeInDown: anim, FadeOutDown: anim,
-    useSharedValue: (v: any) => ({ value: v, get: () => v, set: () => {} }), useAnimatedStyle: () => ({}), withTiming: (v: any) => v, interpolate: () => 1, runOnJS: (fn: any) => fn,
+    useSharedValue: (v: any) => ({ value: v, get: () => v, set: () => {} }), useAnimatedStyle: () => ({}), useAnimatedScrollHandler: () => undefined, withTiming: (v: any) => v, interpolate: () => 1, runOnJS: (fn: any) => fn,
     Easing: { out: () => () => 0, cubic: () => 0 } };
 });
 jest.mock('react-native-sortables', () => {
@@ -124,7 +124,9 @@ test('Wallet shows the summary, toolbar and cards', async () => {
   expect(screen.getByText(/4 CARDS/)).toBeTruthy();
   expect(screen.getByText('Sort')).toBeTruthy();
   expect(screen.getByText('Amex Gold')).toBeTruthy();
-  expect(screen.getByText(/Your best rate/)).toBeTruthy();
+  expect(screen.getByText(/ bonuses$/)).toBeTruthy();
+  expect(screen.getByText(/^Tip: .+ earns /)).toBeTruthy();
+  expect(screen.queryByText('TOP RATE')).toBeNull();
 });
 
 test('Card details: mark the quarterly bonus activated, then save', async () => {
@@ -193,7 +195,7 @@ test('Add: pick several cards, add them, then set up the one with categories', a
   await fireEvent.changeText(screen.getByPlaceholderText('Search banks or cards'), 'cash+');
   await fireEvent.press(screen.getByText('U.S. Bank Cash+'));
   await fireEvent.press(screen.getByText('Add 2 cards'));
-  await fireEvent.changeText(screen.getAllByPlaceholderText('1234')[0], '12a34');
+  await fireEvent.changeText(screen.getAllByPlaceholderText('0000')[0], '12a34');
   await fireEvent.press(screen.getByText('Add to wallet'));
   expect(st().wallet.find(w => w.product === 'chase_sapphire_preferred')?.last4).toBe('1234');
   expect(st().wallet.find(w => w.product === 'usbank_cash_plus')).toBeTruthy();

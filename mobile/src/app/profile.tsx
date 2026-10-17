@@ -1,6 +1,7 @@
 /* Profile (sheet from the avatar): who you are, your data, settings, support, version.
-   Standard grouped-settings layout: your name card and stats on top, then Your data (everything lives only on this
-   phone, so the backup matters most), Settings, Support, and the version as footer text. */
+   One plain page (no boxed sections, like most apps' settings): your name and an outlined stats box on top, then
+   Your data (everything lives only on this phone, so the backup matters most), Settings, Support, and the version
+   as footer text. */
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as StoreReview from 'expo-store-review';
@@ -15,7 +16,7 @@ import { useApp, useCtx } from '@/store/app';
 import { Avatar } from '@/ui/header-buttons';
 import { Icon } from '@/ui/icon';
 import { APP_URL, openSite } from '@/ui/links';
-import { List, Row, SheetBar, tap } from '@/ui/parts';
+import { List, Row, RowIcon, SheetBar, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 import { toast } from '@/ui/toast';
 
@@ -59,10 +60,10 @@ export default function Profile() {
   );
 
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
-      <SheetBar onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Profile</Text>} />
+    <ScrollView style={{ backgroundColor: c.surface }} contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets stickyHeaderIndices={[0]}>
+      <SheetBar bg={c.surface} onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Profile</Text>} />
 
-      <List style={styles.first}>
+      <List flat style={styles.first}>
         {editing ? (
           <View style={styles.id}>
             <Avatar size={56} bg={c.surface2} />
@@ -85,7 +86,7 @@ export default function Profile() {
         )}
       </List>
 
-      <View style={[styles.stats, { backgroundColor: c.surface, borderColor: c.line }]}>
+      <View style={[styles.stats, { borderColor: c.line }]}>
         {([[String(cards.length), 'CARDS'], [String(ctx.state.favs.length), 'FAVORITES'], [`$${fees.toLocaleString('en-US')}`, 'ANNUAL FEES']] as const).map(([n, l], i) => (
           <View key={l} style={[styles.stat, i > 0 && { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: c.line }]} accessible accessibilityLabel={`${n} ${l.toLowerCase()}`}>
             <Text style={[styles.statN, { color: c.ink }]}>{n}</Text><Text style={[styles.statL, { color: c.muted }]}>{l}</Text>
@@ -94,17 +95,17 @@ export default function Profile() {
       </View>
 
       <Text style={[styles.sec, { color: c.ink }]}>Your data</Text>
-      <List>
+      <List flat>
         <Row first icon="lock" title="Data & Privacy" onPress={() => go('/privacy')} right={chev(undefined, stale)}
           sub={backedUp ? `Last backup ${shortDate(backedUp)}` : 'No backup yet'} />
       </List>
 
       <Text style={[styles.sec, { color: c.ink }]}>Settings</Text>
-      <List>
+      <List flat>
         <Row first icon="bell" title="Notifications" onPress={() => go('/notification-settings')} right={chev(notify)} />
         <View style={[styles.pref, { borderTopColor: c.line }]}>
           <View style={styles.prefHead}>
-            <View style={[styles.rowIc, { backgroundColor: c.surface2 }]}><Icon name="sun" color={c.accent} /></View>
+            <RowIcon name="sun" />
             <Text style={[styles.prefTitle, { color: c.ink }]}>Appearance</Text>
           </View>
           <View style={[styles.seg, { backgroundColor: c.surface2 }]} accessibilityRole="radiogroup">
@@ -119,7 +120,7 @@ export default function Profile() {
       </List>
 
       <Text style={[styles.sec, { color: c.ink }]}>Support</Text>
-      <List>
+      <List flat>
         <Row first icon="help" title="Help & FAQ" onPress={() => { tap(); openSite('support'); }} />
         <Row icon="mail" title="Send feedback" sub="Ideas, problems, anything" onPress={() => go({ pathname: '/report', params: { general: '1' } })} />
         <Row icon="plus" title="Request a card" sub="Missing a card? We’ll add it" onPress={() => go({ pathname: '/report', params: { card: '' } })} />
@@ -152,18 +153,17 @@ const styles = StyleSheet.create({
   pencil: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   field: { flex: 1, fontFamily: fonts.semibold, fontSize: 17, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  stats: { flexDirection: 'row', borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, paddingVertical: 14, marginTop: 12 },
+  stats: { flexDirection: 'row', borderRadius: 18, borderWidth: 1, paddingVertical: 14, marginTop: 4, marginHorizontal: 14 },
   stat: { flex: 1, alignItems: 'center' },
   statN: { fontFamily: fonts.display, fontSize: 24 },
   statL: { fontFamily: fonts.semibold, fontSize: 11, letterSpacing: 0.8, marginTop: 4 },
-  sec: { fontFamily: fonts.display, fontSize: 18, marginTop: 26, marginBottom: 10, marginHorizontal: 4 },
+  sec: { fontFamily: fonts.display, fontSize: 20, marginTop: 30, marginBottom: 4, marginHorizontal: 14 },
   right: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   value: { fontFamily: fonts.body, fontSize: 15 },
   dot: { width: 9, height: 9, borderRadius: 5 },
   pref: { padding: 14, gap: 12, borderTopWidth: StyleSheet.hairlineWidth },
   prefHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   prefTitle: { fontFamily: fonts.semibold, fontSize: 16 },
-  rowIc: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   seg: { flexDirection: 'row', borderRadius: 12, padding: 3 },
   segBtn: { flex: 1, minHeight: 40, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   segText: { fontFamily: fonts.semibold, fontSize: 14 },

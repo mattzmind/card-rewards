@@ -574,6 +574,7 @@ button.w-best{width:100%;text-align:left}
 .notes{padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 .flabel{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:16px 2px 8px}
 .field{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:16px}
+#d-last4::placeholder{color:var(--muted);opacity:.6;font-weight:400}
 .field:focus{outline:none;border-color:var(--accent)}
 .source{font-size:12px;color:var(--muted);margin-top:20px;line-height:1.6}
 .source a{color:var(--accent)}
@@ -820,7 +821,7 @@ button.w-best{width:100%;text-align:left}
 /* v2 feature switches: hidden features stay in the code, turn back on here */
 const SHOW={accountDetails:false /* due date, limit, fee, rewards balance */, splash:true /* opening animation */, splashToggle:false /* Profile switch to turn the opening animation off */, multiPeople:false /* household mode: owner badges, Whose card, group by person */};
 const SINGLE_CARD_PER_PRODUCT=true; // wallet holds at most one of each card
-const APP_VERSION="2.1.3"; // shown in Profile > About
+const APP_VERSION="2.1.4"; // shown in Profile > About
 const FEEDBACK_EMAIL=""; // Profile > Send feedback opens a mail to this address (row hidden while empty)
 
 /* ══════════════════════════════════════════════════════════
@@ -895,7 +896,7 @@ const ICONS={
   mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   gear:'<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
-  help:'<circle cx="12" cy="12" r="9.5"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
 };
 const ic=(n,cls)=>`<svg class="ic ${cls||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||ICONS.other}</svg>`;
 
@@ -1321,16 +1322,25 @@ function walletRow(w,{drag=true}={}){
 /* Bank tile: the bank's colors and short name (real card pictures need licensing) */
 function bankTile(w){const p=P(w.product),b=p?B(p.brand):B("?");const[c1,c2]=(typeof ART!=="undefined"&&ART[w.product])||b.colors;
   return `<span class="bank-tile" style="background:linear-gradient(135deg,${c1},${c2})" aria-hidden="true">${esc(b.mono||(b.short||b.name).slice(0,2))}</span>`}
-/* What a card is best for: its top two bonus categories, e.g. "6% grocery · 3% gas" */
+/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery and streaming",
+   "3% gas". At most 2 pills (1 next to an activation pill) and 3 categories, 2 per pill. */
+function rateTiers(hits,maxTiers){
+  const tiers=[];let n=0;
+  for(const h of hits){if(n>=3)break;const last=tiers[tiers.length-1];
+    if(last&&last.rate===h.rate){if(last.labels.length<2){last.labels.push(h.label);n++}}
+    else if(tiers.length<maxTiers){tiers.push({rate:h.rate,labels:[h.label]});n++}
+    else break}
+  return tiers.map(t=>({rate:t.rate,label:t.labels.join(" and ")}));
+}
 function bestFor(w){
   const p=P(w.product);if(!p)return"";const mult=p.type==="cash"?1:(p.cpp||1);
   const hits=visibleCats().filter(c=>c.id!=="other").map(c=>{const e=evalCard(w,c,null);return e?{c,r:e.rate-e.extras.reduce((t,x)=>t+x.extra,0)*mult}:null})
     .filter(x=>x&&x.r>(p.base||0)*mult+0.001).sort((a,b)=>b.r-a.r||(a.c.parent?1:0)-(b.c.parent?1:0));
-  const seen=new Set(),top=[];for(const h of hits){if(top.length>=2)break;const k=h.r+"|"+(h.c.parent||h.c.id);if(seen.has(k))continue;seen.add(k);top.push(h)}
+  const seen=new Set(),top=[];for(const h of hits){const k=h.r+"|"+(h.c.parent||h.c.id);if(seen.has(k))continue;seen.add(k);top.push(h)}
   // a quarterly bonus that still needs activating
   const q=p.rotating&&p.rotating.schedule[QK],pend=q&&!w.activated.includes(QK)?`<span class="bf-pill warn"><b>${fmtRate(p.rotating.rate)}%</b> ${esc(q.label.split(/,| &/)[0].toLowerCase())} · activate</span>`:"";
   if(!top.length)return pend+`<span class="bf-pill">${fmtRate((p.base||0)*mult)}% everywhere</span>`;
-  return pend+top.slice(0,pend?1:2).map(h=>`<span class="bf-pill"><b>${fmtRate(Math.round(h.r*100)/100)}%</b> ${esc(h.c.label.toLowerCase())}</span>`).join("");
+  return pend+rateTiers(top.map(h=>({rate:fmtRate(Math.round(h.r*100)/100)+"%",label:h.c.label.toLowerCase()})),pend?1:2).map(t=>`<span class="bf-pill"><b>${t.rate}</b> ${esc(t.label)}</span>`).join("");
 }
 /* Wallet header: title, people, fanned top cards, then a summary strip like a finance app */
 function walletHero(){
@@ -2232,7 +2242,7 @@ function renderDraft(keep=true){
     ${SHOW.multiPeople&&state.people.length>1?`<div class="flabel">Whose card is this?</div><div class="chips">${ownerChips(draft.owner,"draft.owner='$ID';renderDraft()")}</div>`:""}
     ${p.networkOptions?`<div class="flabel">Which logo is on your card?</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${draft.network===n?"on":""}" onclick="draft.network='${n}';renderDraft()">${capWord(n)}</button>`).join("")}</div>`:""}
     <label class="flabel" for="d-last4">Last 4 digits (optional)</label>
-    <input class="field mono" id="d-last4" inputmode="numeric" maxlength="4" placeholder="1234" value="${esc(draft.last4)}" oninput="draft.last4=this.value.replace(/\\D/g,'').slice(0,4)">
+    <input class="field mono" id="d-last4" inputmode="numeric" maxlength="4" placeholder="0000" value="${esc(draft.last4)}" oninput="draft.last4=this.value.replace(/\\D/g,'').slice(0,4)">
     <label class="flabel" for="d-nick">Nickname (optional)</label>
     <input class="field" id="d-nick" placeholder="${esc(p.short)}" value="${esc(draft.nickname)}" oninput="draft.nickname=this.value">
     <p class="hint">Never enter your full card number. The last 4 only help you spot the card at checkout.</p>

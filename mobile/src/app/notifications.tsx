@@ -1,15 +1,16 @@
 /* Notifications (bell): quarterly activations, picks to confirm or choose, caps reached.
    The gear (top left) opens Notification settings. */
 import { router } from 'expo-router';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { isoToDate, shortDate } from '@/core/dates';
-import { type Task, activeWallet, allTasks, brandOf, dn, productOf } from '@/core/engine';
+import { type Task, activeWallet, allTasks, dn } from '@/core/engine';
 import type { WalletCard } from '@/core/types';
 import { capLabel } from '@/core/wallet';
 import { confirmSame, dismissTask, finishAct, startAct, undoCap } from '@/store/actions';
 import { useCtx } from '@/store/app';
 import { enableReminders } from '@/store/reminders';
+import { openBank as openBankFor } from '@/ui/links';
 import { toast } from '@/ui/toast';
 import { CardArt } from '@/ui/card-art';
 import { Icon } from '@/ui/icon';
@@ -25,7 +26,7 @@ export default function Notifications() {
   const caps: { w: WalletCard; k: string; u: string }[] = [];
   activeWallet(ctx).forEach(w => Object.entries(w.capped || {}).forEach(([k, u]) => { if (u >= TODAY) caps.push({ w, k, u }); }));
   const openCard = (id: string) => router.push({ pathname: '/card/[id]', params: { id } });
-  const openBank = (w: WalletCard) => { const u = brandOf(ctx, productOf(ctx, w.product)?.brand || '').login; if (u) Linking.openURL(u).catch(() => {}); };
+  const openBank = (w: WalletCard) => openBankFor(ctx, w);
 
   const chip = (w: WalletCard) => (
     <View style={styles.chip}><CardArt product={w.product} width={34} /><Text style={[styles.chipText, { color: c.ink }]}>{dn(ctx, w)}{w.last4 ? `  ••${w.last4}` : ''}</Text></View>

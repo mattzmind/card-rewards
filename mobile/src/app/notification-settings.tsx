@@ -1,4 +1,4 @@
-/* Notification settings (from Profile, or the gear in the Notifications inbox).
+/* Notification settings (from Profile, or the gear in the Notifications inbox). One plain page like Profile.
    The phone controls whether Lucro may notify and how (banners, sounds, Lock Screen); this screen only picks which
    activity sends a reminder. A banner on top asks for permission, or points to the phone's Settings when it's blocked. */
 import { router } from 'expo-router';
@@ -31,11 +31,11 @@ export default function NotificationSettings() {
   const openSettings = () => { tap(); Linking.openSettings().catch(() => {}); };
 
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} stickyHeaderIndices={[0]}>
-      <SheetBar onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Notifications</Text>} />
+    <ScrollView style={{ backgroundColor: c.surface }} contentContainerStyle={styles.wrap} stickyHeaderIndices={[0]}>
+      <SheetBar bg={c.surface} onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Notifications</Text>} />
 
       {perm && !on ? (
-        <View style={[styles.banner, { backgroundColor: c.surface, borderColor: c.line }]}>
+        <View style={[styles.banner, { borderColor: c.line }]}>
           <View style={styles.bannerHead}>
             <View style={[styles.ic, { backgroundColor: c.hl }]}><Icon name="bell" color={c.hlInk} size={22} /></View>
             <View style={{ flex: 1 }}>
@@ -51,7 +51,7 @@ export default function NotificationSettings() {
       ) : null}
 
       <Text style={[styles.sec, { color: c.ink }]}>Remind me about</Text>
-      <List style={!on ? { opacity: 0.5 } : undefined}>
+      <List flat style={!on ? { opacity: 0.5 } : undefined}>
         {KINDS.map((k, i) => (
           <Row key={k.kind} first={i === 0} icon={k.icon} title={k.title} sub={k.sub}
             right={<Switch value={on && notifyOn(ctx, k.kind)} disabled={!on} onValueChange={v => { tap(); setNotify(k.kind, v); }}
@@ -71,13 +71,13 @@ export default function NotificationSettings() {
 const styles = StyleSheet.create({
   wrap: { paddingHorizontal: GUTTER, paddingBottom: 48 },
   title: { fontFamily: fonts.display, fontSize: 20, paddingLeft: 4 },
-  banner: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 14, marginTop: 8 },
+  banner: { borderRadius: 18, borderWidth: 1, padding: 14, gap: 14, marginTop: 8, marginHorizontal: 14 },
   bannerHead: { flexDirection: 'row', gap: 12 },
   ic: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   bannerH: { fontFamily: fonts.bold, fontSize: 16, lineHeight: 21 },
   bannerP: { fontFamily: fonts.body, fontSize: 14, marginTop: 3 },
-  sec: { fontFamily: fonts.display, fontSize: 18, marginTop: 18, marginBottom: 10, marginHorizontal: 4 },
-  note: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, marginTop: 8, marginHorizontal: 6 },
-  link: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start', paddingHorizontal: 6 },
+  sec: { fontFamily: fonts.display, fontSize: 20, marginTop: 30, marginBottom: 4, marginHorizontal: 14 },
+  note: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, marginTop: 6, marginHorizontal: 14 },
+  link: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start', paddingHorizontal: 14 },
   linkText: { fontFamily: fonts.semibold, fontSize: 14 },
 });

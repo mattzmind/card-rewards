@@ -98,16 +98,25 @@ function walletRow(w,{drag=true}={}){
 /* Bank tile: the bank's colors and short name (real card pictures need licensing) */
 function bankTile(w){const p=P(w.product),b=p?B(p.brand):B("?");const[c1,c2]=(typeof ART!=="undefined"&&ART[w.product])||b.colors;
   return `<span class="bank-tile" style="background:linear-gradient(135deg,${c1},${c2})" aria-hidden="true">${esc(b.mono||(b.short||b.name).slice(0,2))}</span>`}
-/* What a card is best for: its top two bonus categories, e.g. "6% grocery · 3% gas" */
+/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery and streaming",
+   "3% gas". At most 2 pills (1 next to an activation pill) and 3 categories, 2 per pill. */
+function rateTiers(hits,maxTiers){
+  const tiers=[];let n=0;
+  for(const h of hits){if(n>=3)break;const last=tiers[tiers.length-1];
+    if(last&&last.rate===h.rate){if(last.labels.length<2){last.labels.push(h.label);n++}}
+    else if(tiers.length<maxTiers){tiers.push({rate:h.rate,labels:[h.label]});n++}
+    else break}
+  return tiers.map(t=>({rate:t.rate,label:t.labels.join(" and ")}));
+}
 function bestFor(w){
   const p=P(w.product);if(!p)return"";const mult=p.type==="cash"?1:(p.cpp||1);
   const hits=visibleCats().filter(c=>c.id!=="other").map(c=>{const e=evalCard(w,c,null);return e?{c,r:e.rate-e.extras.reduce((t,x)=>t+x.extra,0)*mult}:null})
     .filter(x=>x&&x.r>(p.base||0)*mult+0.001).sort((a,b)=>b.r-a.r||(a.c.parent?1:0)-(b.c.parent?1:0));
-  const seen=new Set(),top=[];for(const h of hits){if(top.length>=2)break;const k=h.r+"|"+(h.c.parent||h.c.id);if(seen.has(k))continue;seen.add(k);top.push(h)}
+  const seen=new Set(),top=[];for(const h of hits){const k=h.r+"|"+(h.c.parent||h.c.id);if(seen.has(k))continue;seen.add(k);top.push(h)}
   // a quarterly bonus that still needs activating
   const q=p.rotating&&p.rotating.schedule[QK],pend=q&&!w.activated.includes(QK)?`<span class="bf-pill warn"><b>${fmtRate(p.rotating.rate)}%</b> ${esc(q.label.split(/,| &/)[0].toLowerCase())} · activate</span>`:"";
   if(!top.length)return pend+`<span class="bf-pill">${fmtRate((p.base||0)*mult)}% everywhere</span>`;
-  return pend+top.slice(0,pend?1:2).map(h=>`<span class="bf-pill"><b>${fmtRate(Math.round(h.r*100)/100)}%</b> ${esc(h.c.label.toLowerCase())}</span>`).join("");
+  return pend+rateTiers(top.map(h=>({rate:fmtRate(Math.round(h.r*100)/100)+"%",label:h.c.label.toLowerCase()})),pend?1:2).map(t=>`<span class="bf-pill"><b>${t.rate}</b> ${esc(t.label)}</span>`).join("");
 }
 /* Wallet header: title, people, fanned top cards, then a summary strip like a finance app */
 function walletHero(){

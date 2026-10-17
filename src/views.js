@@ -638,7 +638,7 @@ function renderDraft(keep=true){
     ${SHOW.multiPeople&&state.people.length>1?`<div class="flabel">Whose card is this?</div><div class="chips">${ownerChips(draft.owner,"draft.owner='$ID';renderDraft()")}</div>`:""}
     ${p.networkOptions?`<div class="flabel">Which logo is on your card?</div><div class="chips">${p.networkOptions.map(n=>`<button class="chip ${draft.network===n?"on":""}" onclick="draft.network='${n}';renderDraft()">${capWord(n)}</button>`).join("")}</div>`:""}
     <label class="flabel" for="d-last4">Last 4 digits (optional)</label>
-    <input class="field mono" id="d-last4" inputmode="numeric" maxlength="4" placeholder="1234" value="${esc(draft.last4)}" oninput="draft.last4=this.value.replace(/\\D/g,'').slice(0,4)">
+    <input class="field mono" id="d-last4" inputmode="numeric" maxlength="4" placeholder="0000" value="${esc(draft.last4)}" oninput="draft.last4=this.value.replace(/\\D/g,'').slice(0,4)">
     <label class="flabel" for="d-nick">Nickname (optional)</label>
     <input class="field" id="d-nick" placeholder="${esc(p.short)}" value="${esc(draft.nickname)}" oninput="draft.nickname=this.value">
     <p class="hint">Never enter your full card number. The last 4 only help you spot the card at checkout.</p>

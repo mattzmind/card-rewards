@@ -1,9 +1,8 @@
 /* Wallet: summary, sort/filter, pinned + grouped lists. Press and hold a card to drag it (My order);
    swipe a card for actions; tap for details. */
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useScrollToTop } from 'expo-router';
-import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Platform, Pressable, AppState as RNAppState, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
@@ -11,13 +10,16 @@ import Sortable from 'react-native-sortables';
 import { activeWallet, fmtRate } from '@/core/engine';
 import type { WalletCard, WalletFilter } from '@/core/types';
 import {
-  FILTER_DEFAULT, VIEW_DEFAULT, activeFilterCount, filterValueLabel, viewOf, walletFiltered, walletGroups, walletSorted, walletSummary,
+  FILTER_DEFAULT, VIEW_DEFAULT, activeFilterCount, filterValueLabel, viewOf, walletFiltered, walletGroups, walletSorted, walletSummary, walletTip,
 } from '@/core/wallet';
 import { reorder } from '@/store/actions';
 import { useApp, useCtx } from '@/store/app';
 import { HeaderButtons, ScreenTitle } from '@/ui/header-buttons';
+import { Hero } from '@/ui/hero';
 import { Icon } from '@/ui/icon';
 import { Button, tap } from '@/ui/parts';
+import { QuarterCard } from '@/ui/quarter-card';
+import { TopFade, useScrollY } from '@/ui/top-fade';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
 import { WalletRow } from '@/ui/wallet-row';
 
@@ -25,7 +27,14 @@ export default function Wallet() {
   const c = useColors(), insets = useSafeAreaInsets(), ctx = useCtx(), update = useApp(s => s.update);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   useScrollToTop(scrollRef);
+  const { y, onScroll } = useScrollY();
   const [showOff, setShowOff] = useState(false);
+  /* New tip each time the app opens or comes back from the background */
+  const [seed, setSeed] = useState(Math.random);
+  useEffect(() => {
+    const sub = RNAppState.addEventListener('change', s => { if (s === 'active') setSeed(Math.random()); });
+    return () => sub.remove();
+  }, []);
   const v = viewOf(ctx), nf = activeFilterCount(v.f);
   const act = activeWallet(ctx), all = ctx.state.wallet;
   const active = walletFiltered(ctx, act, v.f);
@@ -36,7 +45,7 @@ export default function Wallet() {
   /* Bottom spacing. On iOS the inset already includes the floating tab bar, so the + sits just above it and
      the list ends just above the +. Android's tab screen already stops above its bar. */
   const fabBottom = Platform.OS === 'ios' ? insets.bottom + 12 : 16, listPad = fabBottom + 60 + 12;
-  const sum = walletSummary(ctx);
+  const sum = walletSummary(ctx), tip = walletTip(ctx, seed);
   const clearFilter = (k: keyof WalletFilter | '*') => { tap(); update(s => { const cur = viewOf({ ...ctx, state: s }); s.view = { ...cur, f: k === '*' ? { ...FILTER_DEFAULT } : { ...cur.f, [k]: FILTER_DEFAULT[k] } }; }); };
 
   const list = (items: WalletCard[], key: string) => {
@@ -55,25 +64,21 @@ export default function Wallet() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Animated.ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: listPad }}>
-        <LinearGradient colors={[c.heroA, c.heroB, c.bg]} locations={[0, 0.45, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.4, y: 1 }}
-          style={[styles.hero, { paddingTop: insets.top + 4 }]}>
+      <Animated.ScrollView ref={scrollRef} onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ paddingBottom: listPad }}>
+        <Hero style={[styles.hero, { paddingTop: insets.top + 4 }]}>
           <View style={styles.topRow}><ScreenTitle>Wallet</ScreenTitle><HeaderButtons /></View>
           <Text style={[styles.meta, { color: c.ink }]}>{act.length} CARD{act.length === 1 ? '' : 'S'}  ·  {sum.banks} BANK{sum.banks === 1 ? '' : 'S'}</Text>
-        </LinearGradient>
+        </Hero>
 
         <View style={{ paddingHorizontal: GUTTER }}>
           {act.length ? (
             <>
-              <View style={[styles.stats, { backgroundColor: c.surface }]}>
-                <View style={styles.stat}><Text style={[styles.statN, { color: c.rate }]}>{sum.best ? fmtRate(sum.best.rate) + '%' : '—'}</Text><Text style={[styles.statL, { color: c.muted }]}>TOP RATE</Text></View>
-                <View style={[styles.stat, { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: c.line }]}><Text style={[styles.statN, { color: c.ink }]}>{sum.everyday != null ? fmtRate(sum.everyday) + '%' : '—'}</Text><Text style={[styles.statL, { color: c.muted }]}>EVERYWHERE</Text></View>
-              </View>
-              {sum.best ? (
-                <Pressable onPress={() => { tap(); router.push({ pathname: '/answer', params: { c: sum.best!.catId } }); }}
+              <QuarterCard />
+              {tip ? (
+                <Pressable onPress={() => { tap(); router.push({ pathname: '/answer', params: { c: tip.catId } }); }}
                   style={({ pressed }) => [styles.best, { backgroundColor: pressed ? c.surface2 : c.surface }]}>
                   <Icon name="trophy" color={c.rate} size={20} />
-                  <Text style={[styles.bestText, { color: c.ink }]}>Your best rate: <Text style={{ fontFamily: fonts.bold }}>{fmtRate(sum.best.rate)}% at {sum.best.catLabel.toLowerCase()}</Text> with {sum.best.card}</Text>
+                  <Text style={[styles.bestText, { color: c.ink }]}>Tip: <Text style={{ fontFamily: fonts.bold }}>{tip.card}</Text> earns <Text style={{ fontFamily: fonts.bold, color: c.rate }}>{fmtRate(tip.rate)}%</Text> on {tip.catLabel.toLowerCase()}</Text>
                   <Icon name="chevR" color={c.muted} size={18} />
                 </Pressable>
               ) : null}
@@ -148,6 +153,7 @@ export default function Wallet() {
           ) : null}
         </View>
       </Animated.ScrollView>
+      <TopFade y={y} />
 
       {/* Bottom right, just above the tab bar (like Todoist) */}
       <Pressable onPress={() => { tap(); router.push('/add'); }} accessibilityLabel="Add a card"
@@ -181,10 +187,6 @@ const styles = StyleSheet.create({
   hero: { paddingHorizontal: GUTTER, paddingBottom: 18, overflow: 'hidden' },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, marginBottom: 8 },
   meta: { fontFamily: fonts.bold, fontSize: 13, letterSpacing: 1 },
-  stats: { flexDirection: 'row', borderRadius: 22, paddingVertical: 16, marginTop: 8 },
-  stat: { flex: 1, alignItems: 'center' },
-  statN: { fontFamily: fonts.display, fontSize: 26, letterSpacing: -0.4 },
-  statL: { fontFamily: fonts.semibold, fontSize: 12, letterSpacing: 0.8, marginTop: 4 },
   best: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 12, marginTop: 12, minHeight: 52 },
   bestText: { flex: 1, fontFamily: fonts.body, fontSize: 15 },
   toolbar: { flexDirection: 'row', gap: 10, marginTop: 20 },

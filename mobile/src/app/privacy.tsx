@@ -1,4 +1,4 @@
-/* Data & Privacy (from Profile): backup and restore, how Lucro keeps your data, the privacy policy,
+/* Data & Privacy (from Profile), one plain page like Profile: backup and restore, how Lucro keeps your data, the privacy policy,
    and Erase all data on its own at the bottom. */
 import { router } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -24,11 +24,11 @@ export default function Privacy() {
   ]);
 
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.wrap} stickyHeaderIndices={[0]}>
-      <SheetBar onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Data & Privacy</Text>} />
+    <ScrollView style={{ backgroundColor: c.surface }} contentContainerStyle={styles.wrap} stickyHeaderIndices={[0]}>
+      <SheetBar bg={c.surface} onClose={() => router.back()} left={<Text style={[styles.title, { color: c.ink }]} accessibilityRole="header">Data & Privacy</Text>} />
 
       <Text style={[styles.sec, { color: c.ink }]}>Backup</Text>
-      <List>
+      <List flat>
         <Row first icon="download" title="Save a backup file" onPress={() => { tap(); exportBackup().catch(() => {}); }}
           sub={backedUp ? `Last backup ${shortDate(isoToDate(backedUp))}` : 'No backup yet. Save one to iCloud Drive, Google Drive or Files.'} />
         <Row icon="restore" title="Restore from a backup" sub="Works with backups from the Lucro web app too" onPress={() => { tap(); restore(); }} />
@@ -38,14 +38,14 @@ export default function Privacy() {
       </Text>
 
       <Text style={[styles.sec, { color: c.ink }]}>Privacy</Text>
-      <List>
+      <List flat>
         <Row first icon="lock" title="Privacy Policy" onPress={() => { tap(); openSite('privacy'); }} />
       </List>
       <Text style={[styles.note, { color: c.muted }]}>
         Lucro has no accounts and never asks for card numbers or bank logins. Your wallet stays on this phone.
       </Text>
 
-      <List style={{ marginTop: 28 }}>
+      <List flat style={{ marginTop: 28 }}>
         <Row first icon="trash" title="Erase all data" onPress={erase} right={<View />} danger />
       </List>
     </ScrollView>
@@ -55,6 +55,6 @@ export default function Privacy() {
 const styles = StyleSheet.create({
   wrap: { paddingHorizontal: GUTTER, paddingBottom: 48 },
   title: { fontFamily: fonts.display, fontSize: 20, paddingLeft: 4 },
-  sec: { fontFamily: fonts.display, fontSize: 18, marginTop: 18, marginBottom: 10, marginHorizontal: 4 },
-  note: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, marginTop: 8, marginHorizontal: 6 },
+  sec: { fontFamily: fonts.display, fontSize: 20, marginTop: 30, marginBottom: 4, marginHorizontal: 14 },
+  note: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, marginTop: 6, marginHorizontal: 14 },
 });

@@ -1,8 +1,8 @@
 /* Earn: greeting, store/category search, favorites, popular categories, recents, all categories. */
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useScrollToTop } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CAT_GROUPS, POPULAR_CATS, catById, catName } from '@/core/cats';
@@ -10,9 +10,11 @@ import { activeWallet, allTasks, norm, searchAll, visibleCats } from '@/core/eng
 import { myName, useApp, useCtx } from '@/store/app';
 import { CardArt } from '@/ui/card-art';
 import { HeaderButtons, ScreenTitle } from '@/ui/header-buttons';
+import { Hero } from '@/ui/hero';
 import { Icon } from '@/ui/icon';
 import { Button, List, Row, SectionTitle, Tile, tap } from '@/ui/parts';
 import { GUTTER, fonts, useColors } from '@/ui/theme';
+import { TopFade, useScrollY } from '@/ui/top-fade';
 
 /* Switched off for now (kept so they can come back): the card peeking in the hero, and "N CARDS READY" */
 const SHOW = { cardPeek: false, cardCount: false };
@@ -25,8 +27,9 @@ export default function Earn() {
   const third = Math.floor((width - GUTTER * 2 - 20) / 3); // tile width when three share a row (gap 10)
   const ctx = useCtx(), state = useApp(s => s.state), update = useApp(s => s.update);
   const [q, setQ] = useState('');
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   useScrollToTop(scrollRef);
+  const { y, onScroll } = useScrollY();
   const act = activeWallet(ctx), tasks = allTasks(ctx).length, name = myName(state);
   const top = act.find(w => w.pinned) || act[0];
   const vis = visibleCats(ctx), vid = new Set(vis.map(x => x.id));
@@ -43,9 +46,9 @@ export default function Earn() {
   const canRequest = !!res && norm(q).length >= 2 && !res.st.some(s => norm(s.name) === norm(q));
 
   return (
-    <ScrollView ref={scrollRef} style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentInsetAdjustmentBehavior="never">
-      <LinearGradient colors={[c.heroA, c.heroB, c.bg]} locations={[0, 0.45, 1]} start={{ x: 0, y: 0 }} end={{ x: 0.4, y: 1 }}
-        style={[styles.hero, { paddingTop: insets.top + 4 }]}>
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <Animated.ScrollView ref={scrollRef} onScroll={onScroll} scrollEventThrottle={16} style={{ backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentInsetAdjustmentBehavior="never">
+      <Hero style={[styles.hero, { paddingTop: insets.top + 4 }]}>
         <View style={styles.brandRow}>
           <ScreenTitle>Earn</ScreenTitle>
           <HeaderButtons />
@@ -58,7 +61,7 @@ export default function Earn() {
             {act.length} CARD{act.length === 1 ? '' : 'S'} READY{tasks ? <Text style={{ color: c.warn }}>{`  ·  ${tasks} NEED${tasks === 1 ? 'S' : ''} SETUP`}</Text> : null}
           </Text>
         ) : null}
-      </LinearGradient>
+      </Hero>
 
       {!act.length ? (
         <View style={[styles.emptyBox, { paddingHorizontal: GUTTER }]}>
@@ -149,7 +152,9 @@ export default function Earn() {
         </Text>
       </View>
       )}
-    </ScrollView>
+    </Animated.ScrollView>
+    <TopFade y={y} />
+    </View>
   );
 }
 

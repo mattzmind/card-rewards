@@ -1,7 +1,7 @@
 /* Wallet list logic: sort, group, filter, top rate and "best for" (port of src/wallet.js, minus the DOM). */
 import { CATS, catById } from './cats';
-import { isoToDate, qLabel, shortDate } from './dates';
-import { type Ctx, activeWallet, brandOf, dn, evalCard, fmtRate, netLabel, netOf, productOf, tasksFor, visibleCats } from './engine';
+import { isoToDate, qDeadline, qLabel, qStart, shortDate } from './dates';
+import { type Ctx, activeWallet, brandOf, dn, evalCard, fmtRate, netLabel, netOf, productOf, rank, selLabels, selOpts, tasksFor, visibleCats } from './engine';
 import type { WalletCard, WalletFilter, WalletView } from './types';
 
 export const FILTER_DEFAULT: WalletFilter = { person: 'all', earns: 'all', type: 'all', bank: 'all', network: 'all', fee: 'all', status: 'all' };
@@ -89,8 +89,22 @@ export function walletGroups(ctx: Ctx, list: WalletCard[], v: WalletView = viewO
   return [...map.values()].filter(x => x.items.length);
 }
 
-/* What a card is best for: its top two bonus categories, e.g. "6% grocery · 3% gas" */
+/* What a card is best for: one pill per rate, categories at the same rate share it, e.g. "6% grocery and streaming",
+   "3% gas". At most 2 pills (1 next to an activation pill) and 3 categories, 2 per pill. */
 export interface BestPill { rate: string; label: string; warn?: boolean }
+export const MAX_TIERS = 2, MAX_PER_TIER = 2, MAX_LABELS = 3;
+export function rateTiers(hits: { rate: string; label: string }[], maxTiers = MAX_TIERS) {
+  const tiers: { rate: string; labels: string[] }[] = [];
+  let n = 0;
+  for (const h of hits) {
+    if (n >= MAX_LABELS) break;
+    const last = tiers[tiers.length - 1];
+    if (last && last.rate === h.rate) { if (last.labels.length < MAX_PER_TIER) { last.labels.push(h.label); n++; } }
+    else if (tiers.length < maxTiers) { tiers.push({ rate: h.rate, labels: [h.label] }); n++; }
+    else break;
+  }
+  return tiers.map(t => ({ rate: t.rate, label: t.labels.join(' and ') }));
+}
 export function bestFor(ctx: Ctx, w: WalletCard): BestPill[] {
   const { QK } = ctx.clock;
   const p = productOf(ctx, w.product); if (!p) return [];
@@ -99,11 +113,11 @@ export function bestFor(ctx: Ctx, w: WalletCard): BestPill[] {
     .filter((x): x is { c: (typeof CATS)[number]; r: number } => !!x && x.r > (p.base || 0) * mult + 0.001)
     .sort((a, b) => b.r - a.r || (a.c.parent ? 1 : 0) - (b.c.parent ? 1 : 0));
   const seen = new Set<string>(), top: typeof hits = [];
-  for (const h of hits) { if (top.length >= 2) break; const k = h.r + '|' + (h.c.parent || h.c.id); if (seen.has(k)) continue; seen.add(k); top.push(h); }
+  for (const h of hits) { const k = h.r + '|' + (h.c.parent || h.c.id); if (seen.has(k)) continue; seen.add(k); top.push(h); }
   const q = p.rotating && p.rotating.schedule[QK];
   const pend: BestPill[] = q && !w.activated.includes(QK) ? [{ rate: fmtRate(p.rotating!.rate) + '%', label: q.label.split(/,| &/)[0].toLowerCase() + ' · activate', warn: true }] : [];
   if (!top.length) return [...pend, { rate: fmtRate((p.base || 0) * mult) + '%', label: 'everywhere' }];
-  return [...pend, ...top.slice(0, pend.length ? 1 : 2).map(h => ({ rate: fmtRate(Math.round(h.r * 100) / 100) + '%', label: h.c.label.toLowerCase() }))];
+  return [...pend, ...rateTiers(top.map(h => ({ rate: fmtRate(Math.round(h.r * 100) / 100) + '%', label: h.c.label.toLowerCase() })), pend.length ? 1 : MAX_TIERS)];
 }
 
 /* Filter sheet rows: only the filters that make sense for this wallet */
@@ -142,7 +156,55 @@ export function walletSummary(ctx: Ctx) {
   return { best: best as { rate: number; catId: string; catLabel: string; card: string } | null, everyday: every ? every.rate : null, banks };
 }
 
-export const deactivatedLabel = (ctx: Ctx, w: WalletCard) =>
+/* Wallet "this quarter" card: every active card with a quarterly bonus, what it earns this quarter and
+   whether anything is left to do. Activations that open early for next quarter get their own row.
+   state: on (activated / picks saved), activate, pick (none chosen), confirm (picks from an earlier quarter),
+   missed (activation window closed), tbd (bank hasn't posted the categories yet). */
+export type QuarterState = 'on' | 'activate' | 'pick' | 'confirm' | 'missed' | 'tbd';
+export interface QuarterRow { w: WalletCard; q: string; rate: number; what: string; due: string; state: QuarterState; key?: string }
+export function quarterRows(ctx: Ctx): QuarterRow[] {
+  const { NOW, TODAY, QK, NQK, PICK_Q } = ctx.clock, out: QuarterRow[] = [];
+  for (const w of activeWallet(ctx)) {
+    const p = productOf(ctx, w.product); if (!p) continue;
+    if (p.rotating) {
+      const r = p.rotating, s = r.schedule[QK], by = qDeadline(QK, r.deadlineDay || 31);
+      if (!s) out.push({ w, q: QK, rate: r.rate, what: 'Categories not posted yet', due: '', state: 'tbd' });
+      else {
+        const state: QuarterState = w.activated.includes(QK) ? 'on' : r.retroactive && by < NOW ? 'missed' : 'activate';
+        const due = state !== 'activate' ? '' : r.retroactive ? `Activate by ${shortDate(by)}` : 'Activate before you spend';
+        out.push({ w, q: QK, rate: r.rate, what: s.label, due, state, key: 'act:' + QK });
+      }
+      const n = r.schedule[NQK];
+      if (n && n.opens && n.opens <= TODAY && !w.activated.includes(NQK))
+        out.push({ w, q: NQK, rate: r.rate, what: n.label, due: `Starts ${shortDate(qStart(NQK))}, activate now`, state: 'activate', key: 'act:' + NQK });
+    }
+    const slots = (p.choice || []).filter(s => s.period === 'quarter');
+    if (slots.length) {
+      const none = slots.some(s => !selOpts(w, s).length);
+      const stale = !none && slots.some(s => (w.sel[s.id]?.quarter || '') < PICK_Q);
+      out.push({
+        w, q: PICK_Q, rate: Math.max(...slots.map(s => s.rate)),
+        what: slots.map(s => `${fmtRate(s.rate)}% ${selLabels(w, s).join(', ') || 'not chosen'}`).join(' · '),
+        due: none ? `Earning ${fmtRate(p.base)}% until you choose` : stale ? `Confirm your ${qLabel(PICK_Q)} picks` : '',
+        state: none ? 'pick' : stale ? 'confirm' : 'on',
+      });
+    }
+  }
+  return out;
+}
+
+/* Wallet tip: one category where a card beats the wallet's everyday rate. seed (0–1) picks which,
+   so the tip changes each time the app opens. Bonuses still waiting on activation or picks don't count. */
+export function walletTip(ctx: Ctx, seed: number) {
+  const other = catById('other')!, every = rank(ctx, other)[0]?.rate ?? 0;
+  const tips = visibleCats(ctx).filter(c => c.id !== 'other').flatMap(c => {
+    const top = rank(ctx, c)[0];
+    return top && !top.flags.length && top.rate > every ? [{ catId: c.id, catLabel: c.label, card: dn(ctx, top.w), rate: top.rate }] : [];
+  });
+  return tips.length ? tips[Math.min(tips.length - 1, Math.floor(seed * tips.length))] : null;
+}
+
+export const deactivatedLabel =(ctx: Ctx, w: WalletCard) =>
   w.inactive ? `Deactivated ${shortDate(isoToDate(w.inactive))}${w.inactive.slice(0, 4) !== ctx.clock.TODAY.slice(0, 4) ? ', ' + w.inactive.slice(0, 4) : ''}` : '';
 
 /* Name of a capped bonus, for "X marked as capped" */
