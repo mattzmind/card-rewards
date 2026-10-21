@@ -49,5 +49,8 @@ and update them if the app ever starts collecting data.
 
 ## Updating the app screenshots
 The phone images in `assets/img/` are real screens from the native app (`mobile/`), rendered with
-`npx expo export --platform web` and a made-up wallet, then saved as WebP at 840px wide.
+`npx expo export --platform web` and a made-up wallet ("Alex"; date fixed to Oct 20, 2026), then saved as WebP at 840px wide.
+They are captured at 430×932 (iPhone 6.9") with an iPhone status bar and the floating tab bar drawn in, and sheets shown
+over the dimmed Earn screen like on the phone, so `.phone` in `site.css` adds no gap of its own.
+The full-size versions (1290×2796 PNG, App Store 6.9" size) are in `mobile/store/screenshots/`.
 `og.png` (1200×630) is the image shown when the site is shared on social media or in messages.
